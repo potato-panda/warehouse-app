@@ -32,14 +32,14 @@ public class TestConfig {
                             new PasswordEncoderConfig().passwordEncoder().encode("admin"),
                             List.of(new Role("ROLE_ADMIN")),
                             true)
-            );
+                               );
             userRepository.save(
                     new User(
                             "user",
                             new PasswordEncoderConfig().passwordEncoder().encode("user"),
                             List.of(new Role("ROLE_USER")),
                             true)
-            );
+                               );
         }
     }
 }

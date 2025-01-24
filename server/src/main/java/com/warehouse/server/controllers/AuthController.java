@@ -11,19 +11,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
 public interface AuthController {
-    public ResponseEntity<LoginResponse> login(HttpServletResponse response,
-                                               LoginRequest loginRequest,
-                                               BindingResult bindingResult);
+    ResponseEntity<LoginResponse> login(HttpServletResponse response,
+                                        LoginRequest loginRequest,
+                                        BindingResult bindingResult);
 
-    public ResponseEntity<String> changePassword(HttpServletResponse response,
-                                                 ChangePasswordRequest changePasswordRequest,
-                                                 BindingResult bindingResult) throws InvalidInputException,
+    ResponseEntity<String> changePassword(HttpServletResponse response,
+                                          ChangePasswordRequest changePasswordRequest,
+                                          BindingResult bindingResult) throws InvalidInputException,
             NotFoundException;
 
-    public ResponseEntity<Object> logout(String refreshToken);
+    ResponseEntity<Object> logout(String refreshToken);
 
-    public ResponseEntity<User> getCurrentUser();
+    ResponseEntity<User> getCurrentUser();
 
-    public ResponseEntity<LoginResponse> refreshToken(String refreshToken);
+    ResponseEntity<LoginResponse> refreshToken(String refreshToken);
 
 }

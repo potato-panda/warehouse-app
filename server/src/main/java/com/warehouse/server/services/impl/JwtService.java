@@ -10,7 +10,6 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -18,23 +17,25 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 public class JwtService implements com.warehouse.server.services.JwtService {
 
+    private final RefreshTokenRepository refreshTokenRepository;
     private SecretKey secretKey;
     @Value("${security.jwt.secret}")
     private String    secret;
     @Value("${security.jwt.expirationPeriod}")
-    private long   expirationPeriod;
+    private long      expirationPeriod;
     @Value("${security.jwt.refreshPeriod}")
-    private long   refreshExpirationPeriod;
+    private long      refreshExpirationPeriod;
     @Value("${security.jwt.issuer}")
-    private String issuer;
-
-    private final RefreshTokenRepository refreshTokenRepository;
+    private String    issuer;
 
     @Autowired
     public JwtService(RefreshTokenRepository refreshTokenRepository) {

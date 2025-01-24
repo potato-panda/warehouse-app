@@ -2,10 +2,7 @@ package com.warehouse.server.configs;
 
 import com.warehouse.server.filters.JwtAuthenticationFilter;
 import com.warehouse.server.services.impl.UserDetailsService;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,8 +19,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-import javax.crypto.SecretKey;
-
 @Configuration
 public class SecurityConfig {
 
@@ -39,7 +34,6 @@ public class SecurityConfig {
         this.passwordEncoder         = passwordEncoder;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
-
 
 
     @Bean
