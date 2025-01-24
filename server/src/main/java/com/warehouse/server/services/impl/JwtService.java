@@ -5,36 +5,45 @@ import com.warehouse.server.entities.User;
 import com.warehouse.server.repositories.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
+import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class JwtService implements com.warehouse.server.services.JwtService {
+
+    private SecretKey secretKey;
+    @Value("${security.jwt.secret}")
+    private String    secret;
     @Value("${security.jwt.expirationPeriod}")
     private long   expirationPeriod;
     @Value("${security.jwt.refreshPeriod}")
     private long   refreshExpirationPeriod;
-    @Value("${security.jwt.secret}")
-    private String secret;
     @Value("${security.jwt.issuer}")
     private String issuer;
 
     private final RefreshTokenRepository refreshTokenRepository;
 
+    @Autowired
     public JwtService(RefreshTokenRepository refreshTokenRepository) {
         this.refreshTokenRepository = refreshTokenRepository;
+    }
+
+    @PostConstruct
+    private void init() {
+        this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
 
     @Override
@@ -49,7 +58,7 @@ public class JwtService implements com.warehouse.server.services.JwtService {
                    .issuer(issuer)
                    .issuedAt(new Date(Instant.now().toEpochMilli()))
                    .expiration(new Date(Instant.now().plusSeconds(expirationPeriod).toEpochMilli()))
-                   .signWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
+                   .signWith(secretKey)
                    .compact();
     }
 
@@ -76,7 +85,7 @@ public class JwtService implements com.warehouse.server.services.JwtService {
 
     @Override
     public Claims getClaimsFromToken(String token) {
-        var parser = Jwts.parser().decryptWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8))).build();
+        var parser = Jwts.parser().decryptWith(secretKey).build();
         return parser.parseSignedClaims(token).getPayload();
     }
 
@@ -87,7 +96,7 @@ public class JwtService implements com.warehouse.server.services.JwtService {
                         .issuer(issuer)
                         .issuedAt(new Date(Instant.now().toEpochMilli()))
                         .expiration(new Date(Instant.now().plusSeconds(refreshExpirationPeriod).toEpochMilli()))
-                        .signWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
+                        .signWith(secretKey)
                         .compact();
         var refreshToken = new RefreshToken(false, null, user, token, LocalDateTime.now());
         refreshTokenRepository.save(refreshToken);

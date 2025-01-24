@@ -76,10 +76,16 @@ public class AuthService implements com.warehouse.server.services.AuthService {
             var user = userRepository.getUserByUsername(username);
             if (user != null) {
                 if (passwordEncoder.matches(oldPassword, user.getPassword())) {
+
+
                     user.setPassword(passwordEncoder.encode(newPassword));
 
                     var refreshToken = jwtService.generateRefreshToken(user);
                     var updated      = userRepository.save(user);
+
+                    // invalid old refresh token
+                    refreshTokenRepository.invalidateRefreshTokensByUser(user.getUsername());
+
                     return new SuccessfulPasswordChange(refreshToken, updated);
                 }
                 throw new InvalidInputException("Passwords do not match.");

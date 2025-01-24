@@ -34,24 +34,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        var auth    = request.getHeader(AUTHORIZATION_HEADER);
+        var auth = request.getHeader(AUTHORIZATION_HEADER);
 
         if (auth != null && auth.startsWith("Bearer ")) {
             auth = auth.substring(7);
-        }
 
-        var username = jwtService.getUsernameFromToken(auth);
+            var username = jwtService.getUsernameFromToken(auth);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() != null) {
-            var entity = userDetailsService.loadUserByUsername(username);
-            if (jwtService.isTokenValid(auth, entity)) {
-                var authentication = new UsernamePasswordAuthenticationToken(entity.getUsername(),
-                                                                             null,
-                                                                             entity.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                authentication.setAuthenticated(true);
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() != null) {
+                var entity = userDetailsService.loadUserByUsername(username);
+                if (jwtService.isTokenValid(auth, entity)) {
+                    var authentication = new UsernamePasswordAuthenticationToken(entity.getUsername(),
+                                                                                 null,
+                                                                                 entity.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    authentication.setAuthenticated(true);
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
         }
 

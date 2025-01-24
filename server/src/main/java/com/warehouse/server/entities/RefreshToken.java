@@ -15,7 +15,7 @@ public class RefreshToken {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(referencedColumnName = "user_id", name = "id")
+    @JoinColumn(name = "user_id")
     private User user;
 
     @NotNull

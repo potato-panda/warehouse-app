@@ -15,7 +15,8 @@ public interface AuthController {
                                                LoginRequest loginRequest,
                                                BindingResult bindingResult);
 
-    public ResponseEntity<String> changePassword(ChangePasswordRequest changePasswordRequest,
+    public ResponseEntity<String> changePassword(HttpServletResponse response,
+                                                 ChangePasswordRequest changePasswordRequest,
                                                  BindingResult bindingResult) throws InvalidInputException,
             NotFoundException;
 

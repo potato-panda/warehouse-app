@@ -7,13 +7,13 @@ import com.warehouse.server.entities.User;
 import com.warehouse.server.exceptions.InvalidInputException;
 import com.warehouse.server.exceptions.NotFoundException;
 import com.warehouse.server.services.impl.AuthService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.validation.BindingResult;
@@ -53,10 +53,8 @@ public class AuthController implements com.warehouse.server.controllers.AuthCont
                                               .map(GrantedAuthority::getAuthority)
                                               .toList());
 
-            var cookie = new Cookie("refreshToken", login.refreshToken());
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            response.addCookie(cookie);
+            // Header to set refreshToken to cookie
+            setSecureCookie(response, login.refreshToken());
 
             return ResponseEntity.ok(body);
         }
@@ -66,7 +64,8 @@ public class AuthController implements com.warehouse.server.controllers.AuthCont
 
     @Override
     @PostMapping("/change-password")
-    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest,
+    public ResponseEntity<String> changePassword(HttpServletResponse response,
+                                                 @Valid @RequestBody ChangePasswordRequest changePasswordRequest,
                                                  BindingResult bindingResult) throws InvalidInputException,
             NotFoundException {
         if (bindingResult.hasErrors()) {
@@ -76,6 +75,9 @@ public class AuthController implements com.warehouse.server.controllers.AuthCont
                                                  changePasswordRequest.password(),
                                                  changePasswordRequest.confirmPassword());
         if (success != null) {
+            // Header to set refreshToken to cookie
+            setSecureCookie(response, success.refreshToken());
+
             ResponseEntity.ok("Successfully changed password.");
         }
 
@@ -110,6 +112,15 @@ public class AuthController implements com.warehouse.server.controllers.AuthCont
             return ResponseEntity.ok(body);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    private void setSecureCookie(HttpServletResponse response, String value) {
+        var cookie = ResponseCookie.from("refreshToken", value);
+        cookie.httpOnly(true);
+        cookie.secure(true);
+        cookie.sameSite("Strict");
+        cookie.maxAge((int) expirationPeriod);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.build().toString());
     }
 
 }
