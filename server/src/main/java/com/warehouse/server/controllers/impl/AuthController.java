@@ -2,8 +2,8 @@ package com.warehouse.server.controllers.impl;
 
 import com.warehouse.server.dtos.requests.ChangePasswordRequest;
 import com.warehouse.server.dtos.requests.LoginRequest;
+import com.warehouse.server.dtos.responses.CurrentUserResponse;
 import com.warehouse.server.dtos.responses.LoginResponse;
-import com.warehouse.server.entities.User;
 import com.warehouse.server.exceptions.InvalidInputException;
 import com.warehouse.server.exceptions.NotFoundException;
 import com.warehouse.server.services.impl.AuthService;
@@ -96,10 +96,15 @@ public class AuthController implements com.warehouse.server.controllers.AuthCont
 
     @Override
     @GetMapping("/current-user")
-    public ResponseEntity<User> getCurrentUser() {
+    public ResponseEntity<CurrentUserResponse> getCurrentUser() {
         var user = authService.getCurrentUser();
         if (user != null) {
-            return ResponseEntity.ok(user);
+            var response = new CurrentUserResponse(user.getUsername(),
+                                                   user.getAuthorities()
+                                                       .stream()
+                                                       .map(GrantedAuthority::getAuthority)
+                                                       .toList());
+            return ResponseEntity.ok(response);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }

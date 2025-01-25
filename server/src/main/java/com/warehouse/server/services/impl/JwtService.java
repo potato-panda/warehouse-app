@@ -27,15 +27,15 @@ import java.util.stream.Collectors;
 public class JwtService implements com.warehouse.server.services.JwtService {
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private SecretKey secretKey;
+    private       SecretKey              secretKey;
     @Value("${security.jwt.secret}")
-    private String    secret;
+    private       String                 secret;
     @Value("${security.jwt.expirationPeriod}")
-    private long      expirationPeriod;
+    private       long                   expirationPeriod;
     @Value("${security.jwt.refreshPeriod}")
-    private long      refreshExpirationPeriod;
+    private       long                   refreshExpirationPeriod;
     @Value("${security.jwt.issuer}")
-    private String    issuer;
+    private       String                 issuer;
 
     @Autowired
     public JwtService(RefreshTokenRepository refreshTokenRepository) {
@@ -86,7 +86,7 @@ public class JwtService implements com.warehouse.server.services.JwtService {
 
     @Override
     public Claims getClaimsFromToken(String token) {
-        var parser = Jwts.parser().decryptWith(secretKey).build();
+        var parser = Jwts.parser().verifyWith(secretKey).build();
         return parser.parseSignedClaims(token).getPayload();
     }
 

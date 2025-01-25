@@ -2,8 +2,8 @@ package com.warehouse.server.controllers;
 
 import com.warehouse.server.dtos.requests.ChangePasswordRequest;
 import com.warehouse.server.dtos.requests.LoginRequest;
+import com.warehouse.server.dtos.responses.CurrentUserResponse;
 import com.warehouse.server.dtos.responses.LoginResponse;
-import com.warehouse.server.entities.User;
 import com.warehouse.server.exceptions.InvalidInputException;
 import com.warehouse.server.exceptions.NotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,7 +22,7 @@ public interface AuthController {
 
     ResponseEntity<Object> logout(String refreshToken);
 
-    ResponseEntity<User> getCurrentUser();
+    ResponseEntity<CurrentUserResponse> getCurrentUser();
 
     ResponseEntity<LoginResponse> refreshToken(String refreshToken);
 
