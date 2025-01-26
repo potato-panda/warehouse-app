@@ -6,6 +6,7 @@ import com.warehouse.server.dtos.responses.CurrentUserResponse;
 import com.warehouse.server.dtos.responses.LoginResponse;
 import com.warehouse.server.exceptions.InvalidInputException;
 import com.warehouse.server.exceptions.NotFoundException;
+import com.warehouse.server.exceptions.UnauthorizedException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -13,7 +14,7 @@ import org.springframework.validation.BindingResult;
 public interface AuthController {
     ResponseEntity<LoginResponse> login(HttpServletResponse response,
                                         LoginRequest loginRequest,
-                                        BindingResult bindingResult);
+                                        BindingResult bindingResult) throws NotFoundException;
 
     ResponseEntity<String> changePassword(HttpServletResponse response,
                                           ChangePasswordRequest changePasswordRequest,
@@ -24,6 +25,6 @@ public interface AuthController {
 
     ResponseEntity<CurrentUserResponse> getCurrentUser();
 
-    ResponseEntity<LoginResponse> refreshToken(String refreshToken);
+    ResponseEntity<LoginResponse> refreshToken(String refreshToken) throws UnauthorizedException;
 
 }

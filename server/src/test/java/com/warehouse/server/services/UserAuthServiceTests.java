@@ -3,6 +3,7 @@ package com.warehouse.server.services;
 import com.warehouse.server.configs.TestConfig;
 import com.warehouse.server.dtos.SuccessfulLogin;
 import com.warehouse.server.entities.User;
+import com.warehouse.server.exceptions.NotFoundException;
 import com.warehouse.server.repositories.RefreshTokenRepository;
 import com.warehouse.server.repositories.UserRepository;
 import com.warehouse.server.services.impl.AuthService;
@@ -44,7 +45,7 @@ public class UserAuthServiceTests {
     }
 
     @Test
-    public void testLogin() {
+    public void testLogin() throws NotFoundException {
         String username = "admin";
         String password = "admin";
 

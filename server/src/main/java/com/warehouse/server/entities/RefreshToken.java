@@ -11,7 +11,7 @@ public class RefreshToken {
     public boolean revoked;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

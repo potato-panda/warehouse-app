@@ -6,6 +6,7 @@ import com.warehouse.server.dtos.responses.LoginResponse;
 import com.warehouse.server.entities.User;
 import com.warehouse.server.exceptions.InvalidInputException;
 import com.warehouse.server.exceptions.NotFoundException;
+import com.warehouse.server.exceptions.UnauthorizedException;
 import com.warehouse.server.repositories.RefreshTokenRepository;
 import com.warehouse.server.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService implements com.warehouse.server.services.AuthService {
@@ -41,7 +43,7 @@ public class AuthService implements com.warehouse.server.services.AuthService {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
-    public SuccessfulLogin login(String username, String password) {
+    public SuccessfulLogin login(String username, String password) throws NotFoundException {
 
         var userDetail = userDetailsService.loadUserByUsername(username);
 
@@ -63,9 +65,10 @@ public class AuthService implements com.warehouse.server.services.AuthService {
                 return new SuccessfulLogin(accessToken, refreshToken, user);
             }
         }
-        return null;
+        throw new NotFoundException("Username and or password is invalid.");
     }
 
+    @Transactional
     public SuccessfulPasswordChange changePassword(String oldPassword,
                                                    String newPassword,
                                                    String newPasswordConfirm) throws NotFoundException,
@@ -111,7 +114,7 @@ public class AuthService implements com.warehouse.server.services.AuthService {
     }
 
     @Override
-    public LoginResponse refreshToken(String token) {
+    public LoginResponse refreshToken(String token) throws UnauthorizedException {
         var refreshToken = refreshTokenRepository.findRefreshTokenByToken(token).getFirst();
         if (refreshToken != null) {
             var isValid = jwtService.isRefreshTokenValid(refreshToken);
@@ -125,7 +128,7 @@ public class AuthService implements com.warehouse.server.services.AuthService {
             }
 
         }
-        return null;
+        throw new UnauthorizedException();
     }
 
 }

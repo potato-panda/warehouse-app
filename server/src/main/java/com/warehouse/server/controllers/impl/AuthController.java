@@ -6,6 +6,7 @@ import com.warehouse.server.dtos.responses.CurrentUserResponse;
 import com.warehouse.server.dtos.responses.LoginResponse;
 import com.warehouse.server.exceptions.InvalidInputException;
 import com.warehouse.server.exceptions.NotFoundException;
+import com.warehouse.server.exceptions.UnauthorizedException;
 import com.warehouse.server.services.impl.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +39,7 @@ public class AuthController implements com.warehouse.server.controllers.AuthCont
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(HttpServletResponse response,
                                                @Valid @RequestBody LoginRequest loginRequest,
-                                               BindingResult bindingResult) {
+                                               BindingResult bindingResult) throws NotFoundException {
         if (bindingResult.hasErrors()) {
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getAllErrors().toString());
         }
@@ -59,11 +61,12 @@ public class AuthController implements com.warehouse.server.controllers.AuthCont
             return ResponseEntity.ok(body);
         }
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        return ResponseEntity.badRequest().build();
     }
 
     @Override
     @PostMapping("/change-password")
+    @Transactional
     public ResponseEntity<String> changePassword(HttpServletResponse response,
                                                  @Valid @RequestBody ChangePasswordRequest changePasswordRequest,
                                                  BindingResult bindingResult) throws InvalidInputException,
@@ -78,7 +81,7 @@ public class AuthController implements com.warehouse.server.controllers.AuthCont
             // Header to set refreshToken to cookie
             setSecureCookie(response, success.refreshToken());
 
-            ResponseEntity.ok("Successfully changed password.");
+            return ResponseEntity.ok("Successfully changed password.");
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -111,7 +114,7 @@ public class AuthController implements com.warehouse.server.controllers.AuthCont
 
     @Override
     @PostMapping("/refresh-token")
-    public ResponseEntity<LoginResponse> refreshToken(@CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<LoginResponse> refreshToken(@CookieValue("refreshToken") String refreshToken) throws UnauthorizedException {
         var body = authService.refreshToken(refreshToken);
         if (body != null) {
             return ResponseEntity.ok(body);

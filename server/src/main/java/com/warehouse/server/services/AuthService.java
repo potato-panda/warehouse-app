@@ -6,9 +6,10 @@ import com.warehouse.server.dtos.responses.LoginResponse;
 import com.warehouse.server.entities.User;
 import com.warehouse.server.exceptions.InvalidInputException;
 import com.warehouse.server.exceptions.NotFoundException;
+import com.warehouse.server.exceptions.UnauthorizedException;
 
 public interface AuthService {
-    SuccessfulLogin login(String username, String password) throws InvalidInputException;
+    SuccessfulLogin login(String username, String password) throws InvalidInputException, NotFoundException;
 
     SuccessfulPasswordChange changePassword(String oldPassword,
                                             String newPassword,
@@ -18,5 +19,5 @@ public interface AuthService {
 
     User getCurrentUser();
 
-    LoginResponse refreshToken(String token);
+    LoginResponse refreshToken(String token) throws UnauthorizedException;
 }

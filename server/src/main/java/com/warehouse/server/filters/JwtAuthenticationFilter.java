@@ -1,8 +1,10 @@
 package com.warehouse.server.filters;
 
 import com.warehouse.server.services.JwtService;
+import io.jsonwebtoken.ClaimJwtException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,28 +34,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+                                    @NonNull FilterChain filterChain) throws IOException {
 
-        var auth = request.getHeader(AUTHORIZATION_HEADER);
+        try {
+            var auth = request.getHeader(AUTHORIZATION_HEADER);
 
-        if (auth != null && auth.startsWith("Bearer ")) {
-            auth = auth.substring(7);
+            if (auth != null && auth.startsWith("Bearer ")) {
+                auth = auth.substring(7);
 
-            var username = jwtService.getUsernameFromToken(auth);
+                var username = jwtService.getUsernameFromToken(auth);
 
-            if (username != null) {
-                var entity = userDetailsService.loadUserByUsername(username);
-                if (jwtService.isTokenValid(auth, entity)) {
-                    var authentication = new UsernamePasswordAuthenticationToken(entity.getUsername(),
-                                                                                 entity.getPassword(),
-                                                                                 entity.getAuthorities());
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                if (username != null) {
+                    var entity = userDetailsService.loadUserByUsername(username);
+                    if (jwtService.isTokenValid(auth, entity)) {
+                        var authentication = new UsernamePasswordAuthenticationToken(entity.getUsername(),
+                                                                                     entity.getPassword(),
+                                                                                     entity.getAuthorities());
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    }
                 }
+
             }
+            filterChain.doFilter(request, response);
+        } catch (MalformedJwtException ex) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
+        } catch (ExpiredJwtException ex) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
+        } catch (ClaimJwtException ex) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, ex.getMessage());
+        } catch (Exception ex) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
         }
 
-        filterChain.doFilter(request, response);
     }
 }

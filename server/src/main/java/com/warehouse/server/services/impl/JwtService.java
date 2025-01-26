@@ -13,10 +13,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,12 +55,17 @@ public class JwtService implements com.warehouse.server.services.JwtService {
         claims.put("authorities",
                    user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
 
+        var localDateTime = LocalDateTime.now();
+
         return Jwts.builder()
                    .subject(user.getUsername())
                    .claims(claims)
                    .issuer(issuer)
-                   .issuedAt(new Date(Instant.now().toEpochMilli()))
-                   .expiration(new Date(Instant.now().plusSeconds(expirationPeriod).toEpochMilli()))
+                   .issuedAt(new Date(localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
+                   .expiration(new Date(localDateTime.plusSeconds(expirationPeriod)
+                                                     .atZone(ZoneId.systemDefault())
+                                                     .toInstant()
+                                                     .toEpochMilli()))
                    .signWith(secretKey)
                    .compact();
     }
@@ -91,15 +98,20 @@ public class JwtService implements com.warehouse.server.services.JwtService {
     }
 
     @Override
+    @Transactional
     public String generateRefreshToken(User user) {
+        var localDateTime = LocalDateTime.now();
         var token = Jwts.builder()
                         .subject(user.getUsername())
                         .issuer(issuer)
-                        .issuedAt(new Date(Instant.now().toEpochMilli()))
-                        .expiration(new Date(Instant.now().plusSeconds(refreshExpirationPeriod).toEpochMilli()))
+                        .issuedAt(new Date(localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
+                        .expiration(new Date(localDateTime.plusSeconds(refreshExpirationPeriod)
+                                                          .atZone(ZoneId.systemDefault())
+                                                          .toInstant()
+                                                          .toEpochMilli()))
                         .signWith(secretKey)
                         .compact();
-        var refreshToken = new RefreshToken(false, null, user, token, LocalDateTime.now());
+        var refreshToken = new RefreshToken(false, null, user, token, localDateTime);
         refreshTokenRepository.save(refreshToken);
         return token;
     }
@@ -118,6 +130,7 @@ public class JwtService implements com.warehouse.server.services.JwtService {
     }
 
     @Override
+    @Transactional
     public void deleteRefreshToken(RefreshToken token) {
         token.setRevoked(true);
         refreshTokenRepository.save(token);
