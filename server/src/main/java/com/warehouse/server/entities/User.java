@@ -21,18 +21,18 @@ public class User implements UserDetails {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "user_authority",
+            name = "user_authorities",
             joinColumns = @JoinColumn(name = "username"),
             inverseJoinColumns = @JoinColumn(name = "authority")
     )
-    private Collection<Role> authorities;
+    private Collection<Authority> authorities;
 
     @Column(name = "is_enabled")
     private Boolean isEnabled;
 
     public User(String username,
                 String password,
-                Collection<Role> authorities,
+                Collection<Authority> authorities,
                 Boolean isEnabled) {
         this.username    = username;
         this.password    = password;
@@ -48,7 +48,7 @@ public class User implements UserDetails {
         return authorities;
     }
 
-    public void setAuthorities(Collection<Role> authorities) {
+    public void setAuthorities(Collection<Authority> authorities) {
         this.authorities = authorities;
     }
 

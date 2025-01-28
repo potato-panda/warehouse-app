@@ -1,8 +1,8 @@
 package com.warehouse.server.configs;
 
-import com.warehouse.server.entities.Role;
+import com.warehouse.server.entities.Authority;
 import com.warehouse.server.entities.User;
-import com.warehouse.server.repositories.RoleRepository;
+import com.warehouse.server.repositories.AuthorityRepository;
 import com.warehouse.server.repositories.UserRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,27 +17,27 @@ public class TestConfig {
     private UserRepository userRepository;
 
     @Autowired
-    private RoleRepository roleRepository;
+    private AuthorityRepository authorityRepository;
 
     @PostConstruct
     public void init() {
-        if (roleRepository.count() == 0) {
-            roleRepository.save(new Role("ROLE_ADMIN"));
-            roleRepository.save(new Role("ROLE_USER"));
+        if (authorityRepository.count() == 0) {
+            authorityRepository.save(new Authority("ROLE_ADMIN"));
+            authorityRepository.save(new Authority("ROLE_USER"));
         }
         if (userRepository.count() <= 2) {
             userRepository.save(
                     new User(
                             "admin",
                             new PasswordEncoderConfig().passwordEncoder().encode("admin"),
-                            List.of(new Role("ROLE_ADMIN")),
+                            List.of(new Authority("ROLE_ADMIN")),
                             true)
                                );
             userRepository.save(
                     new User(
                             "user",
                             new PasswordEncoderConfig().passwordEncoder().encode("user"),
-                            List.of(new Role("ROLE_USER")),
+                            List.of(new Authority("ROLE_USER")),
                             true)
                                );
         }

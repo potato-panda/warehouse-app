@@ -27,7 +27,7 @@ public class UserController {
     }
 
     @PostMapping("/new")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> createUser(@Valid @RequestBody CreateUserRequest createUserRequest) throws InvalidInputException {
         var newUser = userDetailsService.createUser(createUserRequest);
         if (newUser != null) {
@@ -39,7 +39,7 @@ public class UserController {
     }
 
     @PostMapping("/delete")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteUser(@Valid @RequestBody DeleteUserRequest deleteUserRequest) throws InvalidInputException, NotFoundException {
         var success = userDetailsService.deleteUser(deleteUserRequest.username());
         if (success != null) {

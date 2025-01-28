@@ -1,0 +1,54 @@
+<div class="container">
+  <form
+    tuiAppearance="floating"
+    tuiCardLarge
+    tuiForm="m"
+    [formGroup]="loginForm"
+    [style.max-width.rem]="32"
+    (ngSubmit)="login()"
+    class="form"
+  >
+    <header tuiHeader>
+      <h2 tuiTitle>
+        Login
+      </h2>
+    </header>
+    <tui-textfield>
+      <label tuiLabel>Username</label>
+      <input
+        formControlName="username"
+        placeholder="username"
+        tuiTextfield
+      />
+    </tui-textfield>
+    <tui-textfield>
+      <label tuiLabel>Password</label>
+      <input
+        formControlName="password"
+        placeholder=""
+        tuiTextfield
+        type="password"
+      />
+    </tui-textfield>
+    <tui-loader
+      class="loader"
+      [inheritColor]="true"
+      [overlay]="true"
+      [showLoader]="isLoading.value"
+    >
+      <button
+        tuiButton
+        type="submit"
+        [disabled]="!loginForm.valid"
+      >
+        Login
+      </button>
+    </tui-loader>
+    <tui-notification appearance="negative" *ngIf="error">
+      <h3 tuiTitle>
+        Authentication failed
+        <span tuiSubtitle>Please try again.</span>
+      </h3>
+    </tui-notification>
+  </form>
+</div>

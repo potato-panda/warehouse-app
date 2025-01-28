@@ -67,11 +67,12 @@ public class SecurityConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.addAllowedOrigin("http://localhost:3000");
+        corsConfig.addAllowedOrigin("http://localhost:4200");
         corsConfig.addAllowedMethod("GET");
         corsConfig.addAllowedMethod("POST");
         corsConfig.addAllowedMethod("PUT");
         corsConfig.addAllowedMethod("DELETE");
+        corsConfig.addAllowedMethod("OPTIONS");
         corsConfig.addAllowedHeader("*");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

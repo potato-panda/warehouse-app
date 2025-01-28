@@ -9,17 +9,17 @@ import org.springframework.security.core.GrantedAuthority;
 
 @Entity
 @Table(name = "authorities")
-public class Role implements GrantedAuthority {
+public class Authority implements GrantedAuthority {
     @Id
     @Column(unique = true, nullable = false)
     @Length(min = 3, max = 60, message = "Role name must be between 3 and 60 characters long.")
     private String authority;
 
-    public Role(String authority) {
+    public Authority(String authority) {
         this.authority = authority;
     }
 
-    protected Role() {}
+    protected Authority() {}
 
     @Override
     public String getAuthority() {

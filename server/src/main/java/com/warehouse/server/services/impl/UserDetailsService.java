@@ -1,7 +1,7 @@
 package com.warehouse.server.services.impl;
 
 import com.warehouse.server.dtos.requests.CreateUserRequest;
-import com.warehouse.server.entities.Role;
+import com.warehouse.server.entities.Authority;
 import com.warehouse.server.entities.User;
 import com.warehouse.server.exceptions.InvalidInputException;
 import com.warehouse.server.exceptions.NotFoundException;
@@ -60,7 +60,7 @@ public class UserDetailsService implements org.springframework.security.core.use
                                passwordEncoder.encode(createUserRequest.password()),
                                createUserRequest.authorities()
                                                 .stream()
-                                                .map(Role::new)
+                                                .map(Authority::new)
                                                 .collect(Collectors.toList()),
                                true);
 
