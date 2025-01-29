@@ -1,12 +1,12 @@
 <div class="container">
   <form
+    (ngSubmit)="login()"
+    [formGroup]="loginForm"
+    [style.max-width.rem]="32"
+    class="form"
     tuiAppearance="floating"
     tuiCardLarge
     tuiForm="m"
-    [formGroup]="loginForm"
-    [style.max-width.rem]="32"
-    (ngSubmit)="login()"
-    class="form"
   >
     <header tuiHeader>
       <h2 tuiTitle>
@@ -31,20 +31,20 @@
       />
     </tui-textfield>
     <tui-loader
-      class="loader"
       [inheritColor]="true"
       [overlay]="true"
       [showLoader]="isLoading.value"
+      class="loader"
     >
       <button
+        [disabled]="!loginForm.valid"
         tuiButton
         type="submit"
-        [disabled]="!loginForm.valid"
       >
         Login
       </button>
     </tui-loader>
-    <tui-notification appearance="negative" *ngIf="error">
+    <tui-notification *ngIf="error" appearance="negative">
       <h3 tuiTitle>
         Authentication failed
         <span tuiSubtitle>Please try again.</span>

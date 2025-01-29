@@ -15,8 +15,8 @@ interface User {
   providedIn: 'root'
 })
 export class AuthService {
-  tokenKey = "accessToken";
-  currentUserKey = "currentUser";
+  tokenKey = 'accessToken';
+  currentUserKey = 'currentUser';
 
   localStorage?: Storage;
 
@@ -27,6 +27,13 @@ export class AuthService {
               private router: Router,
               @Inject(DOCUMENT) _document: Document) {
     this.localStorage = _document.defaultView?.localStorage;
+    this.loadAuth();
+  }
+
+  loadAuth() {
+    const currentUser = this.localStorage?.getItem(this.currentUserKey);
+    if (currentUser) this.user = JSON.parse(currentUser);
+    this.isAuthenticated.next(this.hasToken());
   }
 
   hasToken() {
@@ -34,7 +41,7 @@ export class AuthService {
   }
 
   login(username: string, password: string) {
-    return this.http.post<LoginResponse>(environment.baseApiUrl + "/auth/login", {
+    return this.http.post<LoginResponse>(environment.baseApiUrl + '/auth/login', {
       username,
       password
     }).pipe(
@@ -60,12 +67,16 @@ export class AuthService {
     return this.localStorage?.getItem(this.tokenKey);
   }
 
+  getUsername() {
+    return this.user?.username;
+  }
+
   getAuthorities() {
     return this.user?.authorities;
   }
 
   refreshToken() {
-    return this.http.post<LoginResponse>(environment.baseApiUrl + "/auth/refresh-token", {}, {
+    return this.http.post<LoginResponse>(environment.baseApiUrl + '/auth/refresh-token', {}, {
       withCredentials: true
     });
   }
@@ -75,7 +86,7 @@ export class AuthService {
   }
 
   logout() {
-    this.http.post(environment.baseApiUrl + "/auth/logout", {}).subscribe();
+    this.http.post(environment.baseApiUrl + '/auth/logout', {}).subscribe();
 
     this.localStorage?.removeItem(this.tokenKey);
     this.localStorage?.removeItem(this.currentUserKey);
@@ -83,11 +94,11 @@ export class AuthService {
 
     this.isAuthenticated.next(false);
 
-    this.router.navigate(["login"]).then();
+    this.router.navigate(['login']).then();
   }
 }
 
 export enum Authority {
-  ADMIN = "ROLE_ADMIN",
-  USER = "ROLE_USER"
+  ADMIN = 'ROLE_ADMIN',
+  USER = 'ROLE_USER'
 }

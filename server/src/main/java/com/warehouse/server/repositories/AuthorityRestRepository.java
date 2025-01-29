@@ -7,6 +7,4 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 @RepositoryRestResource(collectionResourceRel = "authorities", path = "authorities")
 @PreAuthorize("hasRole('ADMIN')")
-public interface AuthorityRestRepository extends
-                                    PagingAndSortingRepository<Authority, Long> {
-}
+public interface AuthorityRestRepository extends PagingAndSortingRepository<Authority, Long> {}

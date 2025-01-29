@@ -39,10 +39,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(authorizeRequests -> authorizeRequests.requestMatchers("/api/auth/login")
+            .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+//                                           .requestMatchers("/api/auth/login")
+                                           .anyRequest()
                                                                          .permitAll()
-                                                                         .anyRequest()
-                                                                         .authenticated())
+//                                                                         .anyRequest()
+//                                                                         .authenticated()
+                                  )
             .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .formLogin(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
@@ -68,6 +71,7 @@ public class SecurityConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
         corsConfig.addAllowedOrigin("http://localhost:4200");
+        corsConfig.addAllowedOrigin("*");
         corsConfig.addAllowedMethod("GET");
         corsConfig.addAllowedMethod("POST");
         corsConfig.addAllowedMethod("PUT");

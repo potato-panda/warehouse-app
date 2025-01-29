@@ -23,7 +23,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
               switchMap(response => {
                 const {accessToken} = response;
 
-                localStorage?.setItem("accessToken", accessToken);
+                localStorage?.setItem('accessToken', accessToken);
 
                 const refreshedTokenReq = req.clone({
                   setHeaders: {

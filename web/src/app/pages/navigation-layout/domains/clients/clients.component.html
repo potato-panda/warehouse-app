@@ -1,0 +1,76 @@
+<main tuiNavigationMain>
+  <nav
+    [style.position]="'sticky'"
+    compact
+    tuiSubheader
+  >
+    <!--    <tui-breadcrumbs [itemsLimit]="10">-->
+    <!--      <ng-container *ngFor="let item of ['Client']; let last = last">-->
+    <!--        <ng-container>-->
+    <!--          <strong-->
+    <!--            *tuiItem-->
+    <!--            tuiFade-->
+    <!--          >-->
+    <!--            {{item}}-->
+    <!--          </strong>-->
+    <!--        </ng-container>-->
+    <!--      </ng-container>-->
+    <!--    </tui-breadcrumbs>-->
+    <strong
+      tuiFade
+    >
+      Client
+    </strong>
+    <hr>
+    <button [routerLink]="['clients',1]">:1</button>
+
+    <button
+      tuiButton
+      type="button"
+      [routerLink]="'new'"
+    >
+      Add Client
+    </button>
+  </nav>
+  <hr>
+
+  <table
+    tuiTable
+    [style.width.rem]="36"
+  >
+    <caption tuiCaption>
+      <span>{{ pageDetails?.totalElements }} rows</span>
+      <tui-pagination
+        [length]="totalPages"
+        [style.float]="'right'"
+        [(index)]="index"
+      />
+      <strong>
+        {{ index * size + 1 }}-{{ (index + 1) * size }} rows
+      </strong>
+      <strong>
+        {{ index }} of {{ totalPages }} pages
+      </strong>
+    </caption>
+    <thead>
+    <tr tuiThGroup>
+      <th tuiTh>Name</th>
+      <th tuiTh>Address</th>
+      <th tuiTh>TIN</th>
+      <th tuiTh>Website</th>
+    </tr>
+    </thead>
+    <tbody tuiTbody>
+    <tr *ngFor="let company of companies">
+      <td tuiTd>
+        <a [routerLink]="[company.id]">{{ company.name }}</a>
+      </td>
+      <td tuiTd>{{ company.address }}</td>
+      <td tuiTd>{{ company.tin }}</td>
+      <td tuiTd>{{ company.website }}</td>
+    </tr>
+    </tbody>
+  </table>
+
+
+</main>

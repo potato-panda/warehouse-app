@@ -1,0 +1,162 @@
+<form
+  [formGroup]="mainForm"
+  [style.max-width.rem]="35"
+  [style.margin-top.rem]="3"
+  tuiAppearance="floating"
+  tuiCardLarge
+  (ngSubmit)="save()"
+>
+  <form
+    tuiForm="m"
+    formGroupName="company"
+  >
+    <header tuiHeader>
+      <h3 tuiTitle>
+        Edit Company Details
+      </h3>
+    </header>
+
+    <tui-textfield>
+      <label tuiLabel>Name</label>
+      <input
+        formControlName="name"
+        placeholder="Company name"
+        tuiTextfield
+      />
+    </tui-textfield>
+    <tui-error
+      formControlName="name"
+      [error]="[] | tuiFieldError | async"
+    />
+
+    <tui-textfield>
+      <label tuiLabel>Address</label>
+      <input
+        formControlName="address"
+        placeholder="Company address"
+        tuiTextfield
+      />
+    </tui-textfield>
+    <tui-error
+      formControlName="address"
+      [error]="[] | tuiFieldError | async"
+    />
+
+    <tui-textfield>
+      <label tuiLabel>Billing Address</label>
+      <input
+        formControlName="billingAddress"
+        placeholder="Company Billing Address"
+        tuiTextfield
+      />
+    </tui-textfield>
+    <tui-error
+      formControlName="billingAddress"
+      [error]="[] | tuiFieldError | async"
+    />
+
+    <tui-textfield>
+      <label tuiLabel>TIN</label>
+      <input
+        formControlName="tin"
+        placeholder="Company TIN"
+        tuiTextfield
+      />
+    </tui-textfield>
+    <tui-error
+      formControlName="tin"
+      [error]="[] | tuiFieldError | async"
+    />
+
+    <tui-textfield>
+      <label tuiLabel>Website</label>
+      <input
+        formControlName="website"
+        placeholder="Company Website"
+        tuiTextfield
+      />
+    </tui-textfield>
+    <tui-error
+      formControlName="website"
+      [error]="[] | tuiFieldError | async"
+    />
+  </form>
+
+  <form
+    tuiForm="m"
+    formGroupName="contact"
+    [style.margin-top.rem]="1"
+  >
+    <header tuiHeader>
+      <h6 tuiTitle>
+        Edit Contact Details
+      </h6>
+    </header>
+
+    <tui-textfield>
+      <label tuiLabel>Name</label>
+      <input
+        formControlName="name"
+        placeholder="Contact name"
+        tuiTextfield
+      />
+    </tui-textfield>
+    <tui-error
+      formControlName="name"
+      [error]="[] | tuiFieldError | async"
+    />
+
+    <tui-textfield>
+      <label tuiLabel>Phone</label>
+      <input
+        formControlName="phone"
+        placeholder="Contact phone"
+        tuiTextfield
+      />
+    </tui-textfield>
+    <tui-error
+      formControlName="phone"
+      [error]="[] | tuiFieldError | async"
+    />
+
+    <tui-textfield>
+      <label tuiLabel>Email</label>
+      <input
+        formControlName="email"
+        placeholder="Contact Email"
+        tuiTextfield
+      />
+    </tui-textfield>
+    <tui-error
+      formControlName="email"
+      [error]="[] | tuiFieldError | async"
+    />
+
+  </form>
+
+
+  <footer class="footer">
+    <tui-loader
+      class="loader"
+      [inheritColor]="true"
+      [overlay]="inProgress"
+      [showLoader]="inProgress"
+    >
+      <button
+        tuiButton
+        type="submit"
+        [disabled]="companyForm.invalid"
+      >
+        Submit
+      </button>
+    </tui-loader>
+    <button
+      appearance="flat"
+      tuiButton
+      type="button"
+      [routerLink]="'..'"
+    >
+      Back
+    </button>
+  </footer>
+</form>

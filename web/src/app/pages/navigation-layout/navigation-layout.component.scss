@@ -1,0 +1,4 @@
+// hacked it out (- 3rem) is the 'block-size' of the layout's header
+.full-height {
+  height: calc(100vh - 3rem);
+}

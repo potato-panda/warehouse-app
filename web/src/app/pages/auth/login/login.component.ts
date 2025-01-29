@@ -29,14 +29,13 @@ import {NgIf} from '@angular/common';
 export class LoginComponent {
   isLoading = new BehaviorSubject(false);
   error = false;
-
-  constructor(private authService: AuthService, private router: Router) {
-  }
-
   protected readonly loginForm = new FormGroup({
     username: new FormControl('', Validators.required),
     password: new FormControl('', Validators.required),
   });
+
+  constructor(private authService: AuthService, private router: Router) {
+  }
 
   login() {
     this.error = false;
@@ -46,7 +45,7 @@ export class LoginComponent {
       this.authService.login(username, password).subscribe({
         next: value => {
           if (value) {
-            this.router.navigate(["/success"]).then();
+            this.router.navigate(['/']).then();
           } else {
             this.error = true;
           }
