@@ -1,0 +1,3 @@
+ALTER TABLE authorities
+ALTER
+COLUMN authority TYPE VARCHAR(255) USING (authority::VARCHAR(255));

@@ -1,13 +1,22 @@
-import {Resource, ResourceCollection} from '../resource';
+import {ResourceRelations} from '../resource';
+import {Contact} from './contact';
 
-export interface Company {
+export interface Company extends CompanyWithContacts {
+  quotation: [],
+  purchaseOrders: [],
+}
+
+export interface CompanySummary {
   id: string | number;
   name: string;
   address: string;
   billingAddress: string;
-  contact: any[];
   website: string;
   tin: string;
-  quotation: [],
-  purchaseOrders: [],
 }
+
+export interface CompanyWithContacts extends CompanySummary {
+  contacts: Contact[];
+}
+
+export type CompanyRelations = ResourceRelations<['contacts']>

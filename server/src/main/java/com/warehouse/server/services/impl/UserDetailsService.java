@@ -32,7 +32,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var entity = userRepository.getUserByUsername(username);
+        var entity = userRepository.getUsersByUsername(username);
 
         return org.springframework.security.core.userdetails.User.builder()
                                                                  .username(entity.getUsername())
@@ -51,7 +51,7 @@ public class UserDetailsService implements org.springframework.security.core.use
     public User createUser(CreateUserRequest createUserRequest) throws InvalidInputException {
         var username = createUserRequest.username();
 
-        var entity = userRepository.getUserByUsername(username);
+        var entity = userRepository.getUsersByUsername(username);
         if (entity != null) {
             throw new InvalidInputException("Username is already taken.");
         }
@@ -69,7 +69,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 
     @Transactional
     public String deleteUser(String username) throws NotFoundException {
-        var entity = userRepository.getUserByUsername(username);
+        var entity = userRepository.getUsersByUsername(username);
         if (entity != null) {
             userRepository.delete(entity);
 

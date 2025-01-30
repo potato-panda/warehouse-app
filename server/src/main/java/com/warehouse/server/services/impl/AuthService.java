@@ -57,7 +57,7 @@ public class AuthService implements com.warehouse.server.services.AuthService {
 
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-                var user = userRepository.getUserByUsername(userDetail.getUsername());
+                var user = userRepository.getUsersByUsername(userDetail.getUsername());
 
                 var accessToken  = jwtService.generateToken(user);
                 var refreshToken = jwtService.generateRefreshToken(user);
@@ -76,7 +76,7 @@ public class AuthService implements com.warehouse.server.services.AuthService {
         var auth     = SecurityContextHolder.getContext().getAuthentication();
         var username = auth.getName();
         if (username != null) {
-            var user = userRepository.getUserByUsername(username);
+            var user = userRepository.getUsersByUsername(username);
             if (user != null) {
                 if (passwordEncoder.matches(oldPassword, user.getPassword())) {
 
@@ -110,7 +110,7 @@ public class AuthService implements com.warehouse.server.services.AuthService {
     public User getCurrentUser() {
         var auth      = SecurityContextHolder.getContext().getAuthentication();
         var principal = auth.getName();
-        return userRepository.getUserByUsername(principal);
+        return userRepository.getUsersByUsername(principal);
     }
 
     @Override

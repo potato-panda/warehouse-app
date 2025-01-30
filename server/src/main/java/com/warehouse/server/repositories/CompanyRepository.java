@@ -1,10 +1,9 @@
 package com.warehouse.server.repositories;
 
 import com.warehouse.server.entities.Company;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-@Repository
-public interface CompanyRepository extends
-                                   CrudRepository<Company, Long> {
-}
+@RepositoryRestResource(collectionResourceRel = "companies", path = "companies", excerptProjection =
+        Company.Summary.class)
+public interface CompanyRepository extends JpaRepository<Company, Long> {}

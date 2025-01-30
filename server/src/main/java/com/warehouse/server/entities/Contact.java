@@ -11,7 +11,6 @@ public class Contact {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "company_id")
     private Company company;
 
     @NotNull

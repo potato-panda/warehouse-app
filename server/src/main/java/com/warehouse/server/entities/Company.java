@@ -2,11 +2,45 @@ package com.warehouse.server.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.rest.core.config.Projection;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Entity(name = "companies")
 public class Company {
+    @Projection(name = "summary", types = Company.class)
+    public interface Summary {
+        Long getId();
+
+        String getName();
+
+        String getAddress();
+
+        String getBillingAddress();
+
+        String getWebsite();
+
+        String getTin();
+    }
+
+    @Projection(name = "contacts", types = Company.class)
+    public interface WithContacts {
+        Long getId();
+
+        String getName();
+
+        String getAddress();
+
+        String getBillingAddress();
+
+        Collection<Contact> getContacts();
+
+        String getWebsite();
+
+        String getTin();
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,9 +55,9 @@ public class Company {
     @NotNull
     private String billingAddress;
 
-    @OneToMany(mappedBy = "company")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @NotNull
-    private Collection<Contact> contact;
+    private Collection<Contact> contacts = new ArrayList<>();
 
     @NotNull
     private String website;
@@ -32,10 +66,10 @@ public class Company {
     private String tin;
 
     @OneToMany(mappedBy = "company")
-    private Collection<Quotation> quotation;
+    private Collection<Quotation> quotation = new ArrayList<>();
 
     @OneToMany(mappedBy = "supplier")
-    private Collection<PurchaseOrder> purchaseOrders;
+    private Collection<PurchaseOrder> purchaseOrders = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -69,12 +103,12 @@ public class Company {
         this.billingAddress = billingAddress;
     }
 
-    public Collection<Contact> getContact() {
-        return contact;
+    public Collection<Contact> getContacts() {
+        return contacts;
     }
 
-    public void setContact(Collection<Contact> contact) {
-        this.contact = contact;
+    public void setContacts(Collection<Contact> contact) {
+        this.contacts = contact;
     }
 
     public String getWebsite() {

@@ -60,7 +60,7 @@ public class UserAuthServiceTests {
         String username = "newuser";
         String password = "password";
 
-        UserDetails exists = userRepository.getUserByUsername("newuser");
+        UserDetails exists = userRepository.getUsersByUsername("newuser");
         if (exists == null) {
             var encryptedPassword = new BCryptPasswordEncoder().encode(password);
             var user              = new User(username, encryptedPassword, List.of(), true);

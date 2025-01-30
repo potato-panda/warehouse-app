@@ -1,11 +1,13 @@
 package com.warehouse.server.repositories;
 
 import com.warehouse.server.entities.User;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.security.access.prepost.PreAuthorize;
 
-@Repository
-public interface UserRepository extends
-                                CrudRepository<com.warehouse.server.entities.User, String> {
-    User getUserByUsername(String username);
+@RepositoryRestResource(collectionResourceRel = "users", path = "users")
+@PreAuthorize("hasRole('ADMIN')")
+public interface UserRepository extends JpaRepository<User, String> {
+    User getUsersByUsername(@NotNull String username);
 }
