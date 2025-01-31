@@ -1,13 +1,13 @@
-import { ResolveFn } from '@angular/router';
+import {ResolveFn} from '@angular/router';
 import {inject} from '@angular/core';
-import {CompanyService, ResourceResponse} from '../../../../../services/company.service';
+import {CompanyService, ResourceWithContactsResponse} from '../../../../../services/company.service';
 import {catchError, EMPTY} from 'rxjs';
 
-export const detailsResolver: ResolveFn<ResourceResponse> = (route, state) => {
+export const detailsResolver: ResolveFn<ResourceWithContactsResponse> = (route, state) => {
   const service = inject(CompanyService);
   const id = route.params['id'];
   if (id) {
-    return service.getOne(id).pipe(catchError((err, caught) => {
+    return service.getOne(id, 'contacts').pipe(catchError((err, caught) => {
       return EMPTY;
     }));
   }

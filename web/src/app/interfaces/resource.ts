@@ -5,11 +5,13 @@ export type Page = {
   number: number;
 };
 
+type Links = { href: string; templated?: boolean };
+
 interface ResourceBase<ResourceName extends string, Relations = {}> {
   _links: {
-    self: { href: string };
-  } & Record<ResourceName, { href: string; templated?: boolean }> & {
-    [K in keyof Relations]: { href: string };
+    self: Links;
+  } & Record<ResourceName, Links> & {
+    [K in keyof Relations]: Links;
   };
 }
 
@@ -24,8 +26,8 @@ export type ResourceCollection<
 > = {
   _embedded: Record<ResourceName, Resource<ResourceType, CollectionName, Relations>[]>;
   _links: {
-    self: { href: string };
-    profile: { href: string };
+    self: Links;
+    profile: Links;
   };
   page: Page;
 };
@@ -41,5 +43,5 @@ export type ResourceWithRelations<
 > = Resource<Type, ResourceName, RelationMap>;
 
 export type ResourceRelations<T extends string[]> = {
-  [K in T[number]]: { href: string };
+  [K in T[number]]: Links;
 }

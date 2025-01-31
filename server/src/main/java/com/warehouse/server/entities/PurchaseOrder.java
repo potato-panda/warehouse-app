@@ -27,6 +27,7 @@ public class PurchaseOrder {
     private String approvedBy;
 
     private String                receivedBy;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "purchaseOrder")
     private Collection<QuoteItem> quoteItems;
 

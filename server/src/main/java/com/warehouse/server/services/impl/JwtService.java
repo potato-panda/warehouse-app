@@ -30,12 +30,16 @@ public class JwtService implements com.warehouse.server.services.JwtService {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private       SecretKey              secretKey;
+
     @Value("${security.jwt.secret}")
     private       String                 secret;
+
     @Value("${security.jwt.expirationPeriod}")
     private       long                   expirationPeriod;
+
     @Value("${security.jwt.refreshPeriod}")
     private       long                   refreshExpirationPeriod;
+
     @Value("${security.jwt.issuer}")
     private       String                 issuer;
 

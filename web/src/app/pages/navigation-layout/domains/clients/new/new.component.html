@@ -1,14 +1,14 @@
 <form
+  (ngSubmit)="save()"
   [formGroup]="mainForm"
-  [style.max-width.rem]="35"
   [style.margin-top.rem]="3"
+  [style.max-width.rem]="35"
   tuiAppearance="floating"
   tuiCardLarge
-  (ngSubmit)="save()"
 >
   <form
-    tuiForm="m"
     formGroupName="company"
+    tuiForm="m"
   >
     <header tuiHeader>
       <h3 tuiTitle>
@@ -25,8 +25,8 @@
       />
     </tui-textfield>
     <tui-error
-      formControlName="name"
       [error]="[] | tuiFieldError | async"
+      formControlName="name"
     />
 
     <tui-textfield>
@@ -38,8 +38,8 @@
       />
     </tui-textfield>
     <tui-error
-      formControlName="address"
       [error]="[] | tuiFieldError | async"
+      formControlName="address"
     />
 
     <tui-textfield>
@@ -51,8 +51,8 @@
       />
     </tui-textfield>
     <tui-error
-      formControlName="billingAddress"
       [error]="[] | tuiFieldError | async"
+      formControlName="billingAddress"
     />
 
     <tui-textfield>
@@ -64,8 +64,8 @@
       />
     </tui-textfield>
     <tui-error
-      formControlName="tin"
       [error]="[] | tuiFieldError | async"
+      formControlName="tin"
     />
 
     <tui-textfield>
@@ -77,15 +77,15 @@
       />
     </tui-textfield>
     <tui-error
-      formControlName="website"
       [error]="[] | tuiFieldError | async"
+      formControlName="website"
     />
   </form>
 
   <form
-    tuiForm="m"
-    formGroupName="contact"
     [style.margin-top.rem]="1"
+    formGroupName="contact"
+    tuiForm="m"
   >
     <header tuiHeader>
       <h6 tuiTitle>
@@ -102,8 +102,8 @@
       />
     </tui-textfield>
     <tui-error
-      formControlName="name"
       [error]="[] | tuiFieldError | async"
+      formControlName="name"
     />
 
     <tui-textfield>
@@ -115,8 +115,8 @@
       />
     </tui-textfield>
     <tui-error
-      formControlName="phone"
       [error]="[] | tuiFieldError | async"
+      formControlName="phone"
     />
 
     <tui-textfield>
@@ -128,8 +128,8 @@
       />
     </tui-textfield>
     <tui-error
-      formControlName="email"
       [error]="[] | tuiFieldError | async"
+      formControlName="email"
     />
 
   </form>
@@ -137,24 +137,24 @@
 
   <footer class="footer">
     <tui-loader
-      class="loader"
       [inheritColor]="true"
       [overlay]="inProgress"
       [showLoader]="inProgress"
+      class="loader"
     >
       <button
+        [disabled]="companyForm.invalid"
         tuiButton
         type="submit"
-        [disabled]="companyForm.invalid"
       >
         Submit
       </button>
     </tui-loader>
     <button
+      [routerLink]="'..'"
       appearance="flat"
       tuiButton
       type="button"
-      [routerLink]="'..'"
     >
       Back
     </button>

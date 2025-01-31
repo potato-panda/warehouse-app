@@ -18,7 +18,7 @@ public class Quotation {
     private Collection<QuoteItem> quoteItems;
 
     @ManyToOne
-    @JoinColumn(name = "company_id", referencedColumnName = "id")
+    @JoinColumn(name = "company_id")
     private Company company;
 
     //    users will manually input
@@ -36,7 +36,6 @@ public class Quotation {
     private Timestamp quotationDate;
 
     @OneToOne(mappedBy = "quotation")
-    @JoinColumn(name = "quotation_id", referencedColumnName = "id")
     private Receipt receipt;
 
     @Column(name = "total_amount")

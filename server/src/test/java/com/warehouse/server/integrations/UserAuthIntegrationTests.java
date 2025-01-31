@@ -6,7 +6,6 @@ import com.warehouse.server.dtos.requests.ChangePasswordRequest;
 import com.warehouse.server.dtos.requests.LoginRequest;
 import com.warehouse.server.dtos.responses.CurrentUserResponse;
 import com.warehouse.server.dtos.responses.LoginResponse;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -80,12 +79,14 @@ public class UserAuthIntegrationTests {
 
         MvcResult authenticatedResult =
                 mockMvc.perform(get("/api/auth/current-user").contentType(MediaType.APPLICATION_JSON)
-                                                                                     .headers(authHeader))
-                                               .andExpect(MockMvcResultMatchers.status().isOk())
-                                               .andReturn();
+                                                             .headers(authHeader))
+                       .andExpect(MockMvcResultMatchers.status().isOk())
+                       .andReturn();
 
         var authenticatedResultResponse = authenticatedResult.getResponse();
-        CurrentUserResponse currentUserResponse = objectMapper.readValue(authenticatedResultResponse.getContentAsString(), CurrentUserResponse.class);
+        CurrentUserResponse currentUserResponse =
+                objectMapper.readValue(authenticatedResultResponse.getContentAsString(),
+                                       CurrentUserResponse.class);
 
         assertThat(currentUserResponse.username()).isEqualTo("admin");
 
@@ -97,9 +98,9 @@ public class UserAuthIntegrationTests {
         authHeader.put("Authorization", List.of("Bearer ABC"));
 
         mockMvc.perform(get("/api/auth/current-user").contentType(MediaType.APPLICATION_JSON)
-                                                             .headers(authHeader))
-                       .andExpect(MockMvcResultMatchers.status().is4xxClientError())
-                       .andReturn();
+                                                     .headers(authHeader))
+               .andExpect(MockMvcResultMatchers.status().is4xxClientError())
+               .andReturn();
 
     }
 
@@ -125,7 +126,9 @@ public class UserAuthIntegrationTests {
 
         Thread.sleep(1000);
 
-        var changePasswordJson    = objectMapper.writeValueAsString(new ChangePasswordRequest("admin", "superadmin", "superadmin"));
+        var changePasswordJson = objectMapper.writeValueAsString(new ChangePasswordRequest("admin",
+                                                                                           "superadmin",
+                                                                                           "superadmin"));
         var authHeader = new HttpHeaders();
         authHeader.put("Authorization", List.of("Bearer %s".formatted(parsedResponse.accessToken())));
 
@@ -133,11 +136,11 @@ public class UserAuthIntegrationTests {
                                                                  .contentType(MediaType.APPLICATION_JSON)
                                                                  .headers(authHeader)
                                                                  .content(changePasswordJson))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                                                .andExpect(MockMvcResultMatchers.status().isOk())
                                                 .andReturn();
 
         var changePasswordResultResponse = changePasswordResult.getResponse();
-        var newRefreshToken = changePasswordResultResponse.getCookie("refreshToken");
+        var newRefreshToken              = changePasswordResultResponse.getCookie("refreshToken");
 
         assertThat(newRefreshToken).isNotNull();
         assertThat(newRefreshToken).isNotEqualTo(refreshToken);

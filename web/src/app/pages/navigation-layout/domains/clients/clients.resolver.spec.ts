@@ -1,12 +1,12 @@
-import { TestBed } from '@angular/core/testing';
-import { ResolveFn } from '@angular/router';
+import {TestBed} from '@angular/core/testing';
+import {ResolveFn} from '@angular/router';
 
-import { clientsResolver } from './clients.resolver';
-import {PageableResourceResponse} from '../../../../services/company.service';
+import {clientsResolver} from './clients.resolver';
+import {ResourceCollectionResponse} from '../../../../services/company.service';
 
 describe('clientsResolver', () => {
-  const executeResolver: ResolveFn<PageableResourceResponse> = (...resolverParameters) =>
-      TestBed.runInInjectionContext(() => clientsResolver(...resolverParameters));
+  const executeResolver: ResolveFn<ResourceCollectionResponse> = (...resolverParameters) =>
+    TestBed.runInInjectionContext(() => clientsResolver(...resolverParameters));
 
   beforeEach(() => {
     TestBed.configureTestingModule({});

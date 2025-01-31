@@ -9,53 +9,22 @@ import java.util.Collection;
 
 @Entity(name = "companies")
 public class Company {
-    @Projection(name = "summary", types = Company.class)
-    public interface Summary {
-        Long getId();
-
-        String getName();
-
-        String getAddress();
-
-        String getBillingAddress();
-
-        String getWebsite();
-
-        String getTin();
-    }
-
-    @Projection(name = "contacts", types = Company.class)
-    public interface WithContacts {
-        Long getId();
-
-        String getName();
-
-        String getAddress();
-
-        String getBillingAddress();
-
-        Collection<Contact> getContacts();
-
-        String getWebsite();
-
-        String getTin();
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long                id;
 
     @NotNull
-    private String name;
+    private String              name;
 
     @NotNull
-    private String address;
+    private String              address;
 
     @Column(name = "billing_address")
     @NotNull
-    private String billingAddress;
+    private String              billingAddress;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "company", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
+            CascadeType.REFRESH})
     @NotNull
     private Collection<Contact> contacts = new ArrayList<>();
 
@@ -66,7 +35,7 @@ public class Company {
     private String tin;
 
     @OneToMany(mappedBy = "company")
-    private Collection<Quotation> quotation = new ArrayList<>();
+    private Collection<Quotation>     quotations     = new ArrayList<>();
 
     @OneToMany(mappedBy = "supplier")
     private Collection<PurchaseOrder> purchaseOrders = new ArrayList<>();
@@ -127,12 +96,12 @@ public class Company {
         this.tin = tin;
     }
 
-    public Collection<Quotation> getQuotation() {
-        return quotation;
+    public Collection<Quotation> getQuotations() {
+        return quotations;
     }
 
-    public void setQuotation(Collection<Quotation> quotation) {
-        this.quotation = quotation;
+    public void setQuotations(Collection<Quotation> quotation) {
+        this.quotations = quotation;
     }
 
     public Collection<PurchaseOrder> getPurchaseOrders() {
@@ -141,5 +110,37 @@ public class Company {
 
     public void setPurchaseOrders(Collection<PurchaseOrder> purchaseOrders) {
         this.purchaseOrders = purchaseOrders;
+    }
+
+    @Projection(name = "summary", types = Company.class)
+    public interface Summary {
+        Long getId();
+
+        String getName();
+
+        String getAddress();
+
+        String getBillingAddress();
+
+        String getWebsite();
+
+        String getTin();
+    }
+
+    @Projection(name = "contacts", types = Company.class)
+    public interface WithContacts {
+        Long getId();
+
+        String getName();
+
+        String getAddress();
+
+        String getBillingAddress();
+
+        Collection<Contact> getContacts();
+
+        String getWebsite();
+
+        String getTin();
     }
 }

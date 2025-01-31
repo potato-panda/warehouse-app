@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {AsyncPipe} from '@angular/common';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
@@ -16,6 +16,8 @@ import {
 import {TuiCardLarge, TuiForm, TuiHeader} from '@taiga-ui/layout';
 import {TuiFieldErrorPipe} from '@taiga-ui/kit';
 import {CompanyService} from '../../../../../services/company.service';
+import {concatMap, forkJoin} from 'rxjs';
+import {ContactsService} from '../../../../../services/contacts.service';
 
 @Component({
   selector: 'app-new',
@@ -61,7 +63,9 @@ export class NewComponent {
     contact: this.contactForm
   });
 
-  constructor(private service: CompanyService, private alert: TuiAlertService) {
+  private readonly alerts = inject(TuiAlertService);
+
+  constructor(private companyService: CompanyService, private contactService: ContactsService) {
   }
 
   ngOnInit() {
@@ -69,33 +73,38 @@ export class NewComponent {
 
   save() {
     this.inProgress = true;
-    const company = this.mainForm.get('company')?.value;
-    const contact = this.mainForm.get('contact')?.value;
-    const toSave = {
-      ...company,
-      contact: [contact]
-    };
-    this.service.createOne(toSave).subscribe({
-      error: err => {
-        this.alert.open(context => {
-          },
-          {
-            appearance: 'negative',
-            label: 'Save failed. Please try again later.'
-          }).subscribe();
-      },
-      next: value => {
-        this.alert.open(context => {
-          },
-          {
-            appearance: 'positive',
-            label: 'Save successful!',
-          }).subscribe();
-      },
-      complete: () => {
-        this.inProgress = false;
-      }
-    });
+    const companyFormValue = this.mainForm.get('company')?.value;
+    const contactFormValue = this.mainForm.get('contact')?.value;
+
+    forkJoin([this.companyService.createOne(companyFormValue), this.contactService.createOne(contactFormValue)])
+      .pipe(
+        concatMap(([companyResponse, contactResponse]) => {
+          return this.contactService.updateRelation(contactResponse._links.company.href, companyResponse._links.self.href);
+        })
+      )
+      .subscribe({
+        error: err => {
+          this.alerts.open(context => {
+            },
+            {
+              appearance: 'negative',
+              label: 'Save failed. Please try again later.'
+            }).subscribe();
+          this.inProgress = false;
+        },
+        next: value => {
+          this.alerts.open(context => {
+            },
+            {
+              appearance: 'positive',
+              label: 'Save successful!',
+            }).subscribe();
+          this.inProgress = false;
+        },
+        complete: () => {
+          this.inProgress = false;
+        }
+      });
   }
 
 }

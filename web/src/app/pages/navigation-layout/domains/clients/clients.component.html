@@ -21,56 +21,105 @@
     >
       Client
     </strong>
+
     <hr>
-    <button [routerLink]="['clients',1]">:1</button>
+    <!--    <button [routerLink]="['clients',1]">:1</button>-->
 
     <button
+      [routerLink]="'new'"
       tuiButton
       type="button"
-      [routerLink]="'new'"
     >
       Add Client
     </button>
   </nav>
   <hr>
 
-  <table
-    tuiTable
-    [style.width.rem]="36"
+  <tui-loader
+    [overlay]="true"
+    [showLoader]="!!(loading$ | async)"
   >
-    <caption tuiCaption>
-      <span>{{ pageDetails?.totalElements }} rows</span>
-      <tui-pagination
-        [length]="totalPages"
-        [style.float]="'right'"
-        [(index)]="index"
-      />
-      <strong>
-        {{ index * size + 1 }}-{{ (index + 1) * size }} rows
-      </strong>
-      <strong>
-        {{ index }} of {{ totalPages }} pages
-      </strong>
-    </caption>
-    <thead>
-    <tr tuiThGroup>
-      <th tuiTh>Name</th>
-      <th tuiTh>Address</th>
-      <th tuiTh>TIN</th>
-      <th tuiTh>Website</th>
-    </tr>
-    </thead>
-    <tbody tuiTbody>
-    <tr *ngFor="let company of companies">
-      <td tuiTd>
-        <a [routerLink]="[company.id]">{{ company.name }}</a>
-      </td>
-      <td tuiTd>{{ company.address }}</td>
-      <td tuiTd>{{ company.tin }}</td>
-      <td tuiTd>{{ company.website }}</td>
-    </tr>
-    </tbody>
-  </table>
-
-
+    <table
+      (directionChange)="direction$.next($event)"
+      (tuiSortByChange)="sorter$.next($event!)"
+      *ngIf="data$ | async as data"
+      [columns]="columns"
+      [direction]="(direction$ | async) || 1"
+      [size]="'s'"
+      [tuiSortBy]="sorter$ | async"
+      class="table"
+      tuiTable
+    >
+      <thead tuiThead>
+      <tr tuiThGroup>
+        <th *tuiHead="'name'" tuiSortable tuiTh>Name</th>
+        <th *tuiHead="'address'" tuiSortable tuiTh>Address</th>
+        <th *tuiHead="'tin'" tuiSortable tuiTh>TIN</th>
+        <th *tuiHead="'website'" tuiSortable tuiTh>Website</th>
+        <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
+      </tr>
+      </thead>
+      <tbody
+        *tuiLet="data as sortedData"
+        [data]="sortedData"
+        tuiTbody
+      >
+      <tr *ngFor="let item of sortedData" tuiTr>
+        <td *tuiCell="'name'" tuiTd>
+          <a [routerLink]="[item.id]"
+             tuiLink
+          >
+            {{ item.name }}
+          </a>
+        </td>
+        <td *tuiCell="'address'" tuiTd>{{ item.address }}</td>
+        <td *tuiCell="'tin'" tuiTd>{{ item.tin }}</td>
+        <td *tuiCell="'website'" tuiTd>{{ item.website }}</td>
+        <td *tuiCell="'actions'" tuiTd>
+          <span tuiStatus>
+          <button
+            [routerLink]="[item.id]"
+            appearance="action"
+            iconStart="@tui.pencil"
+            size="xs"
+            tuiIconButton
+            type="button"
+          >
+            Edit
+          </button>
+          <button
+            appearance="action"
+            iconStart="@tui.ellipsis"
+            size="xs"
+            tuiIconButton
+            type="button"
+          >
+            More
+          </button>
+        </span>
+        </td>
+      </tr>
+      </tbody>
+      <tfoot>
+      <tr>
+        <td [colSpan]="columns.length">
+          <tui-table-pagination
+            (paginationChange)="onPagination($event)"
+            [page]="(page$ | async) || 0"
+            [size]="(size$ | async) || 20"
+            [total]="(total$ | async) || 0"
+            class="tui-space_top-2"
+          />
+        </td>
+      </tr>
+      </tfoot>
+    </table>
+  </tui-loader>
 </main>
+
+<!--        <a tuiLink-->
+<!--           iconStart="@tui.trash"-->
+<!--           (click)="showDeleteDialog(company)"-->
+<!--        >-->
+<!--          Delete-->
+<!--        </a>-->

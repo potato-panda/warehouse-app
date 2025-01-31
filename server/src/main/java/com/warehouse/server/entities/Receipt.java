@@ -12,7 +12,7 @@ public class Receipt {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "quotation_id", referencedColumnName = "id")
+    @JoinColumn(name = "quotation_id")
     private Quotation quotation;
 
     @Column(name = "received_date")

@@ -10,14 +10,15 @@ public class QuoteItem {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "quotation_id", nullable = false)
+    @JoinColumn(name = "quotation_id")
     private Quotation quotation;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "purchase_order_id", referencedColumnName = "id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "purchase_order_id")
     private PurchaseOrder purchaseOrder;
 
     @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH, CascadeType.PERSIST})
+    @JoinColumn(name = "product_id")
     private Product quotedProduct;
 
     private Integer quantity;

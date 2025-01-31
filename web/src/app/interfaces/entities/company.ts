@@ -2,7 +2,7 @@ import {ResourceRelations} from '../resource';
 import {Contact} from './contact';
 
 export interface Company extends CompanyWithContacts {
-  quotation: [],
+  quotations: [],
   purchaseOrders: [],
 }
 
@@ -19,4 +19,4 @@ export interface CompanyWithContacts extends CompanySummary {
   contacts: Contact[];
 }
 
-export type CompanyRelations = ResourceRelations<['contacts']>
+export type CompanyRelations = ResourceRelations<['contacts', 'purchaseOrders', 'quotations']>

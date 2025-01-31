@@ -1,6 +1,6 @@
 import {Component, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {ActivatedRoute, Data, RouterLink, RouterOutlet} from '@angular/router';
+import {ActivatedRoute, Data, RouterLink} from '@angular/router';
 import {TuiPortals} from '@taiga-ui/cdk';
 import {TuiFade,} from '@taiga-ui/kit';
 import {TuiNavigation} from '@taiga-ui/layout';
@@ -18,7 +18,6 @@ const ICON =
     FormsModule,
     TuiFade,
     TuiNavigation,
-    RouterOutlet,
     TuiButton,
     AsyncPipe,
     RouterLink,

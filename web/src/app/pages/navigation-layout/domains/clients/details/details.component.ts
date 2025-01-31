@@ -1,12 +1,13 @@
-import {Component} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {ActivatedRoute, RouterLink} from '@angular/router';
-import {CompanyService, ResourceResponse} from '../../../../../services/company.service';
-import {Company} from '../../../../../interfaces/entities/company';
+import {CompanyService, ResourceWithContactsResponse} from '../../../../../services/company.service';
+import {CompanyWithContacts} from '../../../../../interfaces/entities/company';
 import {TuiAlertService, TuiAppearance, TuiButton, TuiError, TuiLoader, TuiTextfield, TuiTitle} from '@taiga-ui/core';
 import {TuiCardLarge, TuiForm, TuiHeader} from '@taiga-ui/layout';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {TuiFieldErrorPipe} from '@taiga-ui/kit';
 import {AsyncPipe} from '@angular/common';
+import {ContactsService} from '../../../../../services/contacts.service';
 
 @Component({
   selector: 'app-details',
@@ -29,8 +30,8 @@ import {AsyncPipe} from '@angular/common';
   styleUrl: './details.component.scss'
 })
 export class DetailsComponent {
-  protected pageResponse!: ResourceResponse;
-  protected company!: Company;
+  protected pageResponse!: ResourceWithContactsResponse;
+  protected company!: CompanyWithContacts;
 
   protected inProgress = false;
 
@@ -53,7 +54,12 @@ export class DetailsComponent {
     contact: this.contactForm
   });
 
-  constructor(private route: ActivatedRoute, private service: CompanyService, private alert: TuiAlertService) {
+  private readonly alerts = inject(TuiAlertService);
+
+  constructor(private route: ActivatedRoute,
+              private companyService: CompanyService,
+              private contactsService: ContactsService,
+  ) {
   }
 
   ngOnInit() {
@@ -62,40 +68,84 @@ export class DetailsComponent {
       this.company = this.pageResponse;
 
       this.companyForm.patchValue(this.company ?? {});
-      this.contactForm.patchValue(this.company.contact[0] ?? {});
+      this.contactForm.patchValue(this.company.contacts[0] ?? {});
     });
   }
 
   save() {
-    this.inProgress = true;
-    const company = this.mainForm.get('company')?.value;
-    const contact = this.mainForm.get('contact')?.value;
-    const toSave = {
+    // this.inProgress = true;
+    const companyFormValue = this.mainForm.get('company')?.value;
+    const contactFormValue = this.mainForm.get('contact')?.value;
+    const updatedCompany = {
       id: this.company.id,
-      ...company,
-      contact: [contact]
+      ...companyFormValue,
     };
-    this.service.updateOne(toSave).subscribe({
+    const updatedContact = {
+      // id: this.company.contacts[0]?.id ?? undefined,
+      // company: updatedCompany,
+      ...contactFormValue,
+    };
+
+    const toSave = {
+      ...updatedCompany,
+      contacts: [
+        // updatedContact
+        {
+          name: 'name'
+        }
+      ]
+    };
+
+    this.companyService.updateOne(toSave).subscribe({
       error: err => {
-        this.alert.open(context => {
-          },
+        this.alerts.open(context => 'Please try again later.',
           {
             appearance: 'negative',
-            label: 'Save failed. Please try again later.'
-          }).subscribe();
+            label: 'Save failed'
+          }).subscribe(() => {
+          this.inProgress = false;
+        });
       },
       next: value => {
-        this.alert.open(context => {
+        this.alerts.open(context => {
           },
           {
             appearance: 'positive',
             label: 'Save successful!',
-          }).subscribe();
+          }).subscribe(() => {
+          this.inProgress = false;
+        });
       },
       complete: () => {
         this.inProgress = false;
       }
     });
+
+    // concat(this.companyService.updateOne(updatedCompany), this.contactsService.updateOne(updatedContact)).subscribe({
+    //   error: err => {
+    //     this.alerts.open(context => {
+    //       },
+    //       {
+    //         appearance: 'negative',
+    //         label: 'Save failed. Please try again later.'
+    //       }).subscribe(() => {
+    //       this.inProgress = false;
+    //     });
+    //   },
+    //   next: value => {
+    //     this.alerts.open(context => {
+    //       },
+    //       {
+    //         appearance: 'positive',
+    //         label: 'Save successful!',
+    //       }).subscribe(() => {
+    //       this.inProgress = false;
+    //     });
+    //   },
+    //   complete: () => {
+    //     this.inProgress = false;
+    //   }
+    // });
   }
 
 }
