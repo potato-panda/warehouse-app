@@ -38,7 +38,7 @@ public class Product {
     private String umAmount;
 
     @OneToOne(mappedBy = "quotedProduct", optional = false)
-    private QuoteItem quotation;
+    private QuoteItem quoteItem;
 
     public Long getId() {
         return id;
@@ -112,11 +112,11 @@ public class Product {
         this.umAmount = umAmount;
     }
 
-    public QuoteItem getQuotation() {
-        return quotation;
+    public QuoteItem getQuoteItem() {
+        return quoteItem;
     }
 
-    public void setQuotation(QuoteItem quotation) {
-        this.quotation = quotation;
+    public void setQuoteItem(QuoteItem quotation) {
+        this.quoteItem = quotation;
     }
 }

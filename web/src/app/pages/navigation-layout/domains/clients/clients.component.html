@@ -35,47 +35,60 @@
   </nav>
   <hr>
 
-  <tui-loader
-    [overlay]="true"
-    [showLoader]="!!(loading$ | async)"
+  <tui-textfield
+    iconStart="@tui.search"
   >
-    <table
-      (directionChange)="direction$.next($event)"
-      (tuiSortByChange)="sorter$.next($event!)"
-      *ngIf="data$ | async as data"
-      [columns]="columns"
-      [direction]="(direction$ | async) || 1"
-      [size]="'s'"
-      [tuiSortBy]="sorter$ | async"
-      class="table"
-      tuiTable
+    <label tuiLabel>Search by Name</label>
+    <input
+      tuiTextfield
+      [(ngModel)]="nameSearch"
+    />
+<!--    <tui-icon tuiTooltip="Search by Name"/>-->
+  </tui-textfield>
+
+  <div
+    class="content">
+    <tui-loader
+      [overlay]="true"
+      [showLoader]="!!(loading$ | async)"
     >
-      <thead tuiThead>
-      <tr tuiThGroup>
-        <th *tuiHead="'name'" tuiSortable tuiTh>Name</th>
-        <th *tuiHead="'address'" tuiSortable tuiTh>Address</th>
-        <th *tuiHead="'tin'" tuiSortable tuiTh>TIN</th>
-        <th *tuiHead="'website'" tuiSortable tuiTh>Website</th>
-        <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
-      </tr>
-      </thead>
-      <tbody
-        *tuiLet="data as sortedData"
-        [data]="sortedData"
-        tuiTbody
+      <table
+        (directionChange)="direction$.next($event)"
+        (tuiSortByChange)="sorter$.next($event!)"
+        *ngIf="data$ | async as data"
+        [columns]="columns"
+        [direction]="(direction$ | async) || 1"
+        [size]="'s'"
+        [tuiSortBy]="sorter$ | async"
+        class="table"
+        tuiTable
       >
-      <tr *ngFor="let item of sortedData" tuiTr>
-        <td *tuiCell="'name'" tuiTd>
-          <a [routerLink]="[item.id]"
-             tuiLink
-          >
-            {{ item.name }}
-          </a>
-        </td>
-        <td *tuiCell="'address'" tuiTd>{{ item.address }}</td>
-        <td *tuiCell="'tin'" tuiTd>{{ item.tin }}</td>
-        <td *tuiCell="'website'" tuiTd>{{ item.website }}</td>
-        <td *tuiCell="'actions'" tuiTd>
+        <thead tuiThead>
+        <tr tuiThGroup>
+          <th *tuiHead="'name'" tuiSortable tuiTh>Name</th>
+          <th *tuiHead="'address'" tuiSortable tuiTh>Address</th>
+          <th *tuiHead="'tin'" tuiSortable tuiTh>TIN</th>
+          <th *tuiHead="'website'" tuiSortable tuiTh>Website</th>
+          <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
+        </tr>
+        </thead>
+        <tbody
+          *tuiLet="data as sortedData"
+          [data]="sortedData"
+          tuiTbody
+        >
+        <tr *ngFor="let item of sortedData" tuiTr>
+          <td *tuiCell="'name'" tuiTd>
+            <a [routerLink]="[item.id]"
+               tuiLink
+            >
+              {{ item.name }}
+            </a>
+          </td>
+          <td *tuiCell="'address'" tuiTd>{{ item.address }}</td>
+          <td *tuiCell="'tin'" tuiTd>{{ item.tin }}</td>
+          <td *tuiCell="'website'" tuiTd>{{ item.website }}</td>
+          <td *tuiCell="'actions'" tuiTd>
           <span tuiStatus>
           <button
             [routerLink]="[item.id]"
@@ -88,38 +101,46 @@
             Edit
           </button>
           <button
+            [tuiDropdown]="content"
             appearance="action"
             iconStart="@tui.ellipsis"
             size="xs"
+            tuiDropdownOpen
             tuiIconButton
             type="button"
           >
             More
           </button>
+          <ng-template #content>
+            <tui-data-list role="menu">
+              <a (click)="showDeleteDialog(item)"
+                 iconStart="@tui.trash"
+                 tuiLink
+              >
+                Delete
+              </a>
+            </tui-data-list>
+          </ng-template>
         </span>
-        </td>
-      </tr>
-      </tbody>
-      <tfoot>
-      <tr>
-        <td [colSpan]="columns.length">
-          <tui-table-pagination
-            (paginationChange)="onPagination($event)"
-            [page]="(page$ | async) || 0"
-            [size]="(size$ | async) || 20"
-            [total]="(total$ | async) || 0"
-            class="tui-space_top-2"
-          />
-        </td>
-      </tr>
-      </tfoot>
-    </table>
-  </tui-loader>
+          </td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr>
+          <td [colSpan]="columns.length">
+            <tui-table-pagination
+              (paginationChange)="onPagination($event)"
+              [page]="(page$ | async) || 0"
+              [size]="(size$ | async) || 20"
+              [total]="(total$ | async) || 0"
+              class="tui-space_top-2"
+            />
+          </td>
+        </tr>
+        </tfoot>
+      </table>
+    </tui-loader>
+  </div>
 </main>
 
-<!--        <a tuiLink-->
-<!--           iconStart="@tui.trash"-->
-<!--           (click)="showDeleteDialog(company)"-->
-<!--        >-->
-<!--          Delete-->
-<!--        </a>-->
+

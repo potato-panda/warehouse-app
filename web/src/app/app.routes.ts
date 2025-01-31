@@ -12,7 +12,6 @@ import {
   DetailsComponent as ClientDetailsComponent
 } from './pages/navigation-layout/domains/clients/details/details.component';
 import {detailsResolver} from './pages/navigation-layout/domains/clients/details/details.resolver';
-import {clientsResolver} from './pages/navigation-layout/domains/clients/clients.resolver';
 
 export const routes: Routes = [
   {
@@ -38,9 +37,6 @@ export const routes: Routes = [
             path: '',
             data: {
               breadcrumb: 'Clients'
-            },
-            resolve: {
-              clients: clientsResolver
             },
             component: ClientsComponent
           },

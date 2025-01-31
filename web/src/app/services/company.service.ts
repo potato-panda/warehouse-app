@@ -30,6 +30,12 @@ export class CompanyService extends RestService {
     });
   }
 
+  getPageByName(name: string, pageable: Pageable = {page: 0}) {
+    return this.http.get<ResourceCollectionResponse>(`${this.resourceEndpoint}/search/byName`, {
+      params: {...pageable, name},
+    });
+  }
+
   getOne<T extends ResourceProjections>(id: string | number, projection?: T) {
     return this.http.get<T extends 'summary' ? ResourceSummaryResponse
       : T extends 'contacts' ? ResourceWithContactsResponse

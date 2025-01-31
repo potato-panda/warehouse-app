@@ -26,6 +26,12 @@ export class ContactsService extends RestService {
     });
   }
 
+  getPageByName(name: string, pageable: Pageable = {page: 0}) {
+    return this.http.get<ResourceCollectionResponse>(`${this.resourceEndpoint}/search/byName`, {
+      params: {...pageable, name},
+    });
+  }
+
   getOne(id: string | number) {
     return this.http.get<ResourceResponse>(`${this.resourceEndpoint}/${id}`);
   }

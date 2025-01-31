@@ -1,5 +1,5 @@
 export interface Pageable {
-  page?: number,
-  size?: number,
+  page?: string | number,
+  size?: string | number,
   sort?: string,
 }

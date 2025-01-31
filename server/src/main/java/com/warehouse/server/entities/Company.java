@@ -11,20 +11,19 @@ import java.util.Collection;
 public class Company {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long                id;
+    private Long id;
 
     @NotNull
-    private String              name;
+    private String name;
 
     @NotNull
-    private String              address;
+    private String address;
 
     @Column(name = "billing_address")
     @NotNull
-    private String              billingAddress;
+    private String billingAddress;
 
-    @OneToMany(mappedBy = "company", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
-            CascadeType.REFRESH})
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
     @NotNull
     private Collection<Contact> contacts = new ArrayList<>();
 
@@ -34,10 +33,10 @@ public class Company {
     @NotNull
     private String tin;
 
-    @OneToMany(mappedBy = "company")
-    private Collection<Quotation>     quotations     = new ArrayList<>();
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<Quotation> quotations = new ArrayList<>();
 
-    @OneToMany(mappedBy = "supplier")
+    @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<PurchaseOrder> purchaseOrders = new ArrayList<>();
 
     public Long getId() {
