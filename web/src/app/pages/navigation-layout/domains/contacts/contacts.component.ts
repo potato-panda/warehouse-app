@@ -1,25 +1,37 @@
 import {Component, inject, model} from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
+import {FormsModule} from '@angular/forms';
 import {
   TuiAlertService,
   TuiButton,
-  TuiDataList,
+  TuiDataListComponent,
   TuiDialogService,
   TuiDropdown,
+  TuiDropdownOpen,
+  TuiLabel,
   TuiLink,
   TuiLoader,
-  TuiTextfield
+  TuiTextfieldComponent,
+  TuiTextfieldDirective
 } from '@taiga-ui/core';
 import {TuiFade, TuiStatus} from '@taiga-ui/kit';
+import {tuiIsFalsy, tuiIsPresent, TuiLet} from '@taiga-ui/cdk';
 import {TuiMainComponent, TuiSubheaderCompactComponent} from '@taiga-ui/layout';
-import {CompanyService, ResourceCollectionResponse} from '../../../../services/company.service';
-import {RouterLink} from '@angular/router';
-import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
-import {Resource} from '../../../../interfaces/resource';
-import {TuiTable, TuiTablePagination, TuiTablePaginationEvent} from '@taiga-ui/addon-table';
-import {DeleteDialogComponent} from '../../../../components/delete-dialog/delete-dialog.component';
-import {CompanyRelations, CompanySummary} from '../../../../interfaces/entities/company';
-import {PolymorpheusComponent} from '@taiga-ui/polymorpheus';
+import {
+  TuiTable,
+  TuiTableCell,
+  TuiTableDirective,
+  TuiTablePagination,
+  TuiTablePaginationEvent,
+  TuiTableSortable,
+  TuiTableSortBy,
+  TuiTableTbody,
+  TuiTableTd,
+  TuiTableTh,
+  TuiTableThead,
+  TuiTableThGroup,
+  TuiTableTr
+} from '@taiga-ui/addon-table';
 import {
   BehaviorSubject,
   combineLatest,
@@ -32,38 +44,58 @@ import {
   startWith,
   switchMap
 } from 'rxjs';
-import {tuiIsFalsy, tuiIsPresent, TuiLet} from '@taiga-ui/cdk';
 import {toObservable} from '@angular/core/rxjs-interop';
+import {PolymorpheusComponent} from '@taiga-ui/polymorpheus';
+import {DeleteDialogComponent} from '../../../../components/delete-dialog/delete-dialog.component';
+import {Resource} from '../../../../interfaces/resource';
+import {Contact, ContactRelations} from '../../../../interfaces/entities/contact';
+import {
+  ContactsService,
+  ResourceCollectionResponse as ContactResourceCollectionResponse
+} from '../../../../services/contacts.service';
+import {RouterLink} from '@angular/router';
 
-type CompanyResourceList = Resource<CompanySummary, 'company', CompanyRelations>[];
+type CompanyResourceList = Resource<Contact, 'contact', ContactRelations>[];
 
 @Component({
-  selector: 'app-clients',
+  selector: 'app-contacts',
   imports: [
-    FormsModule,
-    ReactiveFormsModule,
-    TuiButton,
-    TuiFade,
-    TuiMainComponent,
-    TuiSubheaderCompactComponent,
-    RouterLink,
-    NgForOf,
-    TuiTable,
-    TuiLink,
-    TuiTablePagination,
-    TuiLet,
-    TuiStatus,
-    TuiLoader,
     AsyncPipe,
+    FormsModule,
+    NgForOf,
     NgIf,
-    TuiDropdown,
-    TuiDataList,
-    TuiTextfield
+    TuiButton,
+    TuiDataListComponent,
+    TuiDropdownOpen,
+    TuiFade,
+    TuiLabel,
+    TuiLet,
+    TuiLink,
+    TuiLoader,
+    TuiMainComponent,
+    TuiStatus,
+    TuiSubheaderCompactComponent,
+    TuiTableCell,
+    TuiTableDirective,
+    TuiTablePagination,
+    TuiTableSortBy,
+    TuiTableSortable,
+    TuiTableTbody,
+    TuiTableTd,
+    TuiTableTh,
+    TuiTableThGroup,
+    TuiTableThead,
+    TuiTableTr,
+    TuiTextfieldComponent,
+    TuiTextfieldDirective,
+    RouterLink,
+    TuiTable,
+    TuiDropdown
   ],
-  templateUrl: './clients.component.html',
-  styleUrl: './clients.component.scss'
+  templateUrl: './contacts.component.html',
+  styleUrl: './contacts.component.scss'
 })
-export class ClientsComponent {
+export class ContactsComponent {
   protected readonly size$ = new BehaviorSubject(20);
   protected readonly page$ = new BehaviorSubject(0);
 
@@ -73,14 +105,12 @@ export class ClientsComponent {
   protected readonly refresh$ = new BehaviorSubject<void>(undefined);
   protected nameSearch = model('');
   protected readonly search$ = toObservable(this.nameSearch);
-  protected columns = ['name', 'address', 'tin', 'website', 'actions'];
+  protected columns: (keyof Contact | 'actions')[] = ['name', 'email', 'phone', 'actions'];
   // any changes will trigger a data update, debounced of course
   protected readonly request$ = combineLatest([
     this.search$.pipe(
       debounceTime(300),
       distinctUntilChanged()
-      // switchMap((searchValue) => searchValue),
-      // share()
     ),
     this.sorter$,
     this.direction$,
@@ -100,14 +130,14 @@ export class ClientsComponent {
   );
   protected readonly data$: Observable<CompanyResourceList> = this.request$.pipe(
     filter(tuiIsPresent),
-    map((response) => response._embedded.companies),
+    map((response) => response._embedded.contacts),
     map((items) => items.filter(tuiIsPresent)),
     startWith([]),
   );
   private readonly dialogs = inject(TuiDialogService);
   private readonly alerts = inject(TuiAlertService);
 
-  constructor(private companyService: CompanyService,
+  constructor(private contactsService: ContactsService,
   ) {
   }
 
@@ -120,7 +150,7 @@ export class ClientsComponent {
     this.size$.next(size);
   };
 
-  protected showDeleteDialog({id, name}: CompanySummary): void {
+  protected showDeleteDialog({id, name}: Contact): void {
     this.dialogs.open<Observable<any>>(new PolymorpheusComponent(DeleteDialogComponent), {
       dismissible: true,
       closeable: true,
@@ -128,7 +158,7 @@ export class ClientsComponent {
       size: 'm',
       data: {
         subject: name,
-        submit: () => this.companyService.deleteOne(id)
+        submit: () => this.contactsService.deleteOne(id)
       }
     }).subscribe(obs => {
       obs.subscribe({
@@ -136,14 +166,14 @@ export class ClientsComponent {
           this.alerts.open(context => {
           }, {
             appearance: 'negative',
-            label: `Error deleting '${name}'`
+            label: `Error deleting contact '${name}'`
           });
         },
         next: response => {
           this.alerts.open(context => {
           }, {
             appearance: 'positive',
-            label: `Successfully deleted '${name}'`
+            label: `Successfully deleted contact '${name}'`
           }).subscribe();
         },
         complete: () => {
@@ -153,16 +183,16 @@ export class ClientsComponent {
     });
   }
 
-  private getData(search?: string): Observable<ResourceCollectionResponse> {
+  private getData(search?: string): Observable<ContactResourceCollectionResponse> {
     const pageable = {
       page: this.page$.value,
       size: this.size$.value,
       sort: this.sorter$.value ? this.sorter$.value + (this.direction$.value == 1 ? ',asc' : ',desc') : undefined
     };
     if (search && search.length && search.length > 0) {
-      return this.companyService.getPageByName(search, pageable).pipe(map(response => response));
+      return this.contactsService.getPageByName(search, pageable).pipe(map(response => response));
     }
-    return this.companyService.getPage(pageable).pipe(map(response => response));
+    return this.contactsService.getPage(pageable).pipe(map(response => response));
   }
 
 }

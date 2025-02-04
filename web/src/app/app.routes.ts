@@ -11,7 +11,14 @@ import {NewComponent as ClientNewComponent} from './pages/navigation-layout/doma
 import {
   DetailsComponent as ClientDetailsComponent
 } from './pages/navigation-layout/domains/clients/details/details.component';
-import {detailsResolver} from './pages/navigation-layout/domains/clients/details/details.resolver';
+import {
+  detailsResolver as companyDetailsResolver
+} from './pages/navigation-layout/domains/clients/details/details.resolver';
+import {
+  detailsResolver as contactDetailsResolver
+} from './pages/navigation-layout/domains/contacts/form/details.resolver';
+import {ContactsComponent} from './pages/navigation-layout/domains/contacts/contacts.component';
+import {FormComponent as ContactsFormComponent} from './pages/navigation-layout/domains/contacts/form/form.component';
 
 export const routes: Routes = [
   {
@@ -49,10 +56,33 @@ export const routes: Routes = [
           },
           {
             resolve: {
-              client: detailsResolver
+              client: companyDetailsResolver
             },
             path: ':id',
             component: ClientDetailsComponent
+          }
+        ]
+      }, {
+        path: 'contacts',
+        component: DomainsComponent,
+        children: [
+          {
+            path: '',
+            data: {
+              breadcrumb: 'Contacts'
+            },
+            component: ContactsComponent
+          },
+          {
+            path: 'create',
+            component: ContactsFormComponent
+          },
+          {
+            resolve: {
+              data: contactDetailsResolver
+            },
+            path: ':id',
+            component: ContactsFormComponent
           }
         ]
       },

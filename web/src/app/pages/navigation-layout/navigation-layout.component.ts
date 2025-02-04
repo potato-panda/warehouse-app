@@ -31,7 +31,8 @@ export class NavigationLayoutComponent extends TuiPortals {
   protected expanded = signal(false);
   protected open = false;
   protected readonly routes: any = {
-    clients: '/clients'
+    clients: '/clients',
+    contacts: '/contacts'
   };
   protected username: Observable<Data>;
 

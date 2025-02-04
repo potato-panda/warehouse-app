@@ -2,10 +2,9 @@ import {TestBed} from '@angular/core/testing';
 import {ResolveFn} from '@angular/router';
 
 import {detailsResolver} from './details.resolver';
-import {ResourceWithContactsResponse} from '../../../../../services/company.service';
 
 describe('detailsResolver', () => {
-  const executeResolver: ResolveFn<ResourceWithContactsResponse> = (...resolverParameters) =>
+  const executeResolver: ResolveFn<boolean> = (...resolverParameters) =>
     TestBed.runInInjectionContext(() => detailsResolver(...resolverParameters));
 
   beforeEach(() => {

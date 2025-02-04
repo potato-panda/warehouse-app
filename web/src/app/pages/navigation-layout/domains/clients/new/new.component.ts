@@ -16,8 +16,9 @@ import {
 import {TuiCardLarge, TuiForm, TuiHeader} from '@taiga-ui/layout';
 import {TuiFieldErrorPipe} from '@taiga-ui/kit';
 import {CompanyService} from '../../../../../services/company.service';
-import {concatMap, forkJoin} from 'rxjs';
+import {concatMap, of} from 'rxjs';
 import {ContactsService} from '../../../../../services/contacts.service';
+import IsEmptyObject from '../../../../../utils/is-empty-object';
 
 @Component({
   selector: 'app-new',
@@ -75,11 +76,20 @@ export class NewComponent {
     this.inProgress = true;
     const companyFormValue = this.mainForm.get('company')?.value;
     const contactFormValue = this.mainForm.get('contact')?.value;
+    const isContactFormValueEmpty = IsEmptyObject.evaluate(contactFormValue);
 
-    forkJoin([this.companyService.createOne(companyFormValue), this.contactService.createOne(contactFormValue)])
+    this.companyService.createOne(companyFormValue)
       .pipe(
-        concatMap(([companyResponse, contactResponse]) => {
-          return this.contactService.updateRelation(contactResponse._links.company.href, companyResponse._links.self.href);
+        concatMap((companyResponse) => {
+          if (!isContactFormValueEmpty) {
+            return this.contactService.createOne(contactFormValue).pipe(
+              concatMap(contactResponse => {
+                return this.contactService.updateRelation(contactResponse._links.contact.href, companyResponse._links.self.href);
+              })
+            );
+          }
+
+          return of(companyResponse);
         })
       )
       .subscribe({

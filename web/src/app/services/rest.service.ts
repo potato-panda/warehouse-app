@@ -1,6 +1,7 @@
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
+import CleanUrl from '../utils/clean-url';
 
 @Injectable({
   providedIn: 'root',
@@ -13,11 +14,11 @@ export abstract class RestService {
   /**
    * Creates a relationship between two entities
    * @param propertyUrl This is the url of the property that represents an entity or collection of entities
-   * @param relationUrl This is the url of the entity to associate with
+   * @param referenceUrl This is the url of the entity to associate with
    * @returns {Observable<Object>}
    */
-  createRelation(propertyUrl: string, relationUrl: string): Observable<object> {
-    return this.http.post(this.cleanURL(propertyUrl), this.cleanURL(relationUrl), {
+  createRelation(propertyUrl: string, referenceUrl: string): Observable<object> {
+    return this.http.post(this.cleanURL(propertyUrl), this.cleanURL(referenceUrl), {
       headers: new HttpHeaders({
         'Content-Type': 'text/uri-list',
       })
@@ -27,23 +28,32 @@ export abstract class RestService {
   /**
    * Updates a relationship between two entities
    * @param propertyUrl This is the url of the property that represents an entity or collection of entities
-   * @param relationUrl This is the url of the entity to associate with
+   * @param referenceUrl This is the url of the entity to associate with
    * @returns {Observable<Object>}
    */
-  updateRelation(propertyUrl: string, relationUrl: string | string []): Observable<object> {
-    return this.http.put(this.cleanURL(propertyUrl), this.cleanURL(relationUrl), {
+  updateRelation(propertyUrl: string, referenceUrl: string | string []): Observable<object> {
+    return this.http.put(this.cleanURL(propertyUrl), this.cleanURL(referenceUrl), {
       headers: new HttpHeaders({
         'Content-Type': 'text/uri-list',
       })
     });
   }
 
-  private cleanURL(url: string | string []): string {
-    if (typeof url === 'string') {
-      return url.replace(/{.*?}/g, '');
-    } else if (Array.isArray(url)) {
-      return url.map(s => s.replace(/{.*?}/g, '')).join('\n');
-    }
-    return url;
+  /**
+   * Deletes a relationship between two entities
+   * @param propertyUrl This is the url of the property that represents an entity or collection of entities
+   * @param referenceUrl This is the url of the entity to dissociate
+   * @returns {Observable<Object>}
+   */
+  deleteRelation(propertyUrl: string, referenceUrl: string | string []): Observable<object> {
+    return this.http.delete(this.cleanURL(propertyUrl), {
+      headers: new HttpHeaders({
+        'Content-Type': 'text/uri-list',
+      }),
+      body: this.cleanURL(referenceUrl),
+    });
   }
+
+  private cleanURL = (url: string | string []) => CleanUrl.transform(url);
+
 }

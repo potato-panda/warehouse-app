@@ -7,6 +7,7 @@ import {Pageable} from '../interfaces/pageable';
 import {RestService} from './rest.service';
 
 export type ResourceFullResponse = Resource<Company, 'company', CompanyRelations>;
+export type ResourceResponse = ResourceFullResponse;
 export type ResourceSummaryResponse = Resource<CompanySummary, 'company', CompanyRelations>;
 export type ResourceWithContactsResponse = Resource<CompanyWithContacts, 'company', CompanyRelations>;
 export type ResourceCollectionResponse = ResourceCollection<CompanySummary, 'company', 'companies', CompanyRelations>;

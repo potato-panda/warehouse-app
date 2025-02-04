@@ -19,18 +19,18 @@
     <strong
       tuiFade
     >
-      Client
+      Contacts
     </strong>
 
     <hr>
     <!--    <button [routerLink]="['clients',1]">:1</button>-->
 
     <button
-      [routerLink]="'new'"
+      [routerLink]="'create'"
       tuiButton
       type="button"
     >
-      Add Client
+      Add Contact
     </button>
   </nav>
   <hr>
@@ -66,9 +66,9 @@
         <thead tuiThead>
         <tr tuiThGroup>
           <th *tuiHead="'name'" tuiSortable tuiTh>Name</th>
-          <th *tuiHead="'address'" tuiSortable tuiTh>Address</th>
-          <th *tuiHead="'tin'" tuiSortable tuiTh>TIN</th>
-          <th *tuiHead="'website'" tuiSortable tuiTh>Website</th>
+          <th *tuiHead="'phone'" tuiSortable tuiTh>Email</th>
+          <th *tuiHead="'email'" tuiSortable tuiTh>Phone</th>
+          <th *tuiHead="'company'" tuiSortable tuiTh>Company</th>
           <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
         </tr>
         </thead>
@@ -85,9 +85,9 @@
               {{ item.name }}
             </a>
           </td>
-          <td *tuiCell="'address'" tuiTd>{{ item.address }}</td>
-          <td *tuiCell="'tin'" tuiTd>{{ item.tin }}</td>
-          <td *tuiCell="'website'" tuiTd>{{ item.website }}</td>
+          <td *tuiCell="'phone'" tuiTd>{{ item.phone }}</td>
+          <td *tuiCell="'email'" tuiTd>{{ item.email }}</td>
+          <td *tuiCell="'company'" tuiTd>{{ item._embedded?.company?.name ?? '' }}</td>
           <td *tuiCell="'actions'" tuiTd>
           <span tuiStatus>
           <button

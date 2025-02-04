@@ -1,0 +1,116 @@
+<form
+  (ngSubmit)="save()"
+  [formGroup]="form"
+  [style.margin-top.rem]="3"
+  [style.max-width.rem]="35"
+  tuiAppearance="floating"
+  tuiCardLarge
+  tuiForm="m"
+>
+  <form
+    [style.margin-top.rem]="1"
+    formGroupName="contact"
+    tuiForm="m"
+  >
+    <header tuiHeader>
+      <h6 tuiTitle>
+        Contact Details
+      </h6>
+    </header>
+
+    <tui-textfield>
+      <label tuiLabel>Name</label>
+      <input
+        formControlName="name"
+        placeholder="Contact Name"
+        tuiTextfield
+      />
+    </tui-textfield>
+    <tui-error
+      [error]="[] | tuiFieldError | async"
+      formControlName="name"
+    />
+
+    <tui-textfield>
+      <label tuiLabel>Phone</label>
+      <input
+        formControlName="phone"
+        placeholder="Contact Phone"
+        tuiTextfield
+      />
+    </tui-textfield>
+    <tui-error
+      [error]="[] | tuiFieldError | async"
+      formControlName="phone"
+    />
+
+    <tui-textfield>
+      <label tuiLabel>Email</label>
+      <input
+        formControlName="email"
+        placeholder="Contact Email"
+        tuiTextfield
+      />
+    </tui-textfield>
+    <tui-error
+      [error]="[] | tuiFieldError | async"
+      formControlName="email"
+    />
+  </form>
+
+  <tui-combo-box (searchChange)="searchRequest($event)"
+                 *tuiLet="this.searchCompanyResponse$ | async as items"
+                 [stringify]="stringify"
+                 formControlName="company"
+                 tuiTextfieldSize="m"
+  >
+    Company Name
+    <input
+      placeholder="Company Name"
+      tuiTextfieldLegacy
+    />
+    <ng-template tuiDataList>
+      <ng-container>
+        <tui-data-list *ngIf="items; else loading">
+          <button
+            *ngFor="let item of items"
+            [value]="item._links.self.href | cleanUrl"
+            tuiOption
+          >
+            <div class="name">{{ item.name }}</div>
+          </button>
+        </tui-data-list>
+      </ng-container>
+      <ng-template #loading>
+        <tui-loader></tui-loader>
+      </ng-template>
+    </ng-template>
+
+  </tui-combo-box>
+
+
+  <footer class="footer">
+    <tui-loader
+      [inheritColor]="true"
+      [overlay]="inProgress"
+      [showLoader]="inProgress"
+      class="loader"
+    >
+      <button
+        [disabled]="form.invalid"
+        tuiButton
+        type="submit"
+      >
+        Submit
+      </button>
+    </tui-loader>
+    <button
+      [routerLink]="'..'"
+      appearance="flat"
+      tuiButton
+      type="button"
+    >
+      Back
+    </button>
+  </footer>
+</form>
