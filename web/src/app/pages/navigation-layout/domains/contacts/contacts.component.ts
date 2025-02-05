@@ -5,7 +5,7 @@ import {
   TuiAlertService,
   TuiButton,
   TuiDataListComponent,
-  TuiDialogService,
+  tuiDialog,
   TuiDropdown,
   TuiDropdownOpen,
   TuiLabel,
@@ -45,7 +45,6 @@ import {
   switchMap
 } from 'rxjs';
 import {toObservable} from '@angular/core/rxjs-interop';
-import {PolymorpheusComponent} from '@taiga-ui/polymorpheus';
 import {DeleteDialogComponent} from '../../../../components/delete-dialog/delete-dialog.component';
 import {Resource} from '../../../../interfaces/resource';
 import {Contact, ContactRelations} from '../../../../interfaces/entities/contact';
@@ -96,12 +95,11 @@ type CompanyResourceList = Resource<Contact, 'contact', ContactRelations>[];
   styleUrl: './contacts.component.scss'
 })
 export class ContactsComponent {
+
   protected readonly size$ = new BehaviorSubject(20);
   protected readonly page$ = new BehaviorSubject(0);
-
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
   protected readonly sorter$ = new BehaviorSubject<'name' | 'address' | 'tin' | 'website' | null>(null);
-
   protected readonly refresh$ = new BehaviorSubject<void>(undefined);
   protected nameSearch = model('');
   protected readonly search$ = toObservable(this.nameSearch);
@@ -134,8 +132,14 @@ export class ContactsComponent {
     map((items) => items.filter(tuiIsPresent)),
     startWith([]),
   );
-  private readonly dialogs = inject(TuiDialogService);
+
   private readonly alerts = inject(TuiAlertService);
+
+  protected readonly dialog = tuiDialog(DeleteDialogComponent, {
+    dismissible: true,
+    closeable: false,
+    label: 'Delete?',
+  });
 
   constructor(private contactsService: ContactsService,
   ) {
@@ -151,35 +155,29 @@ export class ContactsComponent {
   };
 
   protected showDeleteDialog({id, name}: Contact): void {
-    this.dialogs.open<Observable<any>>(new PolymorpheusComponent(DeleteDialogComponent), {
-      dismissible: true,
-      closeable: true,
-      label: 'Delete?',
-      size: 'm',
-      data: {
-        subject: name,
-        submit: () => this.contactsService.deleteOne(id)
+    this.dialog(name).subscribe((confirm) => {
+      if (confirm) {
+        this.contactsService.deleteOne(id).subscribe({
+          error: err => {
+            this.alerts.open(context => {
+            }, {
+              appearance: 'negative',
+              label: `Error deleting contact '${name}'`
+            });
+          },
+          next: response => {
+            this.alerts.open(context => {
+            }, {
+              appearance: 'positive',
+              label: `Successfully deleted contact '${name}'`
+            }).subscribe();
+
+            this.refreshData();
+          },
+          complete: () => {
+          }
+        });
       }
-    }).subscribe(obs => {
-      obs.subscribe({
-        error: err => {
-          this.alerts.open(context => {
-          }, {
-            appearance: 'negative',
-            label: `Error deleting contact '${name}'`
-          });
-        },
-        next: response => {
-          this.alerts.open(context => {
-          }, {
-            appearance: 'positive',
-            label: `Successfully deleted contact '${name}'`
-          }).subscribe();
-        },
-        complete: () => {
-          this.refreshData();
-        }
-      });
     });
   }
 

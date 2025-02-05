@@ -79,7 +79,7 @@ export const routes: Routes = [
           },
           {
             resolve: {
-              data: contactDetailsResolver
+              resolved: contactDetailsResolver
             },
             path: ':id',
             component: ContactsFormComponent

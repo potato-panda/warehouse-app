@@ -1,19 +1,21 @@
-<p>Are you sure you want to delete{{ data.subject ? ' \'' + data.subject + '\'?' : '?' }}</p>
+<div tuiForm="m">
+  <p>Are you sure you want to delete{{ value ? ' \'' + value + '\'?' : '?' }}</p>
 
-<p>
-  <button
-    (click)="submit()"
-    size="m"
-    tuiButton
-    type="submit"
-  >
-    Yes
-  </button>
-  <button
-    (click)="cancel()"
-    size="m"
-    tuiButton
-  >
-    No
-  </button>
-</p>
+  <footer class="footer">
+    <button
+      (click)="submit()"
+      appearance="secondary"
+      size="m"
+      tuiButton
+    >
+      Delete
+    </button>
+    <button
+      (click)="cancel()"
+      size="m"
+      tuiButton
+    >
+      No
+    </button>
+  </footer>
+</div>

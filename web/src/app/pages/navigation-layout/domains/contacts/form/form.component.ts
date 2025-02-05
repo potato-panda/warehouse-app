@@ -92,8 +92,8 @@ export class FormComponent {
   private readonly alerts = inject(TuiAlertService);
   private mappedCompanies$ = new BehaviorSubject<CompanyResourceSummaryResponse[]>([]);
   private readonly searchCompanyRequest$ = new BehaviorSubject<string>('');
-  private resolvedContact!: ContactResourceResponse;
-  private resolvedCompany!: CompanyResourceSummaryResponse;
+  private resolvedContact?: ContactResourceResponse;
+  private resolvedCompany?: CompanyResourceSummaryResponse;
 
   constructor(private route: ActivatedRoute, private contactsService: ContactsService, private companyService: CompanyService) {
   }
@@ -103,16 +103,16 @@ export class FormComponent {
     const companyFormValue = this.form.get('company')?.value;
     const contactFormValue = this.form.get('contact')?.value;
 
-    if (this.resolvedContact.id) {
+    if (this.resolvedContact?.id) {
       const updatedContact = {
         ...contactFormValue,
-        id: this.resolvedContact.id,
+        id: this.resolvedContact?.id,
       };
       const o = this.contactsService.updateOne(updatedContact)
         .pipe(
           concatMap((contactResponse) => {
             const selectedCompany = companyFormValue;
-            const isRelated = CleanUrl.transform(this.resolvedContact._embedded?.company._links.self.href);
+            const isRelated = CleanUrl.transform(this.resolvedContact?._embedded?.company._links.self.href);
             const companyPropertyUrl = contactResponse._links.company.href;
             if (selectedCompany) {
               if (selectedCompany !== isRelated) {
@@ -167,7 +167,7 @@ export class FormComponent {
       return this.getCompanyData(search ?? '').pipe(
         mergeMap((response) => {
           const companies = response._embedded.companies;
-          const uniqueCompanies = UniqueId.filter([this.resolvedCompany, ...companies]);
+          const uniqueCompanies = UniqueId.filter(this.resolvedCompany ? [this.resolvedCompany, ...companies] : companies);
           this.mappedCompanies$.next(uniqueCompanies);
           return of(uniqueCompanies);
         }),
@@ -206,14 +206,14 @@ export class FormComponent {
   });
 
   private ngOnInit() {
-    const resolvedContact = this.route.snapshot.data['data']['contact'];
-    const resolvedCompany = this.route.snapshot.data['data']['company'];
+    const resolvedContact = this.route.snapshot.data['resolved']?.['contact'];
+    const resolvedCompany = this.route.snapshot.data['resolved']?.['company'];
     if (resolvedCompany) {
-      this.resolvedCompany = resolvedCompany;
+      this.resolvedCompany = resolvedCompany as CompanyResourceSummaryResponse;
       this.mappedCompanies$.next([this.resolvedCompany]);
     }
     if (resolvedContact) {
-      this.resolvedContact = resolvedContact;
+      this.resolvedContact = resolvedContact as ContactResourceResponse;
       const {_embedded, name, phone, email} = this.resolvedContact;
       const companyHref = _embedded?.company._links.self.href;
 

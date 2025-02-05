@@ -1,36 +1,30 @@
 import {Component} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {TuiButton, TuiDialogContext} from '@taiga-ui/core';
-import {Observable, of} from 'rxjs';
 import {injectContext} from '@taiga-ui/polymorpheus';
-
-type Input = {
-  subject: string,
-  submit: () => Observable<any>
-}
+import {TuiForm} from '@taiga-ui/layout';
 
 @Component({
   selector: 'app-delete-dialog',
   imports: [
     ReactiveFormsModule,
-    TuiButton
+    TuiButton,
+    TuiForm
   ],
   templateUrl: './delete-dialog.component.html',
   styleUrl: './delete-dialog.component.scss'
 })
 export class DeleteDialogComponent {
 
-  protected readonly context = injectContext<TuiDialogContext<Observable<any>, Input>>();
+  public readonly context = injectContext<TuiDialogContext<boolean, string>>();
+  protected value: string | null = null;
 
-  get data(): Input {
-    return this.context.data;
+  protected cancel(): void {
+    this.context.completeWith(false);
   }
 
-  cancel() {
-    this.context.completeWith(of());
+  protected submit(): void {
+    this.context.completeWith(true);
   }
 
-  submit() {
-    this.context.completeWith(this.data.submit());
-  }
 }
