@@ -11,11 +11,16 @@ import {
   detailsResolver as companyDetailsResolver
 } from './pages/navigation-layout/domains/customers/form/details.resolver';
 import {
-  detailsResolver as contactDetailsResolver
+  detailsResolver as contactDetailsResolver,
 } from './pages/navigation-layout/domains/contacts/form/details.resolver';
+import {
+  detailsResolver as productDetailsResolver
+} from './pages/navigation-layout/domains/products/form/details.resolver';
 import {ContactsComponent} from './pages/navigation-layout/domains/contacts/contacts.component';
 import {FormComponent as ContactsFormComponent} from './pages/navigation-layout/domains/contacts/form/form.component';
 import {FormComponent as CustomerFormComponent} from './pages/navigation-layout/domains/customers/form/form.component';
+import {FormComponent as ProductsFormComponent} from './pages/navigation-layout/domains/products/form/form.component';
+import {ProductsComponent} from './pages/navigation-layout/domains/products/products.component';
 
 export const routes: Routes = [
   {
@@ -59,7 +64,8 @@ export const routes: Routes = [
             component: CustomerFormComponent
           }
         ]
-      }, {
+      },
+      {
         path: 'contacts',
         component: DomainsComponent,
         children: [
@@ -80,6 +86,30 @@ export const routes: Routes = [
             },
             path: ':id',
             component: ContactsFormComponent
+          }
+        ]
+      },
+      {
+        path: 'products',
+        component: DomainsComponent,
+        children: [
+          {
+            path: '',
+            data: {
+              breadcrumb: 'Products'
+            },
+            component: ProductsComponent
+          },
+          {
+            path: 'create',
+            component: ProductsFormComponent
+          },
+          {
+            resolve: {
+              resolved: productDetailsResolver
+            },
+            path: ':id',
+            component: ProductsFormComponent
           }
         ]
       },

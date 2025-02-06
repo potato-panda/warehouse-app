@@ -21,7 +21,6 @@ export const detailsResolver: ResolveFn<ResolvedData> = (route, state) => {
           if (companyId) {
             return companyService.getOne(companyId).pipe(
               mergeMap(companyResponse => {
-                console.log(companyResponse);
                 return of({
                   company: companyResponse,
                   contact: contactResponse

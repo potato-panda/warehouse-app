@@ -1,0 +1,112 @@
+<form (ngSubmit)="save()"
+      [formGroup]="productForm"
+      [style.margin-top.rem]="3"
+      [style.max-width.rem]="35"
+      tuiAppearance="floating"
+      tuiCardLarge
+      tuiForm="m"
+>
+  <header tuiHeader><h3 tuiTitle>Product Details</h3></header>
+
+  <tui-textfield>
+    <label tuiLabel>Name</label>
+    <input formControlName="name"
+           placeholder="Product name"
+           tuiTextfield
+    />
+  </tui-textfield>
+  <tui-error [error]="[] | tuiFieldError | async"
+             formControlName="name"
+  />
+
+  <tui-textfield>
+    <label tuiLabel>SKU</label>
+    <input formControlName="sku"
+           placeholder="Product SKU"
+           tuiTextfield
+    />
+  </tui-textfield>
+  <tui-error [error]="[] | tuiFieldError | async"
+             formControlName="sku"
+  />
+
+  <tui-textfield>
+    <label tuiLabel>Item Code</label>
+    <input formControlName="itemCode"
+           placeholder="Product Item Code"
+           tuiTextfield
+    />
+  </tui-textfield>
+  <tui-error [error]="[] | tuiFieldError | async"
+             formControlName="itemCode"
+  />
+
+  <tui-textarea [expandable]="true"
+                [maxLength]="250"
+                [tuiTextfieldCleaner]="true"
+                formControlName="description"
+                tuiTextfieldSize="m"
+  >
+    <label tuiLabel>Product Description</label>
+    <textarea tuiTextfieldLegacy></textarea>
+  </tui-textarea>
+  <tui-error [error]="[] | tuiFieldError | async"
+             formControlName="description"
+  />
+
+  <tui-textfield>
+    <label tuiLabel>Price</label>
+    <input formControlName="price"
+           placeholder="Product Price"
+           tuiTextfield
+    />
+  </tui-textfield>
+  <tui-error [error]="[] | tuiFieldError | async"
+             formControlName="price"
+  />
+
+  <tui-textfield>
+    <label tuiLabel>UM (Unit of Measurement)</label>
+    <input formControlName="um"
+           placeholder="UM (Unit of Measurement)"
+           tuiTextfield
+    />
+  </tui-textfield>
+  <tui-error [error]="[] | tuiFieldError | async"
+             formControlName="um"
+  />
+
+  <tui-textfield>
+    <label tuiLabel>UM Amount</label>
+    <input formControlName="umAmount"
+           placeholder="UM Amount"
+           tuiTextfield
+    />
+  </tui-textfield>
+  <tui-error [error]="[] | tuiFieldError | async"
+             formControlName="umAmount"
+  />
+
+  <footer class="footer">
+    <button [disabled]="productForm.invalid || inProgress"
+            tuiButton
+            type="submit"
+    >
+      Save
+    </button>
+    <button [disabled]="productForm.invalid || inProgress"
+            tuiButton
+            type="button"
+            (click)="save(true)"
+    >
+      Save and Return
+    </button>
+    <button [routerLink]="'..'"
+            appearance="flat"
+            tuiButton
+            type="button"
+    >
+      Back
+    </button>
+  </footer>
+</form>

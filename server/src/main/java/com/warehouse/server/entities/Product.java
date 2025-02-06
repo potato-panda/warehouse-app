@@ -3,6 +3,8 @@ package com.warehouse.server.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Collection;
+
 @Entity(name = "products")
 public class Product {
     @Id
@@ -15,8 +17,7 @@ public class Product {
     @NotNull
     private String sku;
 
-    @Column(name = "item_code",
-            unique = true)
+    @Column(name = "item_code", unique = true)
     @NotNull
     private String itemCode;
 
@@ -35,10 +36,10 @@ public class Product {
 
     @Column(name = "um_amount")
     @NotNull
-    private String umAmount;
+    private Double umAmount;
 
-    @OneToOne(mappedBy = "quotedProduct", optional = false)
-    private QuoteItem quoteItem;
+    @OneToMany(mappedBy = "quotedProduct")
+    private Collection<QuoteItem> quoteItems;
 
     public Long getId() {
         return id;
@@ -104,19 +105,19 @@ public class Product {
         this.um = um;
     }
 
-    public String getUmAmount() {
+    public Double getUmAmount() {
         return umAmount;
     }
 
-    public void setUmAmount(String umAmount) {
+    public void setUmAmount(Double umAmount) {
         this.umAmount = umAmount;
     }
 
-    public QuoteItem getQuoteItem() {
-        return quoteItem;
+    public Collection<QuoteItem> getQuoteItems() {
+        return quoteItems;
     }
 
-    public void setQuoteItem(QuoteItem quotation) {
-        this.quoteItem = quotation;
+    public void setQuoteItems(Collection<QuoteItem> quotation) {
+        this.quoteItems = quotation;
     }
 }

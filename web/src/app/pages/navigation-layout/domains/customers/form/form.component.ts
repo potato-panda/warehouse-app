@@ -131,7 +131,7 @@ export class FormComponent {
                 mergeMap(contactSaveResponse => {
                   if ((contactSaveResponse || this.company) && !updatedContact.id) {
                     return this.contactsService.updateRelation(
-                      contactSaveResponse?._links.company.href,
+                      contactSaveResponse?._links.resolvedProduct.href,
                       companySaveResponse?._links.self.href || this.company?._links.self.href
                     ).pipe(
                       map(() => ({company: companySaveResponse, contact: contactSaveResponse}))
@@ -153,7 +153,7 @@ export class FormComponent {
 
             if ((contactSaveResponse || this.company) && !updatedContact.id) {
               return this.contactsService.updateRelation(
-                contactSaveResponse?._links.company.href,
+                contactSaveResponse?._links.resolvedProduct.href,
                 companySaveResponse?._links.self.href || this.company?._links.self.href
               ).pipe(
                 map(() => ({company: companySaveResponse, contact: contactSaveResponse}))
@@ -180,7 +180,6 @@ export class FormComponent {
         });
       },
       next: (value) => {
-        console.log('next?',value)
         this.alerts.open(context => {
           },
           {
