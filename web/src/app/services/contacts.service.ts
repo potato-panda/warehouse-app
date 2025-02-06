@@ -3,11 +3,14 @@ import {HttpClient} from '@angular/common/http';
 import {Pageable} from '../interfaces/pageable';
 import {environment} from '../../environments/environment';
 import {Contact, ContactRelations} from '../interfaces/entities/contact';
-import {Resource, ResourceCollection} from '../interfaces/resource';
+import {CollectionResource, Resource} from '../interfaces/resource';
 import {RestService} from './rest.service';
 
-export type ResourceResponse = Resource<Contact, 'contact', ContactRelations>;
-export type ResourceCollectionResponse = ResourceCollection<Contact, 'contact', 'contacts', ContactRelations>
+type ResourceResponse = Resource<Contact, 'contact', ContactRelations>;
+type CollectionResourceResponse = CollectionResource<Contact, 'contact', 'contacts', ContactRelations>
+
+export type ContactsResourceResponse = ResourceResponse;
+export type ContactsCollectionResourceResponse = CollectionResourceResponse;
 
 @Injectable({
   providedIn: 'root'
@@ -21,13 +24,13 @@ export class ContactsService extends RestService {
   }
 
   getPage(pageable: Pageable = {page: 0}) {
-    return this.http.get<ResourceCollectionResponse>(`${this.resourceEndpoint}`, {
+    return this.http.get<CollectionResourceResponse>(`${this.resourceEndpoint}`, {
       params: {...pageable},
     });
   }
 
   getPageByName(name: string, pageable: Pageable = {page: 0}) {
-    return this.http.get<ResourceCollectionResponse>(`${this.resourceEndpoint}/search/byName`, {
+    return this.http.get<CollectionResourceResponse>(`${this.resourceEndpoint}/search/byName`, {
       params: {...pageable, name},
     });
   }

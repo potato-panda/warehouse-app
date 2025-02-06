@@ -1,11 +1,10 @@
 import {TestBed} from '@angular/core/testing';
 import {ResolveFn} from '@angular/router';
 
-import {detailsResolver} from './details.resolver';
-import {ResourceWithContactsResponse} from '../../../../../services/company.service';
+import {detailsResolver, ResolvedData} from './details.resolver';
 
 describe('detailsResolver', () => {
-  const executeResolver: ResolveFn<ResourceWithContactsResponse> = (...resolverParameters) =>
+  const executeResolver: ResolveFn<ResolvedData> = (...resolverParameters) =>
     TestBed.runInInjectionContext(() => detailsResolver(...resolverParameters));
 
   beforeEach(() => {

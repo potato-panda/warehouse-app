@@ -1,5 +1,5 @@
 import {OmitEmbedded, ResourceRelations} from '../resource';
-import {ResourceResponse} from '../../services/contacts.service';
+import {ContactsResourceResponse} from '../../services/contacts.service';
 
 export interface Contact {
   id: string | number;
@@ -10,6 +10,6 @@ export interface Contact {
 
 export type ContactRelations = ResourceRelations<['company']> & {
   _embedded?: {
-    company: OmitEmbedded<ResourceResponse>;
+    company: OmitEmbedded<ContactsResourceResponse>;
   };
 };

@@ -2,15 +2,19 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../environments/environment';
 import {Company, CompanyRelations, CompanySummary, CompanyWithContacts} from '../interfaces/entities/company';
-import {Resource, ResourceCollection} from '../interfaces/resource';
+import {CollectionResource, Resource} from '../interfaces/resource';
 import {Pageable} from '../interfaces/pageable';
 import {RestService} from './rest.service';
 
-export type ResourceFullResponse = Resource<Company, 'company', CompanyRelations>;
-export type ResourceResponse = ResourceFullResponse;
-export type ResourceSummaryResponse = Resource<CompanySummary, 'company', CompanyRelations>;
-export type ResourceWithContactsResponse = Resource<CompanyWithContacts, 'company', CompanyRelations>;
-export type ResourceCollectionResponse = ResourceCollection<CompanySummary, 'company', 'companies', CompanyRelations>;
+type ResourceFullResponse = Resource<Company, 'company', CompanyRelations>;
+type ResourceSummaryResponse = Resource<CompanySummary, 'company', CompanyRelations>;
+type ResourceWithContactsResponse = Resource<CompanyWithContacts, 'company', CompanyRelations>;
+type CollectionResourceResponse = CollectionResource<CompanySummary, 'company', 'companies', CompanyRelations>;
+
+export type CompaniesResourceResponse = ResourceFullResponse;
+export type CompaniesSummaryResourceResponse = ResourceSummaryResponse;
+export type CompaniesWithContactsResourceResponse = ResourceWithContactsResponse;
+export type CompaniesCollectionResourceResponse = CollectionResourceResponse;
 
 type ResourceProjections = 'summary' | 'contacts' | null;
 
@@ -26,13 +30,13 @@ export class CompanyService extends RestService {
   }
 
   getPage(pageable: Pageable = {page: 0}) {
-    return this.http.get<ResourceCollectionResponse>(`${this.resourceEndpoint}`, {
+    return this.http.get<CollectionResourceResponse>(`${this.resourceEndpoint}`, {
       params: {...pageable},
     });
   }
 
   getPageByName(name: string, pageable: Pageable = {page: 0}) {
-    return this.http.get<ResourceCollectionResponse>(`${this.resourceEndpoint}/search/byName`, {
+    return this.http.get<CollectionResourceResponse>(`${this.resourceEndpoint}/search/byName`, {
       params: {...pageable, name},
     });
   }

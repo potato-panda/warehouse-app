@@ -12,7 +12,7 @@ import {
 } from '@taiga-ui/core';
 import {TuiFade, TuiStatus} from '@taiga-ui/kit';
 import {TuiMainComponent, TuiSubheaderCompactComponent} from '@taiga-ui/layout';
-import {CompanyService, ResourceCollectionResponse} from '../../../../services/company.service';
+import {CompaniesCollectionResourceResponse, CompanyService} from '../../../../services/company.service';
 import {RouterLink} from '@angular/router';
 import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
 import {Resource} from '../../../../interfaces/resource';
@@ -38,7 +38,7 @@ import {toObservable} from '@angular/core/rxjs-interop';
 type CompanyResourceList = Resource<CompanySummary, 'company', CompanyRelations>[];
 
 @Component({
-  selector: 'app-clients',
+  selector: 'app-customers',
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -60,10 +60,10 @@ type CompanyResourceList = Resource<CompanySummary, 'company', CompanyRelations>
     TuiDataList,
     TuiTextfield
   ],
-  templateUrl: './clients.component.html',
-  styleUrl: './clients.component.scss'
+  templateUrl: './customers.component.html',
+  styleUrl: './customers.component.scss'
 })
-export class ClientsComponent {
+export class CustomersComponent {
   protected readonly size$ = new BehaviorSubject(20);
   protected readonly page$ = new BehaviorSubject(0);
 
@@ -153,7 +153,7 @@ export class ClientsComponent {
     });
   }
 
-  private getData(search?: string): Observable<ResourceCollectionResponse> {
+  private getData(search?: string): Observable<CompaniesCollectionResourceResponse> {
     const pageable = {
       page: this.page$.value,
       size: this.size$.value,

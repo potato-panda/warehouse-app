@@ -48,10 +48,7 @@ import {toObservable} from '@angular/core/rxjs-interop';
 import {DeleteDialogComponent} from '../../../../components/delete-dialog/delete-dialog.component';
 import {Resource} from '../../../../interfaces/resource';
 import {Contact, ContactRelations} from '../../../../interfaces/entities/contact';
-import {
-  ContactsService,
-  ResourceCollectionResponse as ContactResourceCollectionResponse
-} from '../../../../services/contacts.service';
+import {ContactsCollectionResourceResponse, ContactsService} from '../../../../services/contacts.service';
 import {RouterLink} from '@angular/router';
 
 type CompanyResourceList = Resource<Contact, 'contact', ContactRelations>[];
@@ -132,14 +129,12 @@ export class ContactsComponent {
     map((items) => items.filter(tuiIsPresent)),
     startWith([]),
   );
-
-  private readonly alerts = inject(TuiAlertService);
-
   protected readonly dialog = tuiDialog(DeleteDialogComponent, {
     dismissible: true,
     closeable: false,
     label: 'Delete?',
   });
+  private readonly alerts = inject(TuiAlertService);
 
   constructor(private contactsService: ContactsService,
   ) {
@@ -181,7 +176,7 @@ export class ContactsComponent {
     });
   }
 
-  private getData(search?: string): Observable<ContactResourceCollectionResponse> {
+  private getData(search?: string): Observable<ContactsCollectionResourceResponse> {
     const pageable = {
       page: this.page$.value,
       size: this.size$.value,

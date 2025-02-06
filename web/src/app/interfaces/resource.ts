@@ -18,7 +18,7 @@ type ResourceBase<ResourceName extends string, Relations = {}> = {
 export type Resource<Type, ResourceName extends string, Relations = {}> = Type &
   ResourceBase<ResourceName, Relations>;
 
-export type ResourceCollection<
+export type CollectionResource<
   ResourceType,
   CollectionName extends string,
   ResourceName extends string,
@@ -34,7 +34,7 @@ export type ResourceCollection<
 };
 
 type Relationships<RelationMap extends Record<string, any>> = {
-  [K in keyof RelationMap]: ResourceCollection<RelationMap[K], string, string>;
+  [K in keyof RelationMap]: CollectionResource<RelationMap[K], string, string>;
 };
 
 export type ResourceWithRelations<

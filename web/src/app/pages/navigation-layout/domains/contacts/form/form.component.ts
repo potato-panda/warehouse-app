@@ -27,13 +27,11 @@ import {
   switchMap
 } from 'rxjs';
 import {
+  CompaniesCollectionResourceResponse,
+  CompaniesSummaryResourceResponse,
   CompanyService,
-  ResourceCollectionResponse as CompanyResourceCollectionResponse,
-  ResourceResponse as CompanyResourceResponse,
-  ResourceSummaryResponse,
-  ResourceSummaryResponse as CompanyResourceSummaryResponse
 } from '../../../../../services/company.service';
-import {ContactsService, ResourceResponse as ContactResourceResponse} from '../../../../../services/contacts.service';
+import {ContactsResourceResponse, ContactsService,} from '../../../../../services/contacts.service';
 import {TuiCardLarge, TuiForm, TuiHeader} from '@taiga-ui/layout';
 import {TuiFieldErrorPipe} from '@taiga-ui/kit';
 import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
@@ -43,6 +41,7 @@ import {TuiLet} from '@taiga-ui/cdk';
 import CleanUrl from '../../../../../utils/clean-url';
 import {CleanUrlPipe} from '../../../../../pipes/clean-url.pipe';
 import UniqueId from '../../../../../utils/unique-id';
+import {ResolvedData} from './details.resolver';
 
 @Component({
   selector: 'app-form',
@@ -90,10 +89,10 @@ export class FormComponent {
   });
 
   private readonly alerts = inject(TuiAlertService);
-  private mappedCompanies$ = new BehaviorSubject<CompanyResourceSummaryResponse[]>([]);
+  private mappedCompanies$ = new BehaviorSubject<CompaniesSummaryResourceResponse[]>([]);
   private readonly searchCompanyRequest$ = new BehaviorSubject<string>('');
-  private resolvedContact?: ContactResourceResponse;
-  private resolvedCompany?: CompanyResourceSummaryResponse;
+  private resolvedContact?: ContactsResourceResponse;
+  private resolvedCompany?: CompaniesSummaryResourceResponse;
 
   constructor(private route: ActivatedRoute, private contactsService: ContactsService, private companyService: CompanyService) {
   }
@@ -153,14 +152,14 @@ export class FormComponent {
     return this.searchCompanyResponse$;
   }
 
-  getCompanyData: (search?: string) => Observable<CompanyResourceCollectionResponse> = (search?: string) => {
+  getCompanyData: (search?: string) => Observable<CompaniesCollectionResourceResponse> = (search?: string) => {
     if (search && search.length && search.length > 0) {
       return this.companyService.getPageByName(search).pipe(map(response => response));
     }
     return this.companyService.getPage().pipe(map(response => response));
   };
 
-  protected searchCompanyResponse$: Observable<ResourceSummaryResponse[]> = this.searchCompanyRequest$.pipe(
+  protected searchCompanyResponse$: Observable<CompaniesSummaryResourceResponse[]> = this.searchCompanyRequest$.pipe(
     debounceTime(300),
     distinctUntilChanged(),
     switchMap((search) => {
@@ -171,7 +170,7 @@ export class FormComponent {
           this.mappedCompanies$.next(uniqueCompanies);
           return of(uniqueCompanies);
         }),
-        startWith([] as CompanyResourceResponse[]),
+        startWith([] as CompaniesSummaryResourceResponse[]),
       );
     }),
     share()
@@ -206,14 +205,13 @@ export class FormComponent {
   });
 
   private ngOnInit() {
-    const resolvedContact = this.route.snapshot.data['resolved']?.['contact'];
-    const resolvedCompany = this.route.snapshot.data['resolved']?.['company'];
-    if (resolvedCompany) {
-      this.resolvedCompany = resolvedCompany as CompanyResourceSummaryResponse;
+    const {contact, company} = this.route.snapshot.data['resolved'] as ResolvedData;
+    if (company) {
+      this.resolvedCompany = company;
       this.mappedCompanies$.next([this.resolvedCompany]);
     }
-    if (resolvedContact) {
-      this.resolvedContact = resolvedContact as ContactResourceResponse;
+    if (contact) {
+      this.resolvedContact = contact;
       const {_embedded, name, phone, email} = this.resolvedContact;
       const companyHref = _embedded?.company._links.self.href;
 

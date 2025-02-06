@@ -11,6 +11,10 @@ export abstract class RestService {
   protected constructor(protected http: HttpClient) {
   }
 
+  follow<T>(url: string): Observable<T> {
+    return this.http.get<T>(url);
+  }
+
   /**
    * Creates a relationship between two entities
    * @param propertyUrl This is the url of the property that represents an entity or collection of entities

@@ -1,12 +1,12 @@
 import {ResolveFn} from '@angular/router';
-import {ContactsService, ResourceResponse as ContactResourceResponse} from '../../../../../services/contacts.service';
+import {ContactsResourceResponse, ContactsService,} from '../../../../../services/contacts.service';
 import {inject} from '@angular/core';
 import {catchError, concatMap, EMPTY, mergeMap, of} from 'rxjs';
-import {CompanyService, ResourceResponse as CompanyResourceResponse} from '../../../../../services/company.service';
+import {CompaniesResourceResponse, CompanyService,} from '../../../../../services/company.service';
 
-type ResolvedData = {
-  contact: ContactResourceResponse,
-  company: CompanyResourceResponse | null
+export type ResolvedData = {
+  contact: ContactsResourceResponse,
+  company: CompaniesResourceResponse | null
 }
 
 export const detailsResolver: ResolveFn<ResolvedData> = (route, state) => {

@@ -1,11 +1,11 @@
 <form
-  (ngSubmit)="save()"
   [formGroup]="mainForm"
   [style.margin-top.rem]="3"
   [style.max-width.rem]="35"
   tuiAppearance="floating"
   tuiCardLarge
   tuiForm="m"
+  (ngSubmit)="save()"
 >
   <form
     formGroupName="company"
@@ -135,22 +135,22 @@
 
   </form>
 
-
   <footer class="footer">
-    <tui-loader
-      [inheritColor]="true"
-      [overlay]="inProgress"
-      [showLoader]="inProgress"
-      class="loader"
+    <button
+      [disabled]="mainForm.invalid || inProgress"
+      tuiButton
+      type="submit"
     >
-      <button
-        [disabled]="companyForm.invalid"
-        tuiButton
-        type="submit"
-      >
-        Submit
-      </button>
-    </tui-loader>
+      Save
+    </button>
+    <button
+      [disabled]="mainForm.invalid || inProgress"
+      tuiButton
+      type="button"
+      (click)="save(true)"
+    >
+      Save and Return
+    </button>
     <button
       [routerLink]="'..'"
       appearance="flat"
