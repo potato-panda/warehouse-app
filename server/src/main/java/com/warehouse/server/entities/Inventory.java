@@ -2,6 +2,7 @@ package com.warehouse.server.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.rest.core.config.Projection;
 
 @Entity(name = "inventories")
 public class Inventory {
@@ -9,7 +10,7 @@ public class Inventory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
     @JoinColumn(name = "product_id")
     private Product product;
 
@@ -48,5 +49,13 @@ public class Inventory {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    @Projection(name="product", types = Inventory.class)
+    public interface WithProductProjection {
+        Long getId();
+        String getAddress();
+        Integer getQuantity();
+        Product getProduct();
     }
 }

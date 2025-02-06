@@ -16,6 +16,8 @@ export abstract class RestService {
   }
 
   /**
+   * USE WITH COLLECTION PROPERTIES
+   *
    * Creates a relationship between two entities
    * @param propertyUrl This is the url of the property that represents an entity or collection of entities
    * @param referenceUrl This is the url of the entity to associate with

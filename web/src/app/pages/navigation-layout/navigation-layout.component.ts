@@ -30,12 +30,13 @@ export class NavigationLayoutComponent extends TuiPortals {
   protected readonly routes: any = {
     customers: '/customers',
     contacts: '/contacts',
-    products: '/products'
+    products: '/products',
+    inventories: '/inventories'
   };
   protected username: Observable<Data>;
 
   constructor(private route: ActivatedRoute) {
-    super()
+    super();
     this.username = this.route.data.pipe(map(data => data['username']));
 
     // TODO lift breadcrumb data from router state

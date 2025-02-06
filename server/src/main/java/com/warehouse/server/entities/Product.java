@@ -11,8 +11,8 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(mappedBy = "product")
-    private Inventory inventory;
+    @OneToMany(mappedBy = "product")
+    private Collection<Inventory> inventory;
 
     @NotNull
     private String sku;
@@ -49,11 +49,11 @@ public class Product {
         this.id = id;
     }
 
-    public Inventory getInventory() {
+    public Collection<Inventory> getInventory() {
         return inventory;
     }
 
-    public void setInventory(Inventory inventory) {
+    public void setInventory(Collection<Inventory> inventory) {
         this.inventory = inventory;
     }
 

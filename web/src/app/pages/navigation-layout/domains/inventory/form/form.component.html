@@ -1,0 +1,160 @@
+<form (ngSubmit)="save()"
+      [formGroup]="form"
+      [style.margin-top.rem]="3"
+      [style.max-width.rem]="35"
+      tuiAppearance="floating"
+      tuiCardLarge
+      tuiForm="m"
+>
+  <header tuiHeader><h3 tuiTitle>Inventory Details</h3></header>
+
+  <form formGroupName="inventory"
+        tuiForm="m"
+  >
+    <tui-textfield>
+      <label tuiLabel>Address</label>
+      <input formControlName="address"
+             placeholder="Inventory Address"
+             tuiTextfield
+      />
+    </tui-textfield>
+    <tui-error [error]="[] | tuiFieldError | async"
+               formControlName="address"
+    />
+
+    <tui-textfield>
+      <label tuiLabel>Quantity</label>
+      <input formControlName="quantity"
+             placeholder="Inventory Quantity"
+             tuiTextfield
+      />
+    </tui-textfield>
+    <tui-error [error]="[] | tuiFieldError | async"
+               formControlName="quantity"
+    />
+  </form>
+
+  <tui-combo-box (searchChange)="searchRequest($event)"
+                 *tuiLet="this.searchProductResponse$ | async as items"
+                 [stringify]="stringify"
+                 formControlName="product"
+                 tuiTextfieldSize="m"
+  >
+    Product
+    <input placeholder="Inventory Product"
+           tuiTextfieldLegacy
+    />
+    <ng-template tuiDataList>
+      <ng-container>
+        <tui-data-list *ngIf="items; else loading">
+          <button *ngFor="let item of items"
+                  [value]="item._links.self.href | cleanUrl"
+                  tuiOption
+          >
+            <div class="name">{{ item.name }} {{ item.sku }} {{ item.itemCode }}</div>
+          </button>
+        </tui-data-list>
+      </ng-container>
+      <ng-template #loading>
+        <tui-loader></tui-loader>
+      </ng-template>
+    </ng-template>
+
+  </tui-combo-box>
+  <tui-error [error]="[] | tuiFieldError | async"
+             formControlName="product"
+  />
+
+  <tui-elastic-container *ngIf="productInfo$ | async as productInfo">
+    <span tuiHeader>
+      <div tuiCaption>Product Details</div>
+    </span>
+    <div tuiCell="s">
+      <div tuiTitle>
+        Name
+        <div tuiSubtitle
+             [style.display]="'block'"
+        >{{ productInfo?.name }}
+        </div>
+      </div>
+    </div>
+    <div tuiCell="s">
+      <div tuiTitle>
+        SKU
+        <div tuiSubtitle
+             [style.display]="'block'"
+        >{{ productInfo?.sku }}
+        </div>
+      </div>
+    </div>
+    <div tuiCell="s">
+      <div tuiTitle>
+        Item Code
+        <div tuiSubtitle
+             [style.display]="'block'"
+        >{{ productInfo?.itemCode }}
+        </div>
+      </div>
+    </div>
+    <div tuiCell="s">
+      <div tuiTitle>
+        Description
+        <div tuiSubtitle
+             [style.display]="'block'"
+        >{{ productInfo?.description }}
+        </div>
+      </div>
+    </div>
+    <div tuiCell="s">
+      <div tuiTitle>
+        Price
+        <div tuiSubtitle
+             [style.display]="'block'"
+        >{{ productInfo?.price }}
+        </div>
+      </div>
+    </div>
+    <div tuiCell="s">
+      <div tuiTitle>
+        UM
+        <div tuiSubtitle
+             [style.display]="'block'"
+        >{{ productInfo?.um }}
+        </div>
+      </div>
+    </div>
+    <div tuiCell="s">
+      <div tuiTitle>
+        UM Amount
+        <div tuiSubtitle
+             [style.display]="'block'"
+        >{{ productInfo?.umAmount }}
+        </div>
+      </div>
+    </div>
+  </tui-elastic-container>
+
+
+  <footer class="footer">
+    <button [disabled]="form.invalid || inProgress"
+            tuiButton
+            type="submit"
+    >
+      Save
+    </button>
+    <button [disabled]="form.invalid || inProgress"
+            tuiButton
+            type="button"
+            (click)="save(true)"
+    >
+      Save and Return
+    </button>
+    <button [routerLink]="'..'"
+            appearance="flat"
+            tuiButton
+            type="button"
+    >
+      Back
+    </button>
+  </footer>
+</form>

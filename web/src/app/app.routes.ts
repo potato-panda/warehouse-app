@@ -16,11 +16,16 @@ import {
 import {
   detailsResolver as productDetailsResolver
 } from './pages/navigation-layout/domains/products/form/details.resolver';
+import {
+  detailsResolver as inventoryDetailsResolver
+} from './pages/navigation-layout/domains/inventory/form/details.resolver';
 import {ContactsComponent} from './pages/navigation-layout/domains/contacts/contacts.component';
 import {FormComponent as ContactsFormComponent} from './pages/navigation-layout/domains/contacts/form/form.component';
 import {FormComponent as CustomerFormComponent} from './pages/navigation-layout/domains/customers/form/form.component';
 import {FormComponent as ProductsFormComponent} from './pages/navigation-layout/domains/products/form/form.component';
+import {FormComponent as InventoryFormComponent} from './pages/navigation-layout/domains/inventory/form/form.component';
 import {ProductsComponent} from './pages/navigation-layout/domains/products/products.component';
+import {InventoryComponent} from './pages/navigation-layout/domains/inventory/inventory.component';
 
 export const routes: Routes = [
   {
@@ -110,6 +115,30 @@ export const routes: Routes = [
             },
             path: ':id',
             component: ProductsFormComponent
+          }
+        ]
+      },
+      {
+        path: 'inventories',
+        component: DomainsComponent,
+        children: [
+          {
+            path: '',
+            data: {
+              breadcrumb: 'Inventories'
+            },
+            component: InventoryComponent
+          },
+          {
+            path: 'create',
+            component: InventoryFormComponent
+          },
+          {
+            resolve: {
+              resolved: inventoryDetailsResolver
+            },
+            path: ':id',
+            component: InventoryFormComponent
           }
         ]
       },
