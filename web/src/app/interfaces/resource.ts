@@ -20,11 +20,11 @@ export type Resource<Type, ResourceName extends string, Relations = {}> = Type &
 
 export type CollectionResource<
   ResourceType,
-  CollectionName extends string,
   ResourceName extends string,
+  CollectionName extends string,
   Relations = {}
 > = {
-  _embedded: Record<ResourceName, Resource<ResourceType, CollectionName, Relations>[]>;
+  _embedded: Record<CollectionName, Resource<ResourceType, ResourceName, Relations>[]>;
   _links: {
     self: Links;
     profile: Links;

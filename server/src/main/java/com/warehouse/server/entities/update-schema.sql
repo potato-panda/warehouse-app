@@ -1,3 +1,11 @@
 ALTER TABLE authorities
 ALTER
 COLUMN authority TYPE VARCHAR(255) USING (authority::VARCHAR(255));
+ALTER TABLE quote_item
+    ADD price DOUBLE PRECISION;
+
+ALTER TABLE quote_item
+    ALTER COLUMN price SET NOT NULL;
+
+ALTER TABLE authorities
+    ALTER COLUMN authority TYPE VARCHAR(255) USING (authority::VARCHAR(255));

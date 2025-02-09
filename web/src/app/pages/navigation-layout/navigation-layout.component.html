@@ -37,37 +37,40 @@
     <!--        <span tuiFade>A very very long product name</span>-->
     <!--      </button>-->
     <!--    </header>-->
-    <button
-      [routerLink]="routes.customers"
-      iconStart="@tui.building-2"
-      tuiAsideItem
-      type="button"
+    <button [routerLink]="routes.customers"
+            iconStart="@tui.building-2"
+            tuiAsideItem
+            type="button"
     >
       Clients
     </button>
-    <button
-      [routerLink]="routes.contacts"
-      iconStart="@tui.contact"
-      tuiAsideItem
-      type="button"
+    <button [routerLink]="routes.contacts"
+            iconStart="@tui.contact"
+            tuiAsideItem
+            type="button"
     >
       Contacts
     </button>
-    <button
-      [routerLink]="routes.products"
-      iconStart="@tui.package"
-      tuiAsideItem
-      type="button"
+    <button [routerLink]="routes.products"
+            iconStart="@tui.package"
+            tuiAsideItem
+            type="button"
     >
       Products
     </button>
-    <button
-      [routerLink]="routes.inventories"
-      iconStart="@tui.boxes"
-      tuiAsideItem
-      type="button"
+    <button [routerLink]="routes.inventories"
+            iconStart="@tui.boxes"
+            tuiAsideItem
+            type="button"
     >
       Inventory
+    </button>
+    <button [routerLink]="routes.quotations"
+            iconStart="@tui.receipt-text"
+            tuiAsideItem
+            type="button"
+    >
+      Quotations
     </button>
     <!--    <a-->
     <!--      iconStart="@tui.users"-->
@@ -187,11 +190,10 @@
       <!--          >-->
       <!--            Favorites-->
       <!--          </button>-->
-      <button
-        (click)="handleToggle()"
-        [iconStart]="expanded() ? '@tui.chevron-left' : '@tui.chevron-right'"
-        tuiAsideItem
-        type="button"
+      <button (click)="handleToggle()"
+              [iconStart]="expanded() ? '@tui.chevron-left' : '@tui.chevron-right'"
+              tuiAsideItem
+              type="button"
       >
         {{ expanded() ? 'Collapse' : 'Expand' }}
       </button>

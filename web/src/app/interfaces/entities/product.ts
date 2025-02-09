@@ -6,7 +6,6 @@ export interface Product {
   itemCode: string,
   name: string,
   description: string,
-  price: number,
   um: string,
   umAmount: number,
 }

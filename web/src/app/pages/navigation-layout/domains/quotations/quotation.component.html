@@ -3,7 +3,7 @@
        compact
        tuiSubheader
   >
-    <strong tuiFade>Inventories</strong>
+    <strong tuiFade>Quotations</strong>
 
     <hr>
 
@@ -11,13 +11,13 @@
             tuiButton
             type="button"
     >
-      Add Inventory
+      Add Quotation
     </button>
   </nav>
   <hr>
 
   <tui-textfield iconStart="@tui.search">
-    <label tuiLabel>Search by Product Name</label>
+    <label tuiLabel>Search by Company Name</label>
     <input [(ngModel)]="nameSearch"
            tuiTextfield
     />
@@ -40,14 +40,12 @@
       >
         <thead tuiThead>
         <tr tuiThGroup>
-          <th *tuiHead="'address'" tuiSortable tuiTh>Address</th>
-          <th *tuiHead="'quantity'" tuiSortable tuiTh>Quantity</th>
-          <th *tuiHead="'name'" tuiSortable tuiTh>Name</th>
-          <th *tuiHead="'sku'" tuiSortable tuiTh>SKU</th>
-          <th *tuiHead="'itemCode'" tuiSortable tuiTh>Item Code</th>
-          <th *tuiHead="'description'" [tuiSortable]="false" tuiTh>Description</th>
-          <th *tuiHead="'um'" tuiSortable tuiTh>UM</th>
-          <th *tuiHead="'umAmount'" tuiSortable tuiTh>UM Amount</th>
+          <th *tuiHead="'company'" tuiSortable tuiTh>Company</th>
+          <th *tuiHead="'paymentTerms'" tuiSortable tuiTh>Payment Terms</th>
+          <th *tuiHead="'shippingAddress'" tuiSortable tuiTh>Shipping Address</th>
+          <th *tuiHead="'quotationDate'" tuiSortable tuiTh>Quotation Date</th>
+          <th *tuiHead="'receipt'" [tuiSortable]="false" tuiTh>Receipt</th>
+          <th *tuiHead="'totalAmount'" tuiSortable tuiTh>Total Amount</th>
           <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
         </tr>
         </thead>
@@ -56,14 +54,22 @@
                tuiTbody
         >
         <tr *ngFor="let item of sortedData" tuiTr>
-          <td *tuiCell="'address'" tuiTd>{{ item.address }}</td>
-          <td *tuiCell="'quantity'" tuiTd>{{ item.quantity }}</td>
-          <td *tuiCell="'name'" tuiTd>{{ item?.product?.name }}</td>
-          <td *tuiCell="'sku'" tuiTd>{{ item?.product?.sku }}</td>
-          <td *tuiCell="'itemCode'" tuiTd>{{ item?.product?.itemCode }}</td>
-          <td *tuiCell="'description'" tuiTd>{{ item?.product?.description }}</td>
-          <td *tuiCell="'um'" tuiTd>{{ item?.product?.um }}</td>
-          <td *tuiCell="'umAmount'" tuiTd>{{ item?.product?.umAmount }}</td>
+          <td *tuiCell="'company'" tuiTd>
+            {{ item.company.name }}
+          </td>
+          <td *tuiCell="'paymentTerms'" tuiTd>{{ item.paymentTerms }}</td>
+          <td *tuiCell="'shippingAddress'" tuiTd>{{ item.shippingAddress }}</td>
+          <td *tuiCell="'quotationDate'" tuiTd>{{ item.quotationDate | date:'long' }}</td>
+          <td *tuiCell="'receipt'" tuiTd>
+            <ng-container *ngIf="item.receipt.id; else noReceipt"
+            >
+              Received by <strong>{{ item.receipt.receivedBy }}</strong> on
+              <strong>{{ item.receipt.receivedDate | date:'long' }}</strong>
+            </ng-container>
+            <ng-template #noReceipt>
+            </ng-template>
+          </td>
+          <td *tuiCell="'totalAmount'" tuiTd>{{ item.totalAmount }}</td>
           <td *tuiCell="'actions'" tuiTd>
           <span tuiStatus>
           <button [routerLink]="[item.id]"

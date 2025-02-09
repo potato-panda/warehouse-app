@@ -1,0 +1,36 @@
+<tui-combo-box (searchChange)="onSearchChange($event)"
+               *tuiLet="searchResponse$ | async as results"
+               [identityMatcher]="identityMatcher"
+               [stringify]="stringify"
+               [tuiTextfieldSize]="tuiTextfieldSize"
+               [valueContent]="valueContent"
+>
+  {{ label }}
+  <input [placeholder]="placeholder" tuiTextfieldLegacy/>
+
+  <ng-container *ngIf="valueContent">
+    <ng-container *ngTemplateOutlet="valueContent"></ng-container>
+  </ng-container>
+
+  <ng-template tuiDataList>
+    <ng-container *ngIf="results; else loadingTemplate || defaultLoadingTemplate">
+      <tui-data-list>
+        <ng-container *ngFor="let item of results">
+          <button (click)="onItemSelected(item)" [value]="item" tuiOption>
+            <ng-container
+              *ngTemplateOutlet="itemTemplate || defaultItemTemplate; context: { $implicit: item }"></ng-container>
+          </button>
+        </ng-container>
+      </tui-data-list>
+    </ng-container>
+  </ng-template>
+
+</tui-combo-box>
+
+<ng-template #defaultItemTemplate let-item>
+  {{ stringify(item) }}
+</ng-template>
+
+<ng-template #defaultLoadingTemplate>
+  <tui-loader></tui-loader>
+</ng-template>

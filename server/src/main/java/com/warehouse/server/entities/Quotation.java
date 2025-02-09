@@ -2,6 +2,7 @@ package com.warehouse.server.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.rest.core.config.Projection;
 
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -12,9 +13,7 @@ public class Quotation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "quotation",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
+    @OneToMany(mappedBy = "quotation", cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<QuoteItem> quoteItems;
 
     @ManyToOne
@@ -103,5 +102,22 @@ public class Quotation {
 
     public void setTotalAmount(Double totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    @Projection(name = "table", types = {Quotation.class})
+    public interface QuotationTableReceiptProjection {
+        Long getId();
+
+        Company getCompany();
+
+        String getPaymentTerms();
+
+        String getShippingAddress();
+
+        Timestamp getQuotationDate();
+
+        Receipt getReceipt();
+
+        Double getTotalAmount();
     }
 }

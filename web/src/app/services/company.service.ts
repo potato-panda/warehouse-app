@@ -1,15 +1,15 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../environments/environment';
-import {Company, CompanyRelations, CompanySummary, CompanyWithContacts} from '../interfaces/entities/company';
+import {CompanyFull, CompanyRelations, Company, CompanyWithContacts} from '../interfaces/entities/company';
 import {CollectionResource, Resource} from '../interfaces/resource';
 import {Pageable} from '../interfaces/pageable';
 import {RestService} from './rest.service';
 
-type ResourceFullResponse = Resource<Company, 'company', CompanyRelations>;
-type ResourceSummaryResponse = Resource<CompanySummary, 'company', CompanyRelations>;
+type ResourceFullResponse = Resource<CompanyFull, 'company', CompanyRelations>;
+type ResourceSummaryResponse = Resource<Company, 'company', CompanyRelations>;
 type ResourceWithContactsResponse = Resource<CompanyWithContacts, 'company', CompanyRelations>;
-type CollectionResourceResponse = CollectionResource<CompanySummary, 'company', 'companies', CompanyRelations>;
+type CollectionResourceResponse = CollectionResource<Company, 'company', 'companies', CompanyRelations>;
 
 export type CompaniesResourceResponse = ResourceFullResponse;
 export type CompaniesSummaryResourceResponse = ResourceSummaryResponse;

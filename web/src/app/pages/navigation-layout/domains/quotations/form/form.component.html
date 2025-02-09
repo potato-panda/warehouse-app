@@ -1,0 +1,159 @@
+<form (ngSubmit)="save()"
+      [formGroup]="form"
+      [style.margin-top.rem]="3"
+      [style.max-width.rem]="35"
+      tuiAppearance="floating"
+      tuiCardLarge
+      tuiForm="m"
+>
+  <header tuiHeader><h3 tuiTitle>Quotation Details</h3></header>
+
+  <form formGroupName="quotation"
+        tuiForm="m"
+  >
+    <tui-textfield>
+      <label tuiLabel>Payment Terms</label>
+      <input formControlName="paymentTerms"
+             placeholder="Payment Terms"
+             tuiTextfield
+      />
+    </tui-textfield>
+    <tui-error [error]="[] | tuiFieldError | async"
+               formControlName="paymentTerms"
+    />
+
+    <tui-textfield>
+      <label tuiLabel>Shipping Address</label>
+      <input formControlName="shippingAddress"
+             placeholder="Shipping Address"
+             tuiTextfield
+      />
+    </tui-textfield>
+    <tui-error [error]="[] | tuiFieldError | async"
+               formControlName="shippingAddress"
+    />
+
+    <app-combo-box [searchFn]="searchCompanies"
+                   [stringify]="stringifyCompany"
+                   [valueFn]="extractCompanyHref"
+                   label="Company"
+                   placeholder="Company"
+                   formControlName="companyHref"
+                   tuiTextfieldSize="m"
+                   [valueContent]="selected"
+    >
+      <ng-template #selected
+                   let-data
+      >
+        <div class="name">{{ data?.name }}</div>
+      </ng-template>
+      <ng-template #itemTemplate let-company>
+        <div class="name">{{ company.name }}</div>
+      </ng-template>
+      <ng-template #loadingTemplate>
+        <tui-loader></tui-loader>
+      </ng-template>
+    </app-combo-box>
+    <tui-error [error]="[] | tuiFieldError | async"
+               formControlName="companyHref"
+    />
+  </form>
+
+  <form formGroupName="quoteItems"
+        tuiForm="m"
+  >
+    <tui-scrollbar waIntersectionRoot class="scrollbar">
+      <table size="l"
+             tuiTable
+             class="table"
+             [columns]="columns"
+             (directionChange)="direction$.next($event)"
+             (tuiSortByChange)="sorter$.next($event!)"
+             [direction]="(direction$ | async) || 1"
+             [size]="'s'"
+             [tuiSortBy]="sorter$ | async"
+      >
+        <thead tuiThead>
+        <tr tuiThGroup>
+          <th *tuiHead="'product'" [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh class="first">Product</th>
+          <th *tuiHead="'price'" [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh class="number second">Price, $</th>
+          <th *tuiHead="'quantity'" [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Quantity</th>
+          <th *tuiHead="'unit'" [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Units</th>
+          <th *tuiHead="'total'" [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Total</th>
+          <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
+        </tr>
+        </thead>
+
+        <tbody tuiTbody>
+        <ng-container *ngFor="let item of quoteItemsFormArray.controls; let i = index" [formGroupName]="i">
+          <tr tuiTr>
+            <td *tuiCell="'product'" tuiTd>
+              <tui-textfield tuiChevron class="select">
+                <input
+                  tuiTextfield
+                  formControlName="product"
+                  [tuiTextfieldCleaner]="true"
+                  placeholder="Search product..."
+                />
+                <tui-data-list-wrapper
+                  *tuiTextfieldDropdown
+                  [items]="['hello']"
+                />
+                <!--                (itemClick)=""-->
+              </tui-textfield>
+            </td>
+            <td *tuiCell="'price'" tuiTd class="number">
+              <tui-textfield>
+                <input tuiInputNumber
+                       formControlName="price"
+                       class="number"
+                />
+              </tui-textfield>
+            </td>
+            <td *tuiCell="'quantity'" tuiTd>
+              <tui-textfield>
+                <input tuiInputNumber
+                       formControlName="quantity"
+                       [tuiNumberFormat]="{precision: 0}"/>
+              </tui-textfield>
+            </td>
+            <td *tuiCell="'unit'" tuiTd>
+              'Unit'
+            </td>
+            <td *tuiCell="'total'" tuiTd class="number text">
+              Get total
+            </td>
+            <td *tuiCell="'actions'" tuiTd>
+              <button *ngIf="resolvedQuotation?.id" tuiButton size="s" (click)="removeRow(i)">Remove</button>
+            </td>
+          </tr>
+        </ng-container>
+        </tbody>
+      </table>
+    </tui-scrollbar>
+    <button tuiButton size="m" appearance="primary" type="button" (click)="addRow()">Add Row</button>
+  </form>
+
+  <footer class="footer">
+    <button [disabled]="form.invalid || inProgress"
+            tuiButton
+            type="submit"
+    >
+      Save
+    </button>
+    <button [disabled]="form.invalid || inProgress"
+            tuiButton
+            type="button"
+            (click)="save(true)"
+    >
+      Save and Return
+    </button>
+    <button [routerLink]="'..'"
+            appearance="flat"
+            tuiButton
+            type="button"
+    >
+      Back
+    </button>
+  </footer>
+</form>

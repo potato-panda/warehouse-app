@@ -27,9 +27,6 @@ public class Product {
     @NotNull
     private String description;
 
-    @NotNull
-    private Double price;
-
     //    unit of measure (kg, pc, pcs)
     @NotNull
     private String um;
@@ -87,14 +84,6 @@ public class Product {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
     }
 
     public String getUm() {

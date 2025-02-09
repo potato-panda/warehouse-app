@@ -31,7 +31,8 @@ export class NavigationLayoutComponent extends TuiPortals {
     customers: '/customers',
     contacts: '/contacts',
     products: '/products',
-    inventories: '/inventories'
+    inventories: '/inventories',
+    quotations: '/quotations'
   };
   protected username: Observable<Data>;
 

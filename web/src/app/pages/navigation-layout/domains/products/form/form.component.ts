@@ -52,7 +52,6 @@ export class FormComponent {
     sku: new FormControl(''),
     itemCode: new FormControl(''),
     description: new FormControl(''),
-    price: new FormControl(0),
     um: new FormControl(''),
     umAmount: new FormControl(0),
   });

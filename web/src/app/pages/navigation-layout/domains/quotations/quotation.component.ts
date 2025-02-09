@@ -1,25 +1,37 @@
 import {Component, inject, model} from '@angular/core';
+import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {
   TuiAlertService,
   TuiButton,
-  TuiDataList,
+  TuiDataListComponent,
   TuiDialogService,
   TuiDropdown,
+  TuiDropdownOpen,
+  TuiLabel,
   TuiLink,
   TuiLoader,
-  TuiTextfield
+  TuiTextfieldComponent,
+  TuiTextfieldDirective
 } from '@taiga-ui/core';
 import {TuiFade, TuiStatus} from '@taiga-ui/kit';
+import {tuiIsFalsy, tuiIsPresent, TuiLet} from '@taiga-ui/cdk';
 import {TuiMainComponent, TuiSubheaderCompactComponent} from '@taiga-ui/layout';
-import {CompaniesCollectionResourceResponse, CompanyService} from '../../../../services/company.service';
-import {RouterLink} from '@angular/router';
-import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
-import {Resource} from '../../../../interfaces/resource';
-import {TuiTable, TuiTablePagination, TuiTablePaginationEvent} from '@taiga-ui/addon-table';
-import {DeleteDialogComponent} from '../../../../components/delete-dialog/delete-dialog.component';
-import {CompanyRelations, Company} from '../../../../interfaces/entities/company';
-import {PolymorpheusComponent} from '@taiga-ui/polymorpheus';
+import {
+  TuiTable,
+  TuiTableCell,
+  TuiTableDirective,
+  TuiTablePagination,
+  TuiTablePaginationEvent,
+  TuiTableSortable,
+  TuiTableSortBy,
+  TuiTableTbody,
+  TuiTableTd,
+  TuiTableTh,
+  TuiTableThead,
+  TuiTableThGroup,
+  TuiTableTr
+} from '@taiga-ui/addon-table';
 import {
   BehaviorSubject,
   combineLatest,
@@ -32,55 +44,69 @@ import {
   startWith,
   switchMap
 } from 'rxjs';
-import {tuiIsFalsy, tuiIsPresent, TuiLet} from '@taiga-ui/cdk';
 import {toObservable} from '@angular/core/rxjs-interop';
-
-type CompanyResourceList = Resource<Company, 'company', CompanyRelations>[];
+import {PolymorpheusComponent} from '@taiga-ui/polymorpheus';
+import {DeleteDialogComponent} from '../../../../components/delete-dialog/delete-dialog.component';
+import {RouterLink} from '@angular/router';
+import {QuotationService, QuotationsTableCollectionResourceResponse} from '../../../../services/quotation.service';
+import {QuotationTable} from '../../../../interfaces/entities/quotation';
 
 @Component({
-  selector: 'app-customers',
+  selector: 'app-quotation',
   imports: [
-    FormsModule,
+    AsyncPipe,
+    NgForOf,
+    NgIf,
     ReactiveFormsModule,
     TuiButton,
+    TuiDataListComponent,
+    TuiDropdownOpen,
     TuiFade,
-    TuiMainComponent,
-    TuiSubheaderCompactComponent,
-    RouterLink,
-    NgForOf,
-    TuiTable,
-    TuiLink,
-    TuiTablePagination,
+    TuiLabel,
     TuiLet,
-    TuiStatus,
+    TuiLink,
     TuiLoader,
-    AsyncPipe,
-    NgIf,
+    TuiMainComponent,
+    TuiStatus,
+    TuiSubheaderCompactComponent,
+    TuiTableCell,
+    TuiTableDirective,
+    TuiTablePagination,
+    TuiTableSortBy,
+    TuiTableSortable,
+    TuiTableTbody,
+    TuiTableTd,
+    TuiTableTh,
+    TuiTableThGroup,
+    TuiTableThead,
+    TuiTableTr,
+    TuiTextfieldComponent,
+    TuiTextfieldDirective,
+    RouterLink,
+    FormsModule,
     TuiDropdown,
-    TuiDataList,
-    TuiTextfield
+    TuiTable,
+    DatePipe
   ],
-  templateUrl: './customers.component.html',
-  styleUrl: './customers.component.scss'
+  templateUrl: './quotation.component.html',
+  styleUrl: './quotation.component.scss'
 })
-export class CustomersComponent {
+export class QuotationComponent {
   protected readonly size$ = new BehaviorSubject(20);
   protected readonly page$ = new BehaviorSubject(0);
 
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
-  protected readonly sorter$ = new BehaviorSubject<'name' | 'address' | 'tin' | 'website' | null>(null);
+  protected readonly sorter$ = new BehaviorSubject<'company' | 'paymentTerms' | 'shippingAddress' | 'quotationDate' | 'receipt' | 'totalAmount' | null>(null);
 
   protected readonly refresh$ = new BehaviorSubject<void>(undefined);
   protected nameSearch = model('');
   protected readonly search$ = toObservable(this.nameSearch);
-  protected columns = ['name', 'address', 'tin', 'website', 'actions'];
-  // any changes will trigger a data update, debounced of course
+  protected columns = ['company', 'paymentTerms', 'shippingAddress', 'quotationDate', 'receipt', 'totalAmount', 'actions'];
+
   protected readonly request$ = combineLatest([
     this.search$.pipe(
       debounceTime(300),
       distinctUntilChanged()
-      // switchMap((searchValue) => searchValue),
-      // share()
     ),
     this.sorter$,
     this.direction$,
@@ -98,16 +124,16 @@ export class CustomersComponent {
     map((response) => response.page.totalElements),
     startWith(0),
   );
-  protected readonly data$: Observable<CompanyResourceList> = this.request$.pipe(
+  protected readonly data$: Observable<QuotationsTableCollectionResourceResponse['_embedded']['quotations']> = this.request$.pipe(
     filter(tuiIsPresent),
-    map((response) => response._embedded.companies),
+    map((response) => response._embedded.quotations),
     map((items) => items.filter(tuiIsPresent)),
     startWith([]),
   );
   private readonly dialogs = inject(TuiDialogService);
   private readonly alerts = inject(TuiAlertService);
 
-  constructor(private companyService: CompanyService,
+  constructor(private quotationsService: QuotationService,
   ) {
   }
 
@@ -120,15 +146,16 @@ export class CustomersComponent {
     this.size$.next(size);
   };
 
-  protected showDeleteDialog({id, name}: Company): void {
+  protected showDeleteDialog({id, company}: QuotationTable): void {
+    const subject = company.name;
     this.dialogs.open<Observable<any>>(new PolymorpheusComponent(DeleteDialogComponent), {
       dismissible: true,
       closeable: true,
       label: 'Delete?',
       size: 'm',
       data: {
-        subject: name,
-        submit: () => this.companyService.deleteOne(id)
+        subject: `quotation for ${subject}`,
+        submit: () => this.quotationsService.deleteOne(id)
       }
     }).subscribe(obs => {
       obs.subscribe({
@@ -136,14 +163,14 @@ export class CustomersComponent {
           this.alerts.open(context => {
           }, {
             appearance: 'negative',
-            label: `Error deleting '${name}'`
+            label: `Error deleting quotation`
           });
         },
         next: response => {
           this.alerts.open(context => {
           }, {
             appearance: 'positive',
-            label: `Successfully deleted '${name}'`
+            label: `Successfully deleted quotation`
           }).subscribe();
         },
         complete: () => {
@@ -153,16 +180,15 @@ export class CustomersComponent {
     });
   }
 
-  private getData(search?: string): Observable<CompaniesCollectionResourceResponse> {
+  private getData(search?: string): Observable<QuotationsTableCollectionResourceResponse> {
     const pageable = {
       page: this.page$.value,
       size: this.size$.value,
       sort: this.sorter$.value ? this.sorter$.value + (this.direction$.value == 1 ? ',asc' : ',desc') : undefined
     };
     if (search && search.length && search.length > 0) {
-      return this.companyService.getPageByName(search, pageable).pipe(map(response => response));
+      return this.quotationsService.getTablePageByCompany(search, pageable).pipe(map(response => response));
     }
-    return this.companyService.getPage(pageable).pipe(map(response => response));
+    return this.quotationsService.getTablePage(pageable).pipe(map(response => response));
   }
-
 }

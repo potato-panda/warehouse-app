@@ -2,6 +2,7 @@ package com.warehouse.server.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.rest.core.config.Projection;
 
 import java.sql.Timestamp;
 
@@ -11,7 +12,7 @@ public class Receipt {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
     @JoinColumn(name = "quotation_id")
     private Quotation quotation;
 
@@ -21,7 +22,7 @@ public class Receipt {
 
     @Column(name = "received_by")
     @NotNull
-    private Timestamp receivedBy;
+    private String receivedBy;
 
     public Long getId() {
         return id;
@@ -47,11 +48,22 @@ public class Receipt {
         this.receivedDate = receivedDate;
     }
 
-    public Timestamp getReceivedBy() {
+    public String getReceivedBy() {
         return receivedBy;
     }
 
-    public void setReceivedBy(Timestamp receivedBy) {
+    public void setReceivedBy(String receivedBy) {
         this.receivedBy = receivedBy;
+    }
+
+    @Projection(name = "withQuotation", types = {Receipt.class})
+    public interface ReceiptWithQuotationProjection {
+        Long getId();
+
+        Quotation getQuotation();
+
+        Timestamp getReceivedDate();
+
+        String getReceivedBy();
     }
 }

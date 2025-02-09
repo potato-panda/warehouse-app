@@ -94,12 +94,12 @@ export class ProductsComponent {
   protected readonly page$ = new BehaviorSubject(0);
 
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
-  protected readonly sorter$ = new BehaviorSubject<'name' | 'sku' | 'itemCode' | 'description' | 'price' | 'um' | 'umAmount' | null>(null);
+  protected readonly sorter$ = new BehaviorSubject<'name' | 'sku' | 'itemCode' | 'description' | 'um' | 'umAmount' | null>(null);
 
   protected readonly refresh$ = new BehaviorSubject<void>(undefined);
   protected nameSearch = model('');
   protected readonly search$ = toObservable(this.nameSearch);
-  protected columns = ['name', 'sku', 'itemCode', 'description', 'price', 'um', 'umAmount', 'actions'];
+  protected columns = ['name', 'sku', 'itemCode', 'description', 'um', 'umAmount', 'actions'];
 
   protected readonly request$ = combineLatest([
     this.search$.pipe(

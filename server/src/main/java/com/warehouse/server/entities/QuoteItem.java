@@ -2,6 +2,7 @@ package com.warehouse.server.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.rest.core.config.Projection;
 
 @Entity(name = "quote_item")
 public class QuoteItem {
@@ -22,6 +23,9 @@ public class QuoteItem {
     private Product quotedProduct;
 
     private Integer quantity;
+
+    @NotNull
+    private Double price;
 
     @Column(name = "discount_amount")
     @NotNull
@@ -71,19 +75,30 @@ public class QuoteItem {
         this.quantity = quantity;
     }
 
-    public Double getDiscountAmount() {
-        return discountAmount;
-    }
+    public Double getPrice() {return price;}
 
-    public void setDiscountAmount(Double discountAmount) {
-        this.discountAmount = discountAmount;
-    }
+    public void setPrice(Double price) {this.price = price;}
 
-    public Double getTotalAmount() {
-        return totalAmount;
-    }
+    public Double getDiscountAmount() {return discountAmount;}
 
-    public void setTotalAmount(Double totalAmount) {
-        this.totalAmount = totalAmount;
+    public void setDiscountAmount(Double discountAmount) {this.discountAmount = discountAmount;}
+
+    public Double getTotalAmount() {return totalAmount;}
+
+    public void setTotalAmount(Double totalAmount) {this.totalAmount = totalAmount;}
+
+    @Projection(name = "product", types = {QuoteItem.class})
+    public interface QuoteItemProductProjection {
+        Long getId();
+
+        Product getQuotedProduct();
+
+        Integer getQuantity();
+
+        Double getPrice();
+
+        Double getDiscountAmount();
+
+        Double getTotalAmount();
     }
 }
