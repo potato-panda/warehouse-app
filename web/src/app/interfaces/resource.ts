@@ -33,16 +33,6 @@ export type CollectionResource<
   page: Page;
 };
 
-type Relationships<RelationMap extends Record<string, any>> = {
-  [K in keyof RelationMap]: CollectionResource<RelationMap[K], string, string>;
-};
-
-export type ResourceWithRelations<
-  Type,
-  ResourceName extends string,
-  RelationMap extends Record<string, any> = {}
-> = Resource<Type, ResourceName, RelationMap>;
-
 export type ResourceRelations<T extends string[]> = {
   [K in T[number]]: Links;
 }

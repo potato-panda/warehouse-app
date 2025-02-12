@@ -1,11 +1,11 @@
-import { TestBed } from '@angular/core/testing';
-import { ResolveFn } from '@angular/router';
+import {TestBed} from '@angular/core/testing';
+import {ResolveFn} from '@angular/router';
 
-import { detailsResolver } from './details.resolver';
+import {detailsResolver} from './details.resolver';
 
 describe('detailsResolver', () => {
-  const executeResolver: ResolveFn<boolean> = (...resolverParameters) => 
-      TestBed.runInInjectionContext(() => detailsResolver(...resolverParameters));
+  const executeResolver: ResolveFn<boolean> = (...resolverParameters) =>
+    TestBed.runInInjectionContext(() => detailsResolver(...resolverParameters));
 
   beforeEach(() => {
     TestBed.configureTestingModule({});

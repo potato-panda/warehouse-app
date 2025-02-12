@@ -1,7 +1,7 @@
 <tui-combo-box (searchChange)="onSearchChange($event)"
                *tuiLet="searchResponse$ | async as results"
-               [identityMatcher]="identityMatcher"
                [stringify]="stringify"
+               [tuiTextfieldCleaner]="tuiTextfieldCleaner"
                [tuiTextfieldSize]="tuiTextfieldSize"
                [valueContent]="valueContent"
 >
@@ -16,9 +16,10 @@
     <ng-container *ngIf="results; else loadingTemplate || defaultLoadingTemplate">
       <tui-data-list>
         <ng-container *ngFor="let item of results">
-          <button (click)="onItemSelected(item)" [value]="item" tuiOption>
+          <button (click)="onItemSelected(item)" [value]="valueFn(item)" tuiOption type="button">
             <ng-container
-              *ngTemplateOutlet="itemTemplate || defaultItemTemplate; context: { $implicit: item }"></ng-container>
+              *ngTemplateOutlet="itemTemplate || defaultItemTemplate; context: { $implicit: item }">
+            </ng-container>
           </button>
         </ng-container>
       </tui-data-list>
@@ -28,7 +29,7 @@
 </tui-combo-box>
 
 <ng-template #defaultItemTemplate let-item>
-  {{ stringify(item) }}
+  {{ item }}
 </ng-template>
 
 <ng-template #defaultLoadingTemplate>

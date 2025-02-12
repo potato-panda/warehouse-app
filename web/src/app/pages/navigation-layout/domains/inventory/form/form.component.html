@@ -72,8 +72,8 @@
     <div tuiCell="s">
       <div tuiTitle>
         Name
-        <div tuiSubtitle
-             [style.display]="'block'"
+        <div [style.display]="'block'"
+             tuiSubtitle
         >{{ productInfo?.name }}
         </div>
       </div>
@@ -81,8 +81,8 @@
     <div tuiCell="s">
       <div tuiTitle>
         SKU
-        <div tuiSubtitle
-             [style.display]="'block'"
+        <div [style.display]="'block'"
+             tuiSubtitle
         >{{ productInfo?.sku }}
         </div>
       </div>
@@ -90,8 +90,8 @@
     <div tuiCell="s">
       <div tuiTitle>
         Item Code
-        <div tuiSubtitle
-             [style.display]="'block'"
+        <div [style.display]="'block'"
+             tuiSubtitle
         >{{ productInfo?.itemCode }}
         </div>
       </div>
@@ -99,8 +99,8 @@
     <div tuiCell="s">
       <div tuiTitle>
         Description
-        <div tuiSubtitle
-             [style.display]="'block'"
+        <div [style.display]="'block'"
+             tuiSubtitle
         >{{ productInfo?.description }}
         </div>
       </div>
@@ -108,8 +108,8 @@
     <div tuiCell="s">
       <div tuiTitle>
         UM
-        <div tuiSubtitle
-             [style.display]="'block'"
+        <div [style.display]="'block'"
+             tuiSubtitle
         >{{ productInfo?.um }}
         </div>
       </div>
@@ -117,8 +117,8 @@
     <div tuiCell="s">
       <div tuiTitle>
         UM Amount
-        <div tuiSubtitle
-             [style.display]="'block'"
+        <div [style.display]="'block'"
+             tuiSubtitle
         >{{ productInfo?.umAmount }}
         </div>
       </div>
@@ -133,10 +133,10 @@
     >
       Save
     </button>
-    <button [disabled]="form.invalid || inProgress"
+    <button (click)="save(true)"
+            [disabled]="form.invalid || inProgress"
             tuiButton
             type="button"
-            (click)="save(true)"
     >
       Save and Return
     </button>

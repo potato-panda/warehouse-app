@@ -83,10 +83,10 @@
     >
       Save
     </button>
-    <button [disabled]="productForm.invalid || inProgress"
+    <button (click)="save(true)"
+            [disabled]="productForm.invalid || inProgress"
             tuiButton
             type="button"
-            (click)="save(true)"
     >
       Save and Return
     </button>

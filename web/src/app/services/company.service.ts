@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../environments/environment';
-import {CompanyFull, CompanyRelations, Company, CompanyWithContacts} from '../interfaces/entities/company';
+import {Company, CompanyFull, CompanyRelations, CompanyWithContacts} from '../interfaces/entities/company';
 import {CollectionResource, Resource} from '../interfaces/resource';
 import {Pageable} from '../interfaces/pageable';
 import {RestService} from './rest.service';

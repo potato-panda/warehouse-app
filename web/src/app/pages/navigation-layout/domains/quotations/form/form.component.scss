@@ -1,0 +1,40 @@
+.table {
+  width: 100%;
+}
+
+.textfield {
+  max-width: 32rem;
+}
+
+.table thead tr {
+  th {
+    &:first-child {
+      min-width: 16rem;
+    }
+
+    &:last-child {
+      max-width: fit-content;
+    }
+  }
+}
+
+.content {
+  margin-top: 2rem;
+}
+
+.number {
+  text-align: end;
+  flex-direction: row-reverse;
+}
+
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+
+  .column {
+    min-width: 16rem;
+    width: 20rem;
+  }
+}
+

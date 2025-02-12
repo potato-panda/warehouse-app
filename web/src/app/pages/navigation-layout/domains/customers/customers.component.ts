@@ -18,7 +18,7 @@ import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
 import {Resource} from '../../../../interfaces/resource';
 import {TuiTable, TuiTablePagination, TuiTablePaginationEvent} from '@taiga-ui/addon-table';
 import {DeleteDialogComponent} from '../../../../components/delete-dialog/delete-dialog.component';
-import {CompanyRelations, Company} from '../../../../interfaces/entities/company';
+import {Company, CompanyRelations} from '../../../../interfaces/entities/company';
 import {PolymorpheusComponent} from '@taiga-ui/polymorpheus';
 import {
   BehaviorSubject,

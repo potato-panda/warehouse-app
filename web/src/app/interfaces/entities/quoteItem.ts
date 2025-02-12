@@ -10,7 +10,7 @@ export interface QuoteItem {
 }
 
 export interface QuoteItemProduct extends QuoteItem {
-  product: Product;
+  quotedProduct: Product;
 }
 
-export type QuotationRelations = ResourceRelations<['quotation', 'purchaseOrder', 'quotedProduct']>;
+export type QuoteItemRelations = ResourceRelations<['quotation', 'purchaseOrder', 'quotedProduct']>;

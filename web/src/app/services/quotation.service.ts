@@ -7,6 +7,7 @@ import {Quotation, QuotationRelations, QuotationTable} from '../interfaces/entit
 import {environment} from '../../environments/environment';
 import {QuoteItem} from '../interfaces/entities/quoteItem';
 import {CompaniesResourceResponse} from './company.service';
+import {QuoteItemWithProductCollectionResourceResponse} from './quote-item.service';
 
 type ResourceResponse = Resource<Quotation, 'quotation', QuotationRelations>;
 type TableResourceResponse = Resource<QuotationTable, 'quotation', QuotationRelations>;
@@ -67,7 +68,11 @@ export class QuotationService extends RestService {
   }
 
   getQuoteItems(id: string | number) {
-    return this.http.get<TableResourceResponse>(`${this.resourceEndpoint}/${id}/quoteItems`);
+    return this.http.get<QuoteItemsCollectionResourceResponse>(`${this.resourceEndpoint}/${id}/quoteItems`);
+  }
+
+  getQuoteItemsWithProduct(id: string | number) {
+    return this.http.get<QuoteItemWithProductCollectionResourceResponse>(`${this.resourceEndpoint}/${id}/quoteItems?projection=product`);
   }
 
   createOne(quotation: Omit<Quotation, 'id'>) {

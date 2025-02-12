@@ -1,11 +1,11 @@
 <form
+  (ngSubmit)="save()"
   [formGroup]="mainForm"
   [style.margin-top.rem]="3"
   [style.max-width.rem]="35"
   tuiAppearance="floating"
   tuiCardLarge
   tuiForm="m"
-  (ngSubmit)="save()"
 >
   <form
     formGroupName="company"
@@ -144,10 +144,10 @@
       Save
     </button>
     <button
+      (click)="save(true)"
       [disabled]="mainForm.invalid || inProgress"
       tuiButton
       type="button"
-      (click)="save(true)"
     >
       Save and Return
     </button>

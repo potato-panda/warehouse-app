@@ -1,16 +1,13 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {FormArray, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {BehaviorSubject, map, mergeMap, Observable, of, startWith, Subject} from 'rxjs';
-import {
-  ProductsCollectionResourceResponse,
-  ProductsResourceResponse,
-  ProductsService
-} from '../../../../../services/products.service';
+import {BehaviorSubject, map, mergeMap, Observable, of, startWith, Subject, withLatestFrom} from 'rxjs';
+import {ProductsResourceResponse, ProductsService} from '../../../../../services/products.service';
 import {
   TuiAlertService,
   TuiAppearance,
   TuiButton,
   TuiError,
+  TuiIcon,
   TuiLoader,
   TuiNumberFormat,
   TuiScrollbar,
@@ -18,29 +15,33 @@ import {
   TuiTitle
 } from '@taiga-ui/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import CleanUrl from '../../../../../utils/clean-url';
 import UniqueId from '../../../../../utils/unique-id';
 import {ResolvedData} from './details.resolver';
-import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
+import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
 import {TuiCardLarge, TuiForm, TuiHeader} from '@taiga-ui/layout';
-import {TuiChevron, TuiDataListWrapper, TuiFieldErrorPipe, TuiInputNumber} from '@taiga-ui/kit';
+import {TuiFieldErrorPipe, TuiInputNumber} from '@taiga-ui/kit';
 import {QuotationService, QuotationsTableResourceResponse} from '../../../../../services/quotation.service';
-import {
-  CompaniesCollectionResourceResponse,
-  CompaniesResourceResponse,
-  CompaniesSummaryResourceResponse,
-  CompanyService
-} from '../../../../../services/company.service';
+import {CompaniesSummaryResourceResponse, CompanyService} from '../../../../../services/company.service';
 import {ComboBoxComponent} from '../../../../../components/combo-box/combo-box.component';
 import {WaIntersectionObserver} from '@ng-web-apis/intersection-observer';
 import {TuiTable} from '@taiga-ui/addon-table';
+import {QuoteItemWithProductResourceResponse} from '../../../../../services/quote-item.service';
+import CleanUrl from '../../../../../utils/clean-url';
+import {Product} from '../../../../../interfaces/entities/product';
+import {TuiTextareaModule, TuiTextfieldControllerModule} from '@taiga-ui/legacy';
 
 interface QuoteItemRow {
+  _d: FormControl<string>,
+  id: FormControl<string | number | null>,
   quantity: FormControl<number | null>;
   discountAmount: FormControl<number | null>;
   price: FormControl<number | null>;
   totalAmount: FormControl<number | null>;
-  product: FormControl<string | null>;
+  quotedProductHref: FormControl<string | null>;
+}
+
+type ProductWithLink = Product & {
+  link: string;
 }
 
 @Component({
@@ -48,11 +49,6 @@ interface QuoteItemRow {
   imports: [
     AsyncPipe,
     FormsModule,
-    NgForOf,
-    TuiChevron,
-    TuiDataListWrapper,
-    TuiInputNumber,
-    TuiNumberFormat,
     TuiScrollbar,
     TuiTable,
     TuiTextfield,
@@ -69,35 +65,41 @@ interface QuoteItemRow {
     TuiLoader,
     TuiButton,
     RouterLink,
+    TuiInputNumber,
+    TuiNumberFormat,
+    TuiIcon,
+    NgForOf,
     NgIf,
+    DatePipe,
+    TuiTextareaModule,
+    TuiTextfieldControllerModule
   ],
   templateUrl: './form.component.html',
   styleUrl: './form.component.scss'
 })
-export class FormComponent {
-  extractCompanyHref = ((company: CompaniesSummaryResourceResponse) => company._links.self.href);
+export class FormComponent implements OnInit {
   readonly columns = ['product', 'price', 'quantity', 'unit', 'total', 'actions'];
-  protected resolvedQuotation!: QuotationsTableResourceResponse;
+  protected resolvedQuotation$ = new BehaviorSubject<QuotationsTableResourceResponse | null>(null);
   protected inProgress = false;
   protected readonly form = new FormGroup({
     quotation: new FormGroup({
       paymentTerms: new FormControl(''),
       shippingAddress: new FormControl(''),
-      companyHref: new FormControl('', [Validators.required, Validators.min(1)]),
+      companyHref: new FormControl<string | null>('', [Validators.required, Validators.min(1)]),
     }),
     quoteItems: new FormArray<FormGroup<QuoteItemRow>>([])
   });
-  protected productInfo$ = new BehaviorSubject<Record<number, ProductsResourceResponse | null> | null>(null);
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
   protected readonly sorter$ = new BehaviorSubject<'product' | 'price' | 'quantity' | 'unit' | 'total' | null>(null);
+  protected selectedProducts: Record<string | number, Product | null> = {};
+  protected readonly Number = Number;
   private readonly alerts = inject(TuiAlertService);
-  private mappedProducts$ = new BehaviorSubject<Record<number, ProductsCollectionResourceResponse['_embedded']['products']>>({});
+  private mappedProducts$ = new BehaviorSubject<Record<string | number, ProductWithLink[]>>({});
   private readonly searchProductRequest$ = new Subject<{ index: number, search: string }>();
-  private searchCompanyRequest$ = new BehaviorSubject('');
-  // private searchCompanyResponse$ = new BehaviorSubject<CompaniesCollectionResourceResponse['_embedded']['companies']>([]);
-  private resolvedCompany!: CompaniesResourceResponse;
-  private mappedCompanies$ = new BehaviorSubject<CompaniesCollectionResourceResponse['_embedded']['companies']>([]);
-  private companyInfo$ = new Subject<CompaniesSummaryResourceResponse>();
+  private readonly searchCompanyRequest$ = new BehaviorSubject('');
+  private mappedCompanies$ = new BehaviorSubject<CompaniesSummaryResourceResponse[]>([]);
+  private resolvedCompany$ = new BehaviorSubject<CompaniesSummaryResourceResponse | null>(null);
+  private resolvedProducts$ = new BehaviorSubject<Record<string, ProductWithLink | null>>({});
 
   constructor(private route: ActivatedRoute,
               private router: Router,
@@ -107,130 +109,157 @@ export class FormComponent {
   ) {
   }
 
-  get quoteItemsFormArray() {
+  protected get quoteItemsFormArray() {
     return this.form.get('quoteItems') as FormArray<FormGroup<QuoteItemRow>>;
   }
 
-  get isQuoteItemsFormArraySortable() {
+  protected get isQuoteItemsFormArraySortable() {
     return this.quoteItemsFormArray.length > 1;
   }
 
-  addRow() {
-    this.quoteItemsFormArray.push(new FormGroup<QuoteItemRow>({
-      quantity: new FormControl(0),
-      discountAmount: new FormControl(0),
-      price: new FormControl(0),
-      totalAmount: new FormControl(0),
-      product: new FormControl<string | null>(null)
-    }));
+  ngOnInit() {
+    this.route.data.subscribe((data) => {
+      if (data['resolved']) {
+        const {quotation, company} = this.route.snapshot.data['resolved'] as ResolvedData;
+
+        this.resolvedCompany$.next(company);
+        company && this.mappedCompanies$.next([company]);
+
+        this.form.patchValue({
+          quotation: {
+            ...quotation,
+            companyHref: CleanUrl.transform(company?._links?.self.href) ?? null
+          },
+        });
+
+        this.resolvedQuotation$.next(quotation);
+
+        this.quotationsService.getQuoteItemsWithProduct(quotation.id).pipe(
+          mergeMap((quoteItemsResponse) => {
+            // get quote items
+            const quoteItems = quoteItemsResponse._embedded.quoteItems;
+
+            const mapped = quoteItems.reduce((map, quoteItem) => {
+              const id = quoteItem.id;
+              this.resolvedProducts$.next({
+                ...this.resolvedProducts$.value,
+                [id]: this.mapToProductWithLink(quoteItem)
+              });
+              return {
+                ...map,
+                [id]: [this.mapToProductWithLink(quoteItem)]
+              };
+            }, {});
+
+            this.mappedProducts$.next(mapped);
+
+
+            return of(quoteItems);
+          })
+        ).subscribe(quoteItems => {
+          for (const quoteItem of quoteItems) {
+            this.addRow(quoteItem);
+          }
+        });
+
+        this.form.updateValueAndValidity();
+      }
+    });
   }
 
-  removeRow(index: number) {
-    this.mappedProducts$.next({...this.mappedProducts$.value, [index]: []});
-    this.productInfo$.next({...this.productInfo$.value, [index]: null});
-    this.quoteItemsFormArray.removeAt(index);
+  protected toCompanyHref: (item: CompaniesSummaryResourceResponse) => string = item => {
+    // console.log('extractCompanyValue',item)
+    return CleanUrl.transform(item._links.self.href) ?? '';
+  };
+
+  protected toProductHref: (item: ProductWithLink) => string = item => {
+    return item.link;
+  };
+
+  protected addRow(quoteItem?: QuoteItemWithProductResourceResponse) {
+    const _d = 'id' + Math.random().toString(16).slice(2);
+    const row = new FormGroup<QuoteItemRow>({
+      _d: new FormControl(_d, {nonNullable: true}),
+      id: new FormControl(quoteItem?.id ?? null),
+      quantity: new FormControl(quoteItem?.quantity ?? 0),
+      discountAmount: new FormControl(quoteItem?.discountAmount ?? 0),
+      price: new FormControl(quoteItem?.price ?? 0),
+      totalAmount: new FormControl(quoteItem?.totalAmount ?? 0),
+      quotedProductHref: new FormControl(quoteItem?._links.quotedProduct.href ?? null, [Validators.required, Validators.min(1)])
+    });
+    this.selectedProducts[_d] = quoteItem?.quotedProduct ?? null;
+    row.get('quotedProductHref')?.valueChanges.subscribe(value => {
+      if (!value) {
+        this.selectedProducts[_d] = null;
+      }
+    });
+    this.quoteItemsFormArray.push(row);
   }
 
-  save(back?: boolean) {
+  protected removeRow(_d?: string) {
+    const index = this.quoteItemsFormArray.controls.findIndex(fc => fc.value._d === _d);
+    if (index != -1) {
+      if (_d) {
+        this.mappedProducts$.next({...this.mappedProducts$.value, [_d]: []});
+        this.selectedProducts[_d] = null;
+      }
+      this.quoteItemsFormArray.removeAt(index);
+    }
+  }
+
+  protected save(back?: boolean) {
     this.inProgress = true;
     const inventoryFormValue = this.form.get('inventory')?.value;
     const productHref = this.form.get('product')?.value;
-
-    // const updatedInventory = {
-    //   id: this.resolvedQuotation?.id,
-    //   ...inventoryFormValue,
-    // } as Inventory;
-    //
-    // let saveRequest$: Observable<any>;
-    //
-    // if (updatedInventory.id) {
-    //   saveRequest$ = this.inventoryService.updateOne(updatedInventory).pipe(concatMap(inventoryResponse => {
-    //     const inventoryProductPropertyUrl = inventoryResponse._links.product.href;
-    //
-    //     if (productHref && productHref !== this.resolvedProduct?._links.self.href) {
-    //       return this.inventoryService.updateRelation(inventoryProductPropertyUrl, productHref);
-    //     }
-    //
-    //     return of(inventoryResponse);
-    //   }));
-    // } else {
-    //   saveRequest$ = this.inventoryService.createOne(updatedInventory).pipe(concatMap(inventoryResponse => {
-    //     const inventoryProductPropertyUrl = inventoryResponse._links.product.href;
-    //
-    //     if (productHref) {
-    //       return this.inventoryService.updateRelation(inventoryProductPropertyUrl, productHref);
-    //     }
-    //
-    //     return of(inventoryResponse);
-    //   }));
-    // }
-    //
-    // saveRequest$.subscribe({
-    //   error: err => {
-    //     this.alerts.open(context => 'Please try again later.',
-    //       {
-    //         appearance: 'negative',
-    //         label: 'Save failed'
-    //       }).subscribe(() => {
-    //     });
-    //     this.inProgress = false;
-    //   },
-    //   next: (value) => {
-    //     this.alerts.open(context => {
-    //       },
-    //       {
-    //         appearance: 'positive',
-    //         label: 'Save successful!',
-    //       }).subscribe(() => {
-    //     });
-    //     this.inProgress = false;
-    //
-    //     if (back) {
-    //       this.router.navigate(['..'], {relativeTo: this.route}).then();
-    //     }
-    //     if (value.id) {
-    //       this.router.navigate(['..', `${value.id}`], {relativeTo: this.route}).then();
-    //     }
-    //   },
-    //   complete: () => this.inProgress = false
-    // });
   }
 
-  stringifyCompany = (company: CompaniesSummaryResourceResponse) => {
+  protected stringifyCompany = (companyHref: string) => {
+    const company = this.mappedCompanies$.value.filter(c => CleanUrl.transform(c._links.self.href) === CleanUrl.transform(companyHref))?.[0];
     return company?.name ?? '';
   };
 
-  stringifyProduct = (index: number) => (href: string) => {
-    return this.mappedProducts$.value?.[index]?.filter(p => CleanUrl.transform(p?._links.self.href) === href)?.[0]?.name || '';
+  protected stringifyProduct = (_d: string, id?: string | number | null) => (productHref: string) => {
+    // console.log('stringifyProduct', product);
+    // I hate that I did this
+    const product = this.mappedProducts$.value[id || _d].filter(item => CleanUrl.transform(item.link) === CleanUrl.transform(productHref))?.[0];
+    return product?.name ?? '';
   };
 
-  searchProducts: (search?: string) => Observable<ProductsCollectionResourceResponse['_embedded']['products']> = (search?: string) => {
-    let results;
+  protected searchProducts: (_d: string, id?: string | number | null) => (search: string) => Observable<ProductWithLink[]>
+    = (_d: string, id?: string | number | null) => (search: string) => {
+    let results: Observable<ProductsResourceResponse[]>;
     if (search && search.length && search.length > 0) {
-      results = this.productsService.getPageByName(search).pipe(map(response => response));
+      results = this.productsService.getPageByName(search).pipe(map(response => response._embedded.products));
     } else {
-      results = this.productsService.getPage().pipe(map(response => response));
+      results = this.productsService.getPage().pipe(map(response => response._embedded.products));
     }
     return results.pipe(
-      mergeMap((response) => {
-        const products = response._embedded.products;
-        return of(products);
+      mergeMap((products) => {
+        const resolvedProducts = this.resolvedProducts$.value[id || _d];
+        const responseProductsMapped = products.map(this.mapToProductWithLink);
+        const uniqueProductsWithLink = UniqueId.filter(resolvedProducts ? [resolvedProducts, ...responseProductsMapped] : responseProductsMapped);
+        this.mappedProducts$.next({
+          ...this.mappedProducts$.value,
+          [id || _d]: uniqueProductsWithLink
+        });
+        return of(uniqueProductsWithLink);
       }),
       startWith([]),
     );
   };
 
-  searchCompanies: (search?: string) => Observable<CompaniesCollectionResourceResponse['_embedded']['companies']> = (search?: string) => {
-    let results;
+  protected searchCompanies: (search: string) => Observable<CompaniesSummaryResourceResponse[]>
+    = (search: string) => {
+    let results: Observable<CompaniesSummaryResourceResponse[]>;
     if (search && search.length && search.length > 0) {
-      results = this.companiesService.getPageByName(search).pipe(map(response => response));
+      results = this.companiesService.getPageByName(search).pipe(map(response => response._embedded.companies));
     } else {
-      results = this.companiesService.getPage().pipe(map(response => response));
+      results = this.companiesService.getPage().pipe(map(response => response._embedded.companies));
     }
     return results.pipe(
-      mergeMap((response) => {
-        const companies = response._embedded.companies;
-        const uniqueCompanies = UniqueId.filter(this.resolvedCompany ? [this.resolvedCompany, ...companies] : companies);
+      withLatestFrom(this.resolvedCompany$),
+      mergeMap(([response, resolved]) => {
+        const uniqueCompanies = UniqueId.filter(resolved ? [resolved, ...response] : [...response]);
         this.mappedCompanies$.next(uniqueCompanies);
         return of(uniqueCompanies);
       }),
@@ -238,28 +267,17 @@ export class FormComponent {
     );
   };
 
-  companyMatcher: (company: CompaniesSummaryResourceResponse, value: any) => boolean = (c, v) => {
-    console.log('companyMatcher', c, v);
-    return false;
-  };
-
-  private ngOnInit() {
-    this.route.data.subscribe((data) => {
-      if (data['resolved']) {
-        const {quotation, company} = this.route.snapshot.data['resolved'] as ResolvedData;
-        // this.form.get('quotation.companyHref')?.valueChanges.pipe(
-        //   takeUntil(this.destroy$)
-        // ).subscribe(productHref => {
-        //   this.companyInfo$.next(company);
-        // });
-
-        this.form.patchValue({
-          quotation: {
-            ...quotation,
-            companyHref: company?._links.self.href
-          }
-        });
-      }
-    });
+  private mapToProductWithLink(o: ProductsResourceResponse | QuoteItemWithProductResourceResponse): ProductWithLink {
+    if ('quotedProduct' in o) {
+      return {
+        ...o.quotedProduct,
+        link: CleanUrl.transform(o._links.quotedProduct.href),
+      };
+    }
+    // if not quoteItem then it can only be a product
+    return {
+      ...o,
+      link: o._links.self.href,
+    };
   }
 }
