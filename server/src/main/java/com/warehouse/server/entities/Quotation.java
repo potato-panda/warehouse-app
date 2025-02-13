@@ -37,7 +37,7 @@ public class Quotation {
     @OneToOne(mappedBy = "quotation")
     private Receipt receipt;
 
-    @Column(name = "total_amount")
+    @Transient
     private Double totalAmount;
 
     public Long getId() {
@@ -119,5 +119,18 @@ public class Quotation {
         Receipt getReceipt();
 
         Double getTotalAmount();
+    }
+
+    @PrePersist
+    public void addQuotationDate() {
+        quotationDate = new Timestamp(System.currentTimeMillis());
+    }
+
+    @PostLoad
+    public void calculateTotalAmount() {
+        this.totalAmount = getQuoteItems().stream().mapToDouble(quoteItem -> {
+            var subtotal = quoteItem.getQuantity().doubleValue() * quoteItem.getPrice();
+            return subtotal - quoteItem.getDiscountAmount();
+        }).sum();
     }
 }

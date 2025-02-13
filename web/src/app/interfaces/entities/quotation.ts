@@ -3,11 +3,11 @@ import {ResourceRelations} from '../resource';
 import {Receipt} from './receipt';
 
 export interface Quotation {
-  id: string | number;
-  paymentTerms: string;
-  shippingAddress: string;
-  quotationDate: string;
-  totalAmount: number;
+  id: string | number | null | undefined;
+  paymentTerms: string | null | undefined;
+  shippingAddress: string | null | undefined;
+  quotationDate: string | null | undefined;
+  totalAmount: number | null | undefined;
 }
 
 export interface QuotationTable extends Quotation {
@@ -15,4 +15,4 @@ export interface QuotationTable extends Quotation {
   receipt: Receipt;
 }
 
-export type QuotationRelations = ResourceRelations<['company', 'receipt']>;
+export type QuotationRelations = ResourceRelations<['company', 'receipt', 'quoteItems']>;

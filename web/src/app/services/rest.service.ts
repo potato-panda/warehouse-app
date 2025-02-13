@@ -23,7 +23,7 @@ export abstract class RestService {
    * @param referenceUrl This is the url of the entity to associate with
    * @returns {Observable<Object>}
    */
-  createRelation(propertyUrl: string, referenceUrl: string): Observable<object> {
+  createRelation(propertyUrl: string, referenceUrl: string | string []): Observable<object> {
     return this.http.post(this.cleanURL(propertyUrl), this.cleanURL(referenceUrl), {
       headers: new HttpHeaders({
         'Content-Type': 'text/uri-list',
@@ -60,6 +60,6 @@ export abstract class RestService {
     });
   }
 
-  private cleanURL = (url: string | string []) => CleanUrl.transform(url);
+  protected cleanURL = (url: string | string []) => CleanUrl.transform(url);
 
 }

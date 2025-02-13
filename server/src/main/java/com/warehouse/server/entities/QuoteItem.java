@@ -31,8 +31,7 @@ public class QuoteItem {
     @NotNull
     private Double discountAmount;
 
-    @Column(name = "total_amount")
-    @NotNull
+    @Transient
     private Double totalAmount;
 
     public Long getId() {
@@ -100,5 +99,10 @@ public class QuoteItem {
         Double getDiscountAmount();
 
         Double getTotalAmount();
+    }
+
+    @PostLoad
+    public void calculateTotalAmount() {
+        this.totalAmount = (getQuantity() * getPrice()) - getDiscountAmount();
     }
 }

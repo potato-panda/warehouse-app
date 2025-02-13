@@ -130,7 +130,7 @@
                              tuiTextfieldSize="m">
                 <ng-template #selected>
                   @let product = selectedProducts[_d];
-                  <div>
+                  <div *ngIf="product?.name">
                     <span>{{ product?.name }}</span> | <em>{{ product?.itemCode }}</em> , <em>{{ product?.sku }}</em>
                   </div>
                 </ng-template>

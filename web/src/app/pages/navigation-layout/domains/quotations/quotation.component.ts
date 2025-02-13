@@ -39,7 +39,9 @@ import {
   distinctUntilChanged,
   filter,
   map,
+  mergeMap,
   Observable,
+  of,
   share,
   startWith,
   switchMap
@@ -147,18 +149,17 @@ export class QuotationComponent {
   };
 
   protected showDeleteDialog({id, company}: QuotationTable): void {
-    const subject = company.name;
+    const subject = company?.name;
     this.dialogs.open<Observable<any>>(new PolymorpheusComponent(DeleteDialogComponent), {
       dismissible: true,
       closeable: true,
       label: 'Delete?',
       size: 'm',
       data: {
-        subject: `quotation for ${subject}`,
-        submit: () => this.quotationsService.deleteOne(id)
+        subject: `quotation for ${subject}`
       }
-    }).subscribe(obs => {
-      obs.subscribe({
+    }).pipe(mergeMap(value => value ? this.quotationsService.deleteOne(id as string) : of()))
+      .subscribe({
         error: err => {
           this.alerts.open(context => {
           }, {
@@ -167,17 +168,18 @@ export class QuotationComponent {
           });
         },
         next: response => {
-          this.alerts.open(context => {
-          }, {
-            appearance: 'positive',
-            label: `Successfully deleted quotation`
-          }).subscribe();
+          if (response) {
+            this.alerts.open(context => {
+            }, {
+              appearance: 'positive',
+              label: `Successfully deleted quotation`
+            }).subscribe();
+            this.refreshData();
+          }
         },
         complete: () => {
-          this.refreshData();
         }
       });
-    });
   }
 
   private getData(search?: string): Observable<QuotationsTableCollectionResourceResponse> {
@@ -191,4 +193,5 @@ export class QuotationComponent {
     }
     return this.quotationsService.getTablePage(pageable).pipe(map(response => response));
   }
+
 }

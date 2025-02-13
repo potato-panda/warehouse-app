@@ -55,13 +55,15 @@
         >
         <tr *ngFor="let item of sortedData" tuiTr>
           <td *tuiCell="'company'" tuiTd>
-            {{ item.company.name }}
+            <ng-container *ngIf="item.company">
+              {{ item.company.name }}
+            </ng-container>
           </td>
           <td *tuiCell="'paymentTerms'" tuiTd>{{ item.paymentTerms }}</td>
           <td *tuiCell="'shippingAddress'" tuiTd>{{ item.shippingAddress }}</td>
           <td *tuiCell="'quotationDate'" tuiTd>{{ item.quotationDate | date:'long' }}</td>
           <td *tuiCell="'receipt'" tuiTd>
-            <ng-container *ngIf="item.receipt.id; else noReceipt"
+            <ng-container *ngIf="item.receipt; else noReceipt"
             >
               Received by <strong>{{ item.receipt.receivedBy }}</strong> on
               <strong>{{ item.receipt.receivedDate | date:'long' }}</strong>

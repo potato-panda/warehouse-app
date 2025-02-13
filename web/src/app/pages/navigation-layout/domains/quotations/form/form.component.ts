@@ -1,6 +1,19 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {FormArray, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {BehaviorSubject, map, mergeMap, Observable, of, startWith, Subject, withLatestFrom} from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  forkJoin,
+  map,
+  mergeMap,
+  Observable,
+  of,
+  startWith,
+  Subject,
+  take,
+  throwError,
+  withLatestFrom
+} from 'rxjs';
 import {ProductsResourceResponse, ProductsService} from '../../../../../services/products.service';
 import {
   TuiAlertService,
@@ -25,7 +38,11 @@ import {CompaniesSummaryResourceResponse, CompanyService} from '../../../../../s
 import {ComboBoxComponent} from '../../../../../components/combo-box/combo-box.component';
 import {WaIntersectionObserver} from '@ng-web-apis/intersection-observer';
 import {TuiTable} from '@taiga-ui/addon-table';
-import {QuoteItemWithProductResourceResponse} from '../../../../../services/quote-item.service';
+import {
+  QuoteItemResourceResponse,
+  QuoteItemService,
+  QuoteItemWithProductResourceResponse
+} from '../../../../../services/quote-item.service';
 import CleanUrl from '../../../../../utils/clean-url';
 import {Product} from '../../../../../interfaces/entities/product';
 import {TuiTextareaModule, TuiTextfieldControllerModule} from '@taiga-ui/legacy';
@@ -83,9 +100,10 @@ export class FormComponent implements OnInit {
   protected inProgress = false;
   protected readonly form = new FormGroup({
     quotation: new FormGroup({
-      paymentTerms: new FormControl(''),
-      shippingAddress: new FormControl(''),
-      companyHref: new FormControl<string | null>('', [Validators.required, Validators.min(1)]),
+      id: new FormControl<string | number | null | undefined>(''),
+      paymentTerms: new FormControl<string | null | undefined>(''),
+      shippingAddress: new FormControl<string | null | undefined>(''),
+      companyHref: new FormControl<string>('', [Validators.required, Validators.min(1)]),
     }),
     quoteItems: new FormArray<FormGroup<QuoteItemRow>>([])
   });
@@ -105,6 +123,7 @@ export class FormComponent implements OnInit {
               private router: Router,
               private companiesService: CompanyService,
               private quotationsService: QuotationService,
+              private quoteItemsService: QuoteItemService,
               private productsService: ProductsService,
   ) {
   }
@@ -134,13 +153,14 @@ export class FormComponent implements OnInit {
 
         this.resolvedQuotation$.next(quotation);
 
-        this.quotationsService.getQuoteItemsWithProduct(quotation.id).pipe(
+        this.quotationsService.getQuoteItemsWithProduct(quotation.id!).pipe(
           mergeMap((quoteItemsResponse) => {
             // get quote items
             const quoteItems = quoteItemsResponse._embedded.quoteItems;
 
             const mapped = quoteItems.reduce((map, quoteItem) => {
-              const id = quoteItem.id;
+              // fetched quoteItems have string ids
+              const id = quoteItem.id as string;
               this.resolvedProducts$.next({
                 ...this.resolvedProducts$.value,
                 [id]: this.mapToProductWithLink(quoteItem)
@@ -196,21 +216,113 @@ export class FormComponent implements OnInit {
     this.quoteItemsFormArray.push(row);
   }
 
-  protected removeRow(_d?: string) {
+  protected removeRow(_d: string) {
     const index = this.quoteItemsFormArray.controls.findIndex(fc => fc.value._d === _d);
     if (index != -1) {
-      if (_d) {
-        this.mappedProducts$.next({...this.mappedProducts$.value, [_d]: []});
-        this.selectedProducts[_d] = null;
+      const quoteItemControl = this.quoteItemsFormArray.controls[index];
+      if (quoteItemControl) {
+        const id = quoteItemControl.value.id;
+        if (id) {
+          this.quoteItemsService.deleteOne(id.toString()).subscribe();
+        }
       }
+      this.mappedProducts$.next({...this.mappedProducts$.value, [_d]: []});
+      this.selectedProducts[_d] = null;
+
       this.quoteItemsFormArray.removeAt(index);
     }
   }
 
   protected save(back?: boolean) {
     this.inProgress = true;
-    const inventoryFormValue = this.form.get('inventory')?.value;
-    const productHref = this.form.get('product')?.value;
+    const quotationForm = this.form.get('quotation');
+    const quotationValue = quotationForm?.value;
+    const quoteItems = this.quoteItemsFormArray;
+
+    if (!quotationValue) {
+      this.inProgress = false;
+      return;
+    }
+
+    let quotationRequest;
+    let quoteItemRequests = [];
+
+    if (quotationForm?.dirty && quotationForm.valid) {
+      const companyControl = this.form.get('quotation.companyHref');
+      if (quotationValue?.id) {
+        quotationRequest = this.quotationsService.updateOne(quotationValue).pipe(mergeMap(response => {
+          return companyControl?.value && companyControl.dirty && companyControl.valid ? this.quotationsService.addCompany(response.id as string, companyControl?.value) : of(response);
+        }));
+      } else {
+        quotationRequest = this.quotationsService.createOne(quotationValue)
+          .pipe(mergeMap(response => companyControl?.value ? this.quotationsService.addCompany(response.id as string, companyControl?.value) : of(response)));
+      }
+    } else {
+      quotationRequest = this.resolvedQuotation$.pipe(take(1));
+    }
+
+    for (const control of quoteItems.controls) {
+      const {id, quantity, discountAmount, totalAmount, price, quotedProductHref} = control.value;
+      const hasId = !!control.value.id;
+      const productChange = hasId ? control.get('quotedProduct')?.dirty : true;
+
+      const updateProduct = (response: QuoteItemResourceResponse) => {
+        if (productChange && quotedProductHref && response.id) {
+          return this.quoteItemsService.updateProduct(response.id.toString(), quotedProductHref)
+            .pipe(mergeMap(() => of(response)));
+        }
+        return of(response);
+      };
+
+      if (control.dirty && control.valid) {
+        const quoteItemRequest = hasId
+          ? this.quoteItemsService.updateOne(control.value)
+            .pipe(mergeMap(updateProduct))
+          : this.quoteItemsService.createOne({quantity, discountAmount, totalAmount, price})
+            .pipe(mergeMap(updateProduct));
+
+        quoteItemRequests.push(quoteItemRequest);
+      }
+    }
+
+    forkJoin([quotationRequest, ...quoteItemRequests]).pipe(
+      mergeMap(responses => {
+        const [quotation, ...quoteItems] = responses;
+        if (!quotation) return throwError(() => new Error('Are you sure Quotation exists?'));
+
+        return forkJoin(
+          quoteItems.map(quoteItem => this.quoteItemsService.updateQuotation(quoteItem.id as string, quotation._links.self.href))
+        ).pipe(
+          map(() => quotation),
+          catchError((err, caught) => throwError(() => err))
+        );
+      }),
+      catchError((err, caught) => throwError(() => err))
+    ).subscribe({
+      error: err => {
+        this.alerts.open(context => 'Please try again later.',
+          {
+            appearance: 'negative',
+            label: 'Save failed'
+          }).subscribe(() => {
+        });
+        this.inProgress = false;
+      },
+      next: value => {
+        this.alerts.open(() => 'Save successful!', {
+          appearance: 'positive',
+          label: 'Success',
+        }).subscribe();
+
+        this.inProgress = false;
+
+        if (back) this.router.navigate(['..'], {relativeTo: this.route}).then(value1 => console.log('navigateBack'));
+        if (value?.id) this.router.navigate(['..', `${value.id}`], {relativeTo: this.route}).then(value1 => console.log('navigateSelf'));
+      },
+      complete: () => {
+        this.inProgress = false;
+      }
+    });
   }
 
   protected stringifyCompany = (companyHref: string) => {

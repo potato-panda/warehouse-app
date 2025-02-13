@@ -2,11 +2,11 @@ import {Product} from './product';
 import {ResourceRelations} from '../resource';
 
 export interface QuoteItem {
-  id: string | number;
-  quantity: number;
-  price: number;
-  discountAmount: number;
-  totalAmount: number;
+  id: string | number | null | undefined;
+  quantity: number | null;
+  price: number | null;
+  discountAmount: number | null;
+  totalAmount: number | null;
 }
 
 export interface QuoteItemProduct extends QuoteItem {
