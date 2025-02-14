@@ -5,6 +5,8 @@ import {environment} from '../../environments/environment';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Pageable} from '../interfaces/pageable';
 import {QuoteItem, QuoteItemProduct, QuoteItemRelations} from '../interfaces/entities/quoteItem';
+import IdToHrefList from '../utils/id-to-href-list';
+import {resourceEndpoints} from './resource-endpoints';
 
 type ResourceResponse = Resource<QuoteItem, 'quoteItem', QuoteItemRelations>;
 type WithProductResourceResponse = Resource<QuoteItemProduct, 'quoteItem', QuoteItemRelations>;
@@ -76,6 +78,15 @@ export class QuoteItemService extends RestService {
 
   updateQuotation(id: string, quotationSelfHref: string) {
     return this.http.put<ResourceResponse>(`${this.resourceEndpoint}/${id}/quotation`, this.cleanURL(quotationSelfHref), {
+      headers: new HttpHeaders({
+        'Content-Type': 'text/uri-list',
+      })
+    });
+  }
+
+  updatePurchaseOrder(id: string, purchaseOrderId: string | number | string[] | number []) {
+    const hrefs = IdToHrefList.transform(purchaseOrderId, resourceEndpoints.purchaseOrders());
+    return this.http.put<ResourceResponse>(`${this.resourceEndpoint}/${id}/purchaseOrder`, hrefs, {
       headers: new HttpHeaders({
         'Content-Type': 'text/uri-list',
       })

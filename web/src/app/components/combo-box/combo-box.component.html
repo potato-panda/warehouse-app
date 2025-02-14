@@ -6,7 +6,7 @@
                [valueContent]="valueContent"
 >
   {{ label }}
-  <input [placeholder]="placeholder" tuiTextfieldLegacy/>
+  <input [disabled]="disabled" [placeholder]="placeholder" tuiTextfieldLegacy/>
 
   <ng-container *ngIf="valueContent">
     <ng-container *ngTemplateOutlet="valueContent"></ng-container>
@@ -16,7 +16,7 @@
     <ng-container *ngIf="results; else loadingTemplate || defaultLoadingTemplate">
       <tui-data-list>
         <ng-container *ngFor="let item of results">
-          <button (click)="onItemSelected(item)" [value]="valueFn(item)" tuiOption type="button">
+          <button (click)="onItemSelected(item)" [disabled]="disabled" [value]="valueFn(item)" tuiOption type="button">
             <ng-container
               *ngTemplateOutlet="itemTemplate || defaultItemTemplate; context: { $implicit: item }">
             </ng-container>

@@ -1,5 +1,39 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject} from '@angular/core';
+import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
+import {ComboBoxComponent} from '../../../../../components/combo-box/combo-box.component';
 import {FormArray, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {
+  TuiAlertService,
+  TuiAppearance,
+  TuiButton,
+  TuiError,
+  TuiIcon,
+  TuiLabel,
+  TuiLoader,
+  TuiNumberFormat,
+  TuiScrollbar,
+  TuiTextfieldComponent,
+  TuiTextfieldDirective,
+  TuiTextfieldOptionsDirective,
+  TuiTitle
+} from '@taiga-ui/core';
+import {TuiCardLarge, TuiForm, TuiHeader} from '@taiga-ui/layout';
+import {TuiFieldErrorPipe, TuiInputNumber} from '@taiga-ui/kit';
+import {
+  TuiTable,
+  TuiTableCell,
+  TuiTableDirective,
+  TuiTableSortable,
+  TuiTableSortBy,
+  TuiTableTbody,
+  TuiTableTd,
+  TuiTableTh,
+  TuiTableThead,
+  TuiTableThGroup,
+  TuiTableTr
+} from '@taiga-ui/addon-table';
+import {TuiTextareaModule, TuiTextfieldControllerModule} from '@taiga-ui/legacy';
+import {WaIntersectionRoot} from '@ng-web-apis/intersection-observer';
 import {
   BehaviorSubject,
   catchError,
@@ -14,38 +48,21 @@ import {
   throwError,
   withLatestFrom
 } from 'rxjs';
-import {ProductsResourceResponse, ProductsService} from '../../../../../services/products.service';
-import {
-  TuiAlertService,
-  TuiAppearance,
-  TuiButton,
-  TuiError,
-  TuiIcon,
-  TuiLoader,
-  TuiNumberFormat,
-  TuiScrollbar,
-  TuiTextfield,
-  TuiTitle
-} from '@taiga-ui/core';
+import {Product} from '../../../../../interfaces/entities/product';
+import {CompanyService} from '../../../../../services/company.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import UniqueId from '../../../../../utils/unique-id';
-import {ResolvedData} from './details.resolver';
-import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
-import {TuiCardLarge, TuiForm, TuiHeader} from '@taiga-ui/layout';
-import {TuiFieldErrorPipe, TuiInputNumber} from '@taiga-ui/kit';
-import {QuotationService, QuotationsTableResourceResponse} from '../../../../../services/quotation.service';
-import {CompaniesSummaryResourceResponse, CompanyService} from '../../../../../services/company.service';
-import {ComboBoxComponent} from '../../../../../components/combo-box/combo-box.component';
-import {WaIntersectionObserver} from '@ng-web-apis/intersection-observer';
-import {TuiTable} from '@taiga-ui/addon-table';
 import {
   QuoteItemResourceResponse,
   QuoteItemService,
   QuoteItemWithProductResourceResponse
 } from '../../../../../services/quote-item.service';
-import CleanUrl from '../../../../../utils/clean-url';
-import {Product} from '../../../../../interfaces/entities/product';
-import {TuiTextareaModule, TuiTextfieldControllerModule} from '@taiga-ui/legacy';
+import {ProductsResourceResponse, ProductsService} from '../../../../../services/products.service';
+import UniqueId from '../../../../../utils/unique-id';
+import {ResolvedData} from './details.resolver';
+import {Company} from '../../../../../interfaces/entities/company';
+import {PurchaseOrderDetail} from '../../../../../interfaces/entities/purchase-order';
+import {PurchaseOrdersService} from '../../../../../services/purchase-orders.service';
+import {resourceEndpoints} from '../../../../../services/resource-endpoints';
 
 interface QuoteItemRow {
   _d: FormControl<string>,
@@ -54,56 +71,66 @@ interface QuoteItemRow {
   discountAmount: FormControl<number | null>;
   price: FormControl<number | null>;
   totalAmount: FormControl<number | null>;
-  quotedProductHref: FormControl<string | null>;
-}
-
-type ProductWithLink = Product & {
-  link: string;
+  productId: FormControl<string | number | null>;
 }
 
 @Component({
   selector: 'app-form',
   imports: [
     AsyncPipe,
-    FormsModule,
-    TuiScrollbar,
-    TuiTable,
-    TuiTextfield,
-    WaIntersectionObserver,
-    TuiError,
-    ReactiveFormsModule,
-    TuiAppearance,
-    TuiCardLarge,
-    TuiForm,
-    TuiHeader,
-    TuiTitle,
-    TuiFieldErrorPipe,
     ComboBoxComponent,
-    TuiLoader,
-    TuiButton,
-    RouterLink,
-    TuiInputNumber,
-    TuiNumberFormat,
-    TuiIcon,
+    FormsModule,
     NgForOf,
     NgIf,
-    DatePipe,
+    ReactiveFormsModule,
+    TuiAppearance,
+    TuiButton,
+    TuiCardLarge,
+    TuiError,
+    TuiFieldErrorPipe,
+    TuiForm,
+    TuiHeader,
+    TuiIcon,
+    TuiInputNumber,
+    TuiLabel,
+    TuiLoader,
+    TuiScrollbar,
+    TuiTableCell,
+    TuiTableDirective,
+    TuiTableSortBy,
+    TuiTableSortable,
+    TuiTableTbody,
+    TuiTableTd,
+    TuiTableTh,
+    TuiTableThGroup,
+    TuiTableThead,
+    TuiTableTr,
     TuiTextareaModule,
-    TuiTextfieldControllerModule
+    TuiTextfieldComponent,
+    TuiTextfieldControllerModule,
+    TuiTextfieldDirective,
+    TuiTextfieldOptionsDirective,
+    TuiTitle,
+    WaIntersectionRoot,
+    TuiTable,
+    TuiNumberFormat,
+    RouterLink
   ],
   templateUrl: './form.component.html',
   styleUrl: './form.component.scss'
 })
-export class FormComponent implements OnInit {
+export class FormComponent {
   readonly columns = ['product', 'price', 'quantity', 'unit', 'total', 'actions'];
-  protected resolvedQuotation$ = new BehaviorSubject<QuotationsTableResourceResponse | null>(null);
+  protected resolvedPurchaseOrder$ = new BehaviorSubject<PurchaseOrderDetail | null>(null);
   protected inProgress = false;
   protected readonly form = new FormGroup({
-    quotation: new FormGroup({
-      id: new FormControl<string | number | null | undefined>(''),
-      paymentTerms: new FormControl<string | null | undefined>(''),
-      shippingAddress: new FormControl<string | null | undefined>(''),
-      companyHref: new FormControl<string>('', [Validators.required, Validators.min(1)]),
+    purchaseOrder: new FormGroup({
+      id: new FormControl<string | number | null>(null),
+      preparedBy: new FormControl<string | null>(null),
+      checkedBy: new FormControl<string | null>(null),
+      approvedBy: new FormControl<string | null>(null),
+      receivedBy: new FormControl<string | null>(null),
+      supplierId: new FormControl<string | number | null>(null),
     }),
     quoteItems: new FormArray<FormGroup<QuoteItemRow>>([])
   });
@@ -112,17 +139,17 @@ export class FormComponent implements OnInit {
   protected selectedProducts: Record<string | number, Product | null> = {};
   protected readonly Number = Number;
   private readonly alerts = inject(TuiAlertService);
-  private mappedProducts$ = new BehaviorSubject<Record<string | number, ProductWithLink[]>>({});
+  private mappedProducts$ = new BehaviorSubject<Record<string | number, Product[]>>({});
   private readonly searchProductRequest$ = new Subject<{ index: number, search: string }>();
   private readonly searchCompanyRequest$ = new BehaviorSubject('');
-  private mappedCompanies$ = new BehaviorSubject<CompaniesSummaryResourceResponse[]>([]);
-  private resolvedCompany$ = new BehaviorSubject<CompaniesSummaryResourceResponse | null>(null);
-  private resolvedProducts$ = new BehaviorSubject<Record<string, ProductWithLink | null>>({});
+  private mappedCompanies$ = new BehaviorSubject<Company[]>([]);
+  private resolvedCompany$ = new BehaviorSubject<Company | null>(null);
+  private resolvedProducts$ = new BehaviorSubject<Record<string, Product | null>>({});
 
   constructor(private route: ActivatedRoute,
               private router: Router,
               private companiesService: CompanyService,
-              private quotationsService: QuotationService,
+              private purchaseOrdersService: PurchaseOrdersService,
               private quoteItemsService: QuoteItemService,
               private productsService: ProductsService,
   ) {
@@ -139,21 +166,22 @@ export class FormComponent implements OnInit {
   ngOnInit() {
     this.route.data.subscribe((data) => {
       if (data['resolved']) {
-        const {quotation, company} = this.route.snapshot.data['resolved'] as ResolvedData;
+        const {purchaseOrder} = this.route.snapshot.data['resolved'] as ResolvedData;
+        const supplier = purchaseOrder?.supplier;
 
-        this.resolvedCompany$.next(company);
-        company && this.mappedCompanies$.next([company]);
+        this.resolvedCompany$.next(supplier);
+        supplier && this.mappedCompanies$.next([supplier]);
 
         this.form.patchValue({
-          quotation: {
-            ...quotation,
-            companyHref: CleanUrl.transform(company?._links?.self.href) ?? null
+          purchaseOrder: {
+            ...purchaseOrder,
+            supplierId: supplier?.id ?? null
           },
         });
 
-        this.resolvedQuotation$.next(quotation);
+        this.resolvedPurchaseOrder$.next(purchaseOrder);
 
-        this.quotationsService.getQuoteItemsWithProduct(quotation.id!).pipe(
+        this.purchaseOrdersService.getQuoteItemsWithProduct(purchaseOrder.id!).pipe(
           mergeMap((quoteItemsResponse) => {
             // get quote items
             const quoteItems = quoteItemsResponse._embedded.quoteItems;
@@ -163,12 +191,9 @@ export class FormComponent implements OnInit {
               const id = quoteItem.id as string;
               this.resolvedProducts$.next({
                 ...this.resolvedProducts$.value,
-                [id]: this.mapToProductWithLink(quoteItem)
+                [id]: quoteItem.quotedProduct
               });
-              return {
-                ...map,
-                [id]: [this.mapToProductWithLink(quoteItem)]
-              };
+              return {...map, [id]: [quoteItem]};
             }, {});
 
             this.mappedProducts$.next(mapped);
@@ -187,13 +212,13 @@ export class FormComponent implements OnInit {
     });
   }
 
-  protected toCompanyHref: (item: CompaniesSummaryResourceResponse) => string = item => {
+  protected toCompanyId: (item: Company) => string = item => {
     // console.log('extractCompanyValue',item)
-    return CleanUrl.transform(item._links.self.href) ?? '';
+    return item?.id.toString() ?? '';
   };
 
-  protected toProductHref: (item: ProductWithLink) => string = item => {
-    return item.link;
+  protected toProductId: (item: Product) => string = item => {
+    return item?.id.toString() ?? '';
   };
 
   protected addRow(quoteItem?: QuoteItemWithProductResourceResponse) {
@@ -205,10 +230,10 @@ export class FormComponent implements OnInit {
       discountAmount: new FormControl(quoteItem?.discountAmount ?? 0),
       price: new FormControl(quoteItem?.price ?? 0),
       totalAmount: new FormControl(quoteItem?.totalAmount ?? 0),
-      quotedProductHref: new FormControl(quoteItem?._links.quotedProduct.href ?? null, [Validators.required, Validators.min(1)])
+      productId: new FormControl(quoteItem?.quotedProduct.id ?? '', [Validators.min(1)])
     });
     this.selectedProducts[_d] = quoteItem?.quotedProduct ?? null;
-    row.get('quotedProductHref')?.valueChanges.subscribe(value => {
+    row.get('productId')?.valueChanges.subscribe(value => {
       if (!value) {
         this.selectedProducts[_d] = null;
       }
@@ -235,40 +260,46 @@ export class FormComponent implements OnInit {
 
   protected save(back?: boolean) {
     this.inProgress = true;
-    const quotationForm = this.form.get('quotation');
-    const quotationValue = quotationForm?.value;
+    const purchaseOrderForm = this.form.get('purchaseOrder');
+    const purchaseOrderValue = purchaseOrderForm?.value;
     const quoteItems = this.quoteItemsFormArray;
 
-    if (!quotationValue) {
+    if (!purchaseOrderValue) {
       this.inProgress = false;
       return;
     }
 
-    let quotationRequest;
+    let purchaseOrderRequest;
     let quoteItemRequests = [];
 
-    if (quotationForm?.dirty && quotationForm.valid) {
-      const companyControl = this.form.get('quotation.companyHref');
-      if (quotationValue?.id) {
-        quotationRequest = this.quotationsService.updateOne(quotationValue).pipe(mergeMap(response => {
-          return companyControl?.value && companyControl.dirty && companyControl.valid ? this.quotationsService.addCompany(response.id as string, companyControl?.value) : of(response);
+    if (purchaseOrderForm?.dirty && purchaseOrderForm.valid) {
+      const supplierControl = this.form.get('purchaseOrder.supplierId');
+      if (purchaseOrderValue?.id) {
+        purchaseOrderRequest = this.purchaseOrdersService.updateOne({
+          id: purchaseOrderValue.id,
+          approvedBy: purchaseOrderValue.approvedBy,
+          checkedBy: purchaseOrderValue.checkedBy,
+          preparedBy: purchaseOrderValue.preparedBy,
+          receivedBy: purchaseOrderValue.receivedBy
+        }).pipe(mergeMap(response => {
+          return supplierControl?.value && supplierControl.dirty && supplierControl.valid ? this.purchaseOrdersService.addSupplier(response.id as string, supplierControl?.value) : of(response);
         }));
       } else {
-        quotationRequest = this.quotationsService.createOne(quotationValue)
-          .pipe(mergeMap(response => companyControl?.value ? this.quotationsService.addCompany(response.id as string, companyControl?.value) : of(response)));
+        purchaseOrderRequest = this.purchaseOrdersService.createOne(purchaseOrderValue)
+          .pipe(mergeMap(response => supplierControl?.value ? this.purchaseOrdersService.addSupplier(response.id as string, supplierControl?.value) : of(response)));
       }
     } else {
-      quotationRequest = this.resolvedQuotation$.pipe(take(1));
+      purchaseOrderRequest = this.resolvedPurchaseOrder$.pipe(take(1));
     }
 
     for (const control of quoteItems.controls) {
-      const {id, quantity, discountAmount, totalAmount, price, quotedProductHref} = control.value;
+      const {id, quantity, discountAmount, totalAmount, price, productId} = control.value;
       const hasId = !!control.value.id;
       const productChange = hasId ? control.get('quotedProduct')?.dirty : true;
 
       const updateProduct = (response: QuoteItemResourceResponse) => {
-        if (productChange && quotedProductHref && response.id) {
-          return this.quoteItemsService.updateProduct(response.id.toString(), quotedProductHref)
+        if (productChange && response.id && productId) {
+          return this.quoteItemsService.updateProduct(response.id.toString(), resourceEndpoints.products(productId as string))
             .pipe(mergeMap(() => of(response)));
         }
         return of(response);
@@ -285,18 +316,18 @@ export class FormComponent implements OnInit {
       }
     }
 
-    forkJoin([quotationRequest, ...quoteItemRequests]).pipe(
+    forkJoin([purchaseOrderRequest, ...quoteItemRequests]).pipe(
       mergeMap(responses => {
-        const [quotation, ...quoteItems] = responses;
-        if (!quotation) return throwError(() => new Error('Are you sure Quotation exists?'));
+        const [purchaseOrder, ...quoteItems] = responses;
+        if (!purchaseOrder) return throwError(() => new Error('Are you sure purchase order exists?'));
 
-        const updateQuotationRequests = quoteItems.map(quoteItem => this.quoteItemsService.updateQuotation(quoteItem.id as string, quotation._links.self.href));
+        const updatePurchaseOrderRequests = quoteItems.map(quoteItem => this.quoteItemsService.updatePurchaseOrder(quoteItem.id as string, purchaseOrder.id));
 
-        return (updateQuotationRequests.length > 0)
-          ? forkJoin(updateQuotationRequests).pipe(
-            map(() => quotation),
+        return (updatePurchaseOrderRequests.length > 0)
+          ? forkJoin(updatePurchaseOrderRequests).pipe(
+            map(() => purchaseOrder),
             catchError((err, caught) => throwError(() => err)))
-          : of(quotation);
+          : of(purchaseOrder);
       }),
       catchError((err, caught) => throwError(() => err))
     ).subscribe({
@@ -326,22 +357,18 @@ export class FormComponent implements OnInit {
     });
   }
 
-  protected stringifyCompany = (companyHref: string) => {
-    const company = this.mappedCompanies$.value.filter(c => CleanUrl.transform(c._links.self.href) === CleanUrl.transform(companyHref))?.[0];
-    return company?.name ?? '';
+  protected stringifyCompany = (companyId?: string | number) => {
+    return companyId ? (this.mappedCompanies$.value.filter(c => c.id === Number(companyId))?.[0])?.name ?? '' : '';
   };
 
-  protected stringifyProduct = (_d: string, id?: string | number | null) => (productHref: string) => {
-    // console.log('stringifyProduct', product);
-    // I hate that I did this
-    const product = this.mappedProducts$.value[id || _d].filter(item => CleanUrl.transform(item.link) === CleanUrl.transform(productHref))?.[0];
-    return product?.name ?? '';
+  protected stringifyProduct = (_d: string, id?: string | number | null) => (productId?: string | number) => {
+    return productId ? (this.mappedProducts$.value[id || _d].filter(p => p.id === Number(productId))?.[0])?.name ?? '' : '';
   };
 
-  protected searchProducts: (_d: string, id?: string | number | null) => (search: string) => Observable<ProductWithLink[]>
+  protected searchProducts: (_d: string, id?: string | number | null) => (search: string) => Observable<Product[]>
     = (_d: string, id?: string | number | null) => (search: string) => {
     let results: Observable<ProductsResourceResponse[]>;
-    if (search && search.length && search.length > 0) {
+    if (search?.length > 0) {
       results = this.productsService.getPageByName(search).pipe(map(response => response._embedded.products));
     } else {
       results = this.productsService.getPage().pipe(map(response => response._embedded.products));
@@ -349,22 +376,21 @@ export class FormComponent implements OnInit {
     return results.pipe(
       mergeMap((products) => {
         const resolvedProducts = this.resolvedProducts$.value[id || _d];
-        const responseProductsMapped = products.map(this.mapToProductWithLink);
-        const uniqueProductsWithLink = UniqueId.filter(resolvedProducts ? [resolvedProducts, ...responseProductsMapped] : responseProductsMapped);
+        const uniqueProducts = UniqueId.filter(resolvedProducts ? [resolvedProducts, ...products] : products);
         this.mappedProducts$.next({
           ...this.mappedProducts$.value,
-          [id || _d]: uniqueProductsWithLink
+          [id || _d]: uniqueProducts
         });
-        return of(uniqueProductsWithLink);
+        return of(uniqueProducts);
       }),
       startWith([]),
     );
   };
 
-  protected searchCompanies: (search: string) => Observable<CompaniesSummaryResourceResponse[]>
+  protected searchCompanies: (search: string) => Observable<Company[]>
     = (search: string) => {
-    let results: Observable<CompaniesSummaryResourceResponse[]>;
-    if (search && search.length && search.length > 0) {
+    let results: Observable<Company[]>;
+    if (search?.length > 0) {
       results = this.companiesService.getPageByName(search).pipe(map(response => response._embedded.companies));
     } else {
       results = this.companiesService.getPage().pipe(map(response => response._embedded.companies));
@@ -372,25 +398,11 @@ export class FormComponent implements OnInit {
     return results.pipe(
       withLatestFrom(this.resolvedCompany$),
       mergeMap(([response, resolved]) => {
-        const uniqueCompanies = UniqueId.filter(resolved ? [resolved, ...response] : [...response]);
+        const uniqueCompanies = UniqueId.filter(resolved ? [resolved, ...response] : response);
         this.mappedCompanies$.next(uniqueCompanies);
         return of(uniqueCompanies);
       }),
       startWith([]),
     );
   };
-
-  private mapToProductWithLink(o: ProductsResourceResponse | QuoteItemWithProductResourceResponse): ProductWithLink {
-    if ('quotedProduct' in o) {
-      return {
-        ...o.quotedProduct,
-        link: CleanUrl.transform(o._links.quotedProduct.href),
-      };
-    }
-    // if not quoteItem then it can only be a product
-    return {
-      ...o,
-      link: o._links.self.href,
-    };
-  }
 }

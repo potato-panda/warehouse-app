@@ -1,0 +1,244 @@
+<p>form works!</p>
+<form (ngSubmit)="save()"
+      [formGroup]="form"
+      [style.margin-top.rem]="3"
+      tuiAppearance="floating"
+      tuiCardLarge
+      tuiForm="m"
+>
+  <header tuiHeader><h3 tuiTitle>Purchase Order Details</h3></header>
+  <!--  @let disabled = this.resolvedPurchaseOrder$.value?.receivedBy;-->
+  @let disabled = false;
+  <form class="columns"
+        formGroupName="purchaseOrder"
+        tuiForm="m"
+  >
+    <span class="column"
+          tuiForm="m"
+    >
+      <app-combo-box [disabled]="!!disabled"
+                     [searchFn]="searchCompanies"
+                     [stringify]="stringifyCompany"
+                     [valueFn]="toCompanyId"
+                     class="textfield"
+                     formControlName="supplierId"
+                     label="Supplier" placeholder="Supplier"
+                     tuiTextfieldSize="m"
+      >
+        <ng-template #itemTemplate let-company>
+          <div class="name">{{ company.name }}</div>
+        </ng-template>
+        <ng-template #loadingTemplate>
+          <tui-loader></tui-loader>
+        </ng-template>
+      </app-combo-box>
+      <tui-error [error]="[] | tuiFieldError | async"
+                 formControlName="supplierId"
+      />
+
+      <tui-textfield class="textfield">
+        <label tuiLabel>Prepared By</label>
+        <input [disabled]="!!disabled"
+               formControlName="preparedBy"
+               placeholder="Prepared By"
+               tuiTextfield
+        />
+      </tui-textfield>
+      <tui-error [error]="[] | tuiFieldError | async"
+                 formControlName="preparedBy"
+      />
+
+      <tui-textfield class="textfield">
+        <label tuiLabel>Checked By</label>
+        <input [disabled]="!!disabled"
+               formControlName="checkedBy"
+               placeholder="Checked By"
+               tuiTextfield
+        />
+      </tui-textfield>
+      <tui-error [error]="[] | tuiFieldError | async"
+                 formControlName="checkedBy"
+      />
+    </span>
+
+    <span class="column"
+          tuiForm="m"
+    >
+      <tui-textfield class="textfield">
+        <label tuiLabel>Approved By</label>
+        <input [disabled]="!!disabled"
+               formControlName="approvedBy"
+               placeholder="Approved By"
+               tuiTextfield
+        />
+      </tui-textfield>
+      <tui-error [error]="[] | tuiFieldError | async"
+                 formControlName="approvedBy"
+      />
+
+      <tui-textfield class="textfield">
+        <label tuiLabel>Received By</label>
+        <input [disabled]="!!disabled"
+               formControlName="receivedBy"
+               placeholder="Received By"
+               tuiTextfield
+        />
+      </tui-textfield>
+      <tui-error [error]="[] | tuiFieldError | async"
+                 formControlName="receivedBy"
+      />
+
+    </span>
+  </form>
+
+  <form formGroupName="quoteItems"
+        tuiForm="m"
+  >
+    <tui-scrollbar class="scrollbar" waIntersectionRoot>
+      <table (directionChange)="direction$.next($event)"
+             (tuiSortByChange)="sorter$.next($event!)"
+             [columns]="columns"
+             [direction]="(direction$ | async) || 1"
+             [size]="'s'"
+             [tuiSortBy]="sorter$ | async"
+             class="table"
+             size="s"
+             tuiTable
+      >
+        <thead tuiThead>
+        <tr tuiThGroup>
+          <th *tuiHead="'product'" [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Product</th>
+          <th *tuiHead="'price'" [style.min-width]="'3.75rem'" [style.text-align]="'end'"
+              [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Price
+          </th>
+          <th *tuiHead="'quantity'" [style.text-align]="'end'" [style.width]="'3.75rem'"
+              [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Quantity
+          </th>
+          <th *tuiHead="'unit'" [style.width]="'3.75rem'" [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Units</th>
+          <th *tuiHead="'total'" [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Total</th>
+          <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
+        </tr>
+        </thead>
+
+        <tbody tuiTbody>
+        <ng-container *ngFor="let item of quoteItemsFormArray.controls; let i = index" [formGroupName]="i">
+          <tr *ngIf="item.value._d" tuiTr>
+            @let _d = item.value._d;
+            @let id = item.value.id;
+            <td *tuiCell="'product'" tuiTd>
+              <app-combo-box (value)="selectedProducts[_d]=$event"
+                             [disabled]="!!disabled"
+                             [searchFn]="searchProducts(_d ,id)"
+                             [stringify]="stringifyProduct(_d ,id)"
+                             [tuiTextfieldCleaner]="false"
+                             [valueContent]="selected"
+                             [valueFn]="toProductId"
+                             formControlName="productId"
+                             placeholder="Search"
+                             tuiTextfieldSize="m">
+                <ng-template #selected>
+                  @let product = selectedProducts[_d];
+                  <div *ngIf="product?.name">
+                    <span>{{ product?.name }}</span> | <em>{{ product?.itemCode }}</em> , <em>{{ product?.sku }}</em>
+                  </div>
+                </ng-template>
+                <ng-template #itemTemplate let-product>
+                  <div>
+                    <span>{{ product?.name }}</span> | <em>{{ product?.itemCode }}</em> , <em>{{ product?.sku }}</em>
+                  </div>
+                </ng-template>
+                <ng-template #loadingTemplate>
+                  <tui-loader></tui-loader>
+                </ng-template>
+              </app-combo-box>
+            </td>
+            <td *tuiCell="'price'" tuiTd>
+              <tui-textfield>
+                <input [disabled]="!!disabled"
+                       [style.padding-bottom]="0"
+                       class="number"
+                       formControlName="price"
+                       tuiInputNumber
+                       tuiTextfieldSize="m"
+                />
+              </tui-textfield>
+            </td>
+            <td *tuiCell="'quantity'" tuiTd>
+              <tui-textfield>
+                <input [disabled]="!!disabled"
+                       [style.padding-bottom]="0"
+                       [tuiNumberFormat]="{precision: 0}"
+                       class="number"
+                       formControlName="quantity"
+                       tuiInputNumber
+                       tuiTextfieldSize="m"
+                />
+              </tui-textfield>
+            </td>
+            <td *tuiCell="'unit'" tuiTd>
+              <tui-textfield>
+                <input [style.padding-bottom]="0"
+                       [value]="selectedProducts[_d]?.umAmount + ' ' +  selectedProducts[_d]?.um"
+                       class="number"
+                       disabled
+                       tuiTextfield
+                       tuiTextfieldSize="m"
+
+                />
+              </tui-textfield>
+            </td>
+            <td *tuiCell="'total'" tuiTd>
+              <tui-textfield>
+                <input [style.padding-bottom]="0"
+                       [value]="Number(item.get('price')?.value) * Number(item.get('quantity')?.value)"
+                       class="number"
+                       disabled
+                       tuiTextfield
+                       tuiTextfieldSize="m"
+                />
+              </tui-textfield>
+            </td>
+            <td *tuiCell="'actions'" [style.text-align]="'center'" tuiTd>
+              <button (click)="removeRow(_d)" [disabled]="!!disabled" appearance="flat-destructive" size="s"
+                      tuiButton
+                      tuiIconButton
+                      type="button">
+                <tui-icon icon="@tui.trash"/>
+              </button>
+            </td>
+          </tr>
+        </ng-container>
+        </tbody>
+      </table>
+    </tui-scrollbar>
+    <button (click)="addRow()" [disabled]="!!disabled" appearance="primary" size="m" tuiButton type="button">Add Row
+    </button>
+  </form>
+
+  <span [style.flex]="'1 1 auto'"></span>
+
+  <footer class="footer">
+    <button [disabled]="(form.invalid || inProgress) || !!disabled"
+            tuiButton
+            type="submit"
+    >
+      Save
+    </button>
+    <button (click)="save(true)"
+            [disabled]="(form.invalid || inProgress) || !!disabled"
+            tuiButton
+            type="button"
+    >
+      Save and Return
+    </button>
+    <span [style.flex]="'1 1 auto'"></span>
+    <button [disabled]="!!disabled"
+            [routerLink]="'..'"
+            appearance="flat"
+            tuiButton
+            type="button"
+    >
+      Back
+    </button>
+  </footer>
+</form>

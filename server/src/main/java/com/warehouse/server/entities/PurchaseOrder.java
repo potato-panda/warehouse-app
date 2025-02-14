@@ -1,6 +1,7 @@
 package com.warehouse.server.entities;
 
 import jakarta.persistence.*;
+import org.springframework.data.rest.core.config.Projection;
 
 import java.util.Collection;
 
@@ -9,9 +10,6 @@ public class PurchaseOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "reference_no")
-    private String referenceNo;
 
     @ManyToOne
     @JoinColumn(name = "company_id")
@@ -26,13 +24,14 @@ public class PurchaseOrder {
     @Column(name = "approved_by")
     private String approvedBy;
 
-    private String                receivedBy;
+    @Column(name = "received_by")
+    private String receivedBy;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "purchaseOrder")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "purchaseOrder", orphanRemoval = true)
     private Collection<QuoteItem> quoteItems;
 
-    @Column(name = "total_price")
-    private Double totalPrice;
+    @Transient
+    private Double totalAmount;
 
     public Long getId() {
         return id;
@@ -40,14 +39,6 @@ public class PurchaseOrder {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getReferenceNo() {
-        return referenceNo;
-    }
-
-    public void setReferenceNo(String referenceNo) {
-        this.referenceNo = referenceNo;
     }
 
     public Company getSupplier() {
@@ -98,11 +89,52 @@ public class PurchaseOrder {
         this.quoteItems = quoteItems;
     }
 
-    public Double getTotalPrice() {
-        return totalPrice;
+    public Double getTotalAmount() {
+        return totalAmount;
     }
 
-    public void setTotalPrice(Double totalPrice) {
-        this.totalPrice = totalPrice;
+    public void setTotalAmount(Double totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    @PostLoad
+    public void calculateTotalAmount() {
+        this.totalAmount = getQuoteItems().stream().mapToDouble(QuoteItem::getTotalAmount).sum();
+    }
+
+    @Projection(name = "detail", types = {PurchaseOrder.class})
+    public interface PurchaseOrderDetailProjection {
+        Long getId();
+
+        Company getSupplier();
+
+        String getPreparedBy();
+
+        String getCheckedBy();
+
+        String getApprovedBy();
+
+        String getReceivedBy();
+
+        Collection<QuoteItem> getQuoteItems();
+
+        Double getTotalAmount();
+    }
+
+    @Projection(name = "table", types = {PurchaseOrder.class})
+    public interface PurchaseOrderTableProjection {
+        Long getId();
+
+        Company getSupplier();
+
+        String getPreparedBy();
+
+        String getCheckedBy();
+
+        String getApprovedBy();
+
+        String getReceivedBy();
+
+        Double getTotalAmount();
     }
 }

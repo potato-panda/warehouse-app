@@ -40,12 +40,12 @@ export class ComboBoxComponent<T extends any> implements ControlValueAccessor, O
   @Input('valueContent') valueContent?: TemplateRef<any>;
   @ContentChild('itemTemplate') itemTemplate?: TemplateRef<any>;
   @ContentChild('loadingTemplate') loadingTemplate?: TemplateRef<any>;
+  @Input() disabled: boolean = false;
   protected value = output<T | null>();
   protected searchResponse$!: Observable<T[]>;
   private _value: any = null;
   private searchRequest$ = new BehaviorSubject<string>('');
   private touched = false;
-  private disabled: boolean = false;
 
   @Input() identityMatcher: (item1: T, item2: any) => boolean = (item1, item2) => item1 === item2;
 

@@ -51,11 +51,14 @@ public class Inventory {
         this.quantity = quantity;
     }
 
-    @Projection(name="product", types = Inventory.class)
+    @Projection(name = "product", types = Inventory.class)
     public interface WithProductProjection {
         Long getId();
+
         String getAddress();
+
         Integer getQuantity();
+
         Product getProduct();
     }
 }

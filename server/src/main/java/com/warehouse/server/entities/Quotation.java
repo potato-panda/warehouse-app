@@ -3,6 +3,8 @@ package com.warehouse.server.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.rest.core.config.Projection;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -104,6 +106,24 @@ public class Quotation {
         this.totalAmount = totalAmount;
     }
 
+    @PrePersist
+    public void addQuotationDate() {
+        quotationDate = new Timestamp(System.currentTimeMillis());
+    }
+
+    @PostLoad
+    public void calculateTotalAmount() {
+        this.totalAmount = getQuoteItems().stream().mapToDouble(QuoteItem::getTotalAmount).sum();
+    }
+
+    @PreUpdate
+    public void blockIfReceiptExists() {
+        if (getReceipt() != null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                                              "You can't update this quotation. It is already paid.");
+        }
+    }
+
     @Projection(name = "table", types = {Quotation.class})
     public interface QuotationTableReceiptProjection {
         Long getId();
@@ -119,18 +139,5 @@ public class Quotation {
         Receipt getReceipt();
 
         Double getTotalAmount();
-    }
-
-    @PrePersist
-    public void addQuotationDate() {
-        quotationDate = new Timestamp(System.currentTimeMillis());
-    }
-
-    @PostLoad
-    public void calculateTotalAmount() {
-        this.totalAmount = getQuoteItems().stream().mapToDouble(quoteItem -> {
-            var subtotal = quoteItem.getQuantity().doubleValue() * quoteItem.getPrice();
-            return subtotal - quoteItem.getDiscountAmount();
-        }).sum();
     }
 }

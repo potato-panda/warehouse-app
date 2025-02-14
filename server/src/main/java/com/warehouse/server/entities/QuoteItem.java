@@ -3,6 +3,8 @@ package com.warehouse.server.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.rest.core.config.Projection;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Entity(name = "quote_item")
 public class QuoteItem {
@@ -10,15 +12,16 @@ public class QuoteItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quotation_id")
     private Quotation quotation;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "purchase_order_id")
     private PurchaseOrder purchaseOrder;
 
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH, CascadeType.PERSIST})
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH,
+            CascadeType.PERSIST})
     @JoinColumn(name = "product_id")
     private Product quotedProduct;
 
@@ -86,6 +89,19 @@ public class QuoteItem {
 
     public void setTotalAmount(Double totalAmount) {this.totalAmount = totalAmount;}
 
+    @PostLoad
+    public void calculateTotalAmount() {
+        this.totalAmount = (getQuantity() * getPrice()) - getDiscountAmount();
+    }
+
+    @PreUpdate
+    public void blockIfReceiptExists() {
+        if (getQuotation() != null && getQuotation().getReceipt() != null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                                              "You can't update this quote item. It is already paid.");
+        }
+    }
+
     @Projection(name = "product", types = {QuoteItem.class})
     public interface QuoteItemProductProjection {
         Long getId();
@@ -99,10 +115,5 @@ public class QuoteItem {
         Double getDiscountAmount();
 
         Double getTotalAmount();
-    }
-
-    @PostLoad
-    public void calculateTotalAmount() {
-        this.totalAmount = (getQuantity() * getPrice()) - getDiscountAmount();
     }
 }

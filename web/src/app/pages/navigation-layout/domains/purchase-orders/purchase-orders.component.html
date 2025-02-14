@@ -1,0 +1,113 @@
+<main tuiNavigationMain>
+  <nav [style.position]="'sticky'"
+       compact
+       tuiSubheader
+  >
+    <strong tuiFade>Quotations</strong>
+
+    <hr>
+
+    <button [routerLink]="'create'"
+            tuiButton
+            type="button"
+    >
+      Add Quotation
+    </button>
+  </nav>
+  <hr>
+
+  <tui-textfield iconStart="@tui.search">
+    <label tuiLabel>Search by Supplier Name</label>
+    <input [(ngModel)]="nameSearch"
+           tuiTextfield
+    />
+  </tui-textfield>
+
+  <div
+    class="content">
+    <tui-loader [overlay]="true"
+                [showLoader]="!!(loading$ | async)"
+    >
+      <table (directionChange)="direction$.next($event)"
+             (tuiSortByChange)="sorter$.next($event!)"
+             *ngIf="data$ | async as data"
+             [columns]="columns"
+             [direction]="(direction$ | async) || 1"
+             [size]="'s'"
+             [tuiSortBy]="sorter$ | async"
+             class="table"
+             tuiTable
+      >
+        <thead tuiThead>
+        <tr tuiThGroup>
+          <th *tuiHead="'supplier'" tuiSortable tuiTh>Supplier</th>
+          <th *tuiHead="'preparedBy'" tuiSortable tuiTh>Prepared By</th>
+          <th *tuiHead="'checkedBy'" tuiSortable tuiTh>Checked By</th>
+          <th *tuiHead="'approvedBy'" tuiSortable tuiTh>Approved By</th>
+          <th *tuiHead="'receivedBy'" tuiSortable tuiTh>Received By</th>
+          <th *tuiHead="'totalAmount'" tuiSortable tuiTh>Total Amount</th>
+          <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
+        </tr>
+        </thead>
+        <tbody *tuiLet="data as sortedData"
+               [data]="sortedData"
+               tuiTbody
+        >
+        <tr *ngFor="let item of sortedData" tuiTr>
+          <td *tuiCell="'supplier'" tuiTd>{{ item.supplier?.name }}</td>
+          <td *tuiCell="'preparedBy'" tuiTd>{{ item.preparedBy }}</td>
+          <td *tuiCell="'checkedBy'" tuiTd>{{ item.checkedBy }}</td>
+          <td *tuiCell="'approvedBy'" tuiTd>{{ item.approvedBy }}</td>
+          <td *tuiCell="'receivedBy'" tuiTd>{{ item.receivedBy }}</td>
+          <td *tuiCell="'totalAmount'" tuiTd>{{ item.totalAmount }}</td>
+          <td *tuiCell="'actions'" tuiTd>
+          <span tuiStatus>
+          <button [routerLink]="[item.id]"
+                  appearance="action"
+                  iconStart="@tui.pencil"
+                  size="xs"
+                  tuiIconButton
+                  type="button"
+          >
+            Edit
+          </button>
+          <button [tuiDropdown]="content"
+                  appearance="action"
+                  iconStart="@tui.ellipsis"
+                  size="xs"
+                  tuiDropdownOpen
+                  tuiIconButton
+                  type="button"
+          >
+            More
+          </button>
+          <ng-template #content>
+            <tui-data-list role="menu">
+              <a (click)="showDeleteDialog(item)"
+                 iconStart="@tui.trash"
+                 tuiLink
+              >
+                Delete
+              </a>
+            </tui-data-list>
+          </ng-template>
+        </span>
+          </td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr>
+          <td [colSpan]="columns.length">
+            <tui-table-pagination (paginationChange)="onPagination($event)"
+                                  [page]="(page$ | async) || 0"
+                                  [size]="(size$ | async) || 20"
+                                  [total]="(total$ | async) || 0"
+                                  class="tui-space_top-2"
+            />
+          </td>
+        </tr>
+        </tfoot>
+      </table>
+    </tui-loader>
+  </div>
+</main>

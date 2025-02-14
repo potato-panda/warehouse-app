@@ -22,6 +22,9 @@ import {
 import {
   detailsResolver as quotationDetailsResolver
 } from './pages/navigation-layout/domains/quotations/form/details.resolver';
+import {
+  detailsResolver as purchaseOrderDetailsResolver
+} from './pages/navigation-layout/domains/purchase-orders/form/details.resolver';
 import {ContactsComponent} from './pages/navigation-layout/domains/contacts/contacts.component';
 import {FormComponent as ContactsFormComponent} from './pages/navigation-layout/domains/contacts/form/form.component';
 import {FormComponent as CustomerFormComponent} from './pages/navigation-layout/domains/customers/form/form.component';
@@ -30,9 +33,13 @@ import {FormComponent as InventoryFormComponent} from './pages/navigation-layout
 import {
   FormComponent as QuotationFormComponent
 } from './pages/navigation-layout/domains/quotations/form/form.component';
+import {
+  FormComponent as PurchaseOrderFormComponent
+} from './pages/navigation-layout/domains/purchase-orders/form/form.component';
 import {ProductsComponent} from './pages/navigation-layout/domains/products/products.component';
 import {InventoryComponent} from './pages/navigation-layout/domains/inventory/inventory.component';
 import {QuotationComponent} from './pages/navigation-layout/domains/quotations/quotation.component';
+import {PurchaseOrdersComponent} from './pages/navigation-layout/domains/purchase-orders/purchase-orders.component';
 
 export const routes: Routes = [
   {
@@ -170,6 +177,31 @@ export const routes: Routes = [
             },
             path: ':id',
             component: QuotationFormComponent
+          }
+        ]
+      },
+      {
+
+        path: 'purchaseOrders',
+        component: DomainsComponent,
+        children: [
+          {
+            path: '',
+            data: {
+              breadcrumb: 'Purchase Orders'
+            },
+            component: PurchaseOrdersComponent
+          },
+          {
+            path: 'create',
+            component: PurchaseOrderFormComponent
+          },
+          {
+            resolve: {
+              resolved: purchaseOrderDetailsResolver
+            },
+            path: ':id',
+            component: PurchaseOrderFormComponent
           }
         ]
       },
