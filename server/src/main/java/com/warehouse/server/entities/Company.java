@@ -112,7 +112,7 @@ public class Company {
     }
 
     @Projection(name = "summary", types = Company.class)
-    public interface Summary {
+    public interface CompanySummaryProjection {
         Long getId();
 
         String getName();
@@ -127,7 +127,7 @@ public class Company {
     }
 
     @Projection(name = "contacts", types = Company.class)
-    public interface WithContacts {
+    public interface CompanyWithContactsProjection {
         Long getId();
 
         String getName();

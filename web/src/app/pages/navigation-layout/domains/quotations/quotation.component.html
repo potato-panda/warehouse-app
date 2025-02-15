@@ -95,12 +95,15 @@
           </button>
           <ng-template #content>
             <tui-data-list role="menu">
-              <a (click)="showDeleteDialog(item)"
-                 iconStart="@tui.trash"
-                 tuiLink
+              <button
+                iconStart="@tui.trash"
+                tuiLink
+                type="button"
+                (click)="showDeleteDialog(item)"
+                [disabled]="!!item?.receipt?.id"
               >
-                Delete
-              </a>
+              Delete
+              </button>
             </tui-data-list>
           </ng-template>
         </span>

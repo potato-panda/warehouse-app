@@ -5,6 +5,8 @@
       tuiCardLarge
       tuiForm="m"
 >
+  @let resolvedQuotation = (resolvedQuotation$ | async);
+  @let receipt = resolvedQuotation?.receipt;
   <header tuiHeader><h3 tuiTitle>Quotation Details</h3></header>
 
   <div class="columns">
@@ -55,7 +57,6 @@
     <span class="column"
           tuiForm="m"
     >
-      @let resolvedQuotation = (resolvedQuotation$ | async);
       <tui-textfield class="textfield">
         <label tuiLabel>Date created</label>
         <input [value]="resolvedQuotation? (resolvedQuotation.quotationDate | date:'long') : ''"
@@ -63,7 +64,6 @@
                tuiTextfield
         />
       </tui-textfield>
-      @let receipt = resolvedQuotation?.receipt;
       @if (receipt) {
         <tui-textfield class="textfield">
         <label tuiLabel>Receipt received by</label>
@@ -189,9 +189,11 @@
               </tui-textfield>
             </td>
             <td *tuiCell="'actions'" [style.text-align]="'center'" tuiTd>
-              <button (click)="removeRow(_d)" appearance="flat-destructive" size="s" tuiButton
-                      tuiIconButton
-                      type="button">
+              <button (click)="removeRow(_d)" [disabled]="!!receipt?.id"
+                      appearance="flat-destructive"
+                      size="s"
+                      tuiButton
+                      tuiIconButton type="button">
                 <tui-icon icon="@tui.trash"/>
               </button>
             </td>
@@ -200,20 +202,22 @@
         </tbody>
       </table>
     </tui-scrollbar>
-    <button (click)="addRow()" appearance="primary" size="m" tuiButton type="button">Add Row</button>
+    <button (click)="addRow()" [disabled]="!!receipt?.id" appearance="primary" size="m" tuiButton
+            type="button">Add Row
+    </button>
   </form>
 
   <span [style.flex]="'1 1 auto'"></span>
 
   <footer class="footer">
-    <button [disabled]="form.invalid || inProgress"
+    <button [disabled]="form.invalid || inProgress || !!receipt?.id"
             tuiButton
             type="submit"
     >
       Save
     </button>
     <button (click)="save(true)"
-            [disabled]="form.invalid || inProgress"
+            [disabled]="form.invalid || inProgress || !!receipt?.id"
             tuiButton
             type="button"
     >

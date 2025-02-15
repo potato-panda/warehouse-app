@@ -10,8 +10,11 @@ export interface Quotation {
   totalAmount: number | null | undefined;
 }
 
-export interface QuotationTable extends Quotation {
+export interface QuotationWithCompany extends Quotation {
   company: Company;
+}
+
+export interface QuotationTable extends QuotationWithCompany {
   receipt: Receipt;
 }
 

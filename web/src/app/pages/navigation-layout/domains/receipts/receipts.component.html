@@ -1,0 +1,91 @@
+<main tuiNavigationMain>
+  <nav [style.position]="'sticky'"
+       compact
+       tuiSubheader
+  >
+    <strong tuiFade>Receipts</strong>
+
+    <hr>
+  </nav>
+  <hr>
+
+  <tui-textfield iconStart="@tui.search">
+    <label tuiLabel>Search by Company Name</label>
+    <input [(ngModel)]="nameSearch"
+           tuiTextfield
+    />
+  </tui-textfield>
+
+  <div
+    class="content">
+    <tui-loader [overlay]="true"
+                [showLoader]="!!(loading$ | async)"
+    >
+      <table (directionChange)="direction$.next($event)"
+             (tuiSortByChange)="sorter$.next($event!)"
+             *ngIf="data$ | async as data"
+             [columns]="columns"
+             [direction]="(direction$ | async) || 1"
+             [size]="'s'"
+             [tuiSortBy]="sorter$ | async"
+             class="table"
+             tuiTable
+      >
+        <thead tuiThead>
+        <tr tuiThGroup>
+          <th *tuiHead="'company'" tuiSortable tuiTh>Company</th>
+          <th *tuiHead="'companyTin'" tuiSortable tuiTh>Tin</th>
+          <th *tuiHead="'receivedBy'" tuiSortable tuiTh>Received By</th>
+          <th *tuiHead="'receivedDate'" tuiSortable tuiTh>Received Date</th>
+          <th *tuiHead="'totalAmount'" tuiSortable tuiTh>Total Amount</th>
+          <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
+        </tr>
+        </thead>
+        <tbody *tuiLet="data as sortedReceipts"
+               [data]="sortedReceipts"
+               tuiTbody
+        >
+        <tr *ngFor="let receipt of sortedReceipts" tuiTr>
+          @let quotation = receipt.quotation;
+          @let company = quotation.company;
+          <td *tuiCell="'company'" tuiTd>
+            <ng-container *ngIf="company">{{ company.name }}</ng-container>
+          </td>
+          <td *tuiCell="'companyTin'" tuiTd>{{ company.tin }}</td>
+          <td *tuiCell="'paymentTerms'" tuiTd>{{ quotation.paymentTerms }}</td>
+          <td *tuiCell="'receivedBy'" tuiTd>{{ receipt.receivedBy }}</td>
+          <td *tuiCell="'receivedDate'" tuiTd>{{ receipt.receivedDate | date:'long' }}</td>
+          <td *tuiCell="'totalAmount'" tuiTd>{{ quotation.totalAmount }}</td>
+          <td *tuiCell="'actions'" tuiTd>
+            <span tuiStatus>
+              <button [routerLink]="['/quotations', quotation.id]"
+                      appearance="action"
+                      iconStart="@tui.arrow-up-right"
+                      size="xs"
+                      tuiIconButton
+                      type="button"
+              >
+              View
+              </button>
+            </span>
+          </td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr>
+          <td [colSpan]="columns.length">
+            <tui-table-pagination (paginationChange)="onPagination($event)"
+                                  [page]="(page$ | async) || 0"
+                                  [size]="(size$ | async) || 20"
+                                  [total]="(total$ | async) || 0"
+                                  class="tui-space_top-2"
+            />
+          </td>
+        </tr>
+        </tfoot>
+      </table>
+    </tui-loader>
+  </div>
+</main>
+
+

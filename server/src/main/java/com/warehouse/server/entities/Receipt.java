@@ -60,7 +60,7 @@ public class Receipt {
     public interface ReceiptWithQuotationProjection {
         Long getId();
 
-        Quotation getQuotation();
+        Quotation.QuotationInReceiptProjection getQuotation();
 
         Timestamp getReceivedDate();
 

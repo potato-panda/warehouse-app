@@ -124,6 +124,21 @@ public class Quotation {
         }
     }
 
+    @Projection(name = "inReceipt", types = {Quotation.class})
+    public interface QuotationInReceiptProjection {
+        Long getId();
+
+        Company.CompanySummaryProjection getCompany();
+
+        String getPaymentTerms();
+
+        String getShippingAddress();
+
+        Timestamp getQuotationDate();
+
+        Double getTotalAmount();
+    }
+
     @Projection(name = "table", types = {Quotation.class})
     public interface QuotationTableReceiptProjection {
         Long getId();

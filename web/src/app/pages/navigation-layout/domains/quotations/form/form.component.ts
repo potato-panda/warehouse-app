@@ -183,6 +183,8 @@ export class FormComponent implements OnInit {
         });
 
         this.form.updateValueAndValidity();
+
+        quotation?.receipt?.id && this.form.disable();
       }
     });
   }
@@ -213,6 +215,7 @@ export class FormComponent implements OnInit {
         this.selectedProducts[_d] = null;
       }
     });
+    this.resolvedQuotation$.value?.receipt.id && row.disable();
     this.quoteItemsFormArray.push(row);
   }
 

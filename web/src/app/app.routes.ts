@@ -40,6 +40,7 @@ import {ProductsComponent} from './pages/navigation-layout/domains/products/prod
 import {InventoryComponent} from './pages/navigation-layout/domains/inventory/inventory.component';
 import {QuotationComponent} from './pages/navigation-layout/domains/quotations/quotation.component';
 import {PurchaseOrdersComponent} from './pages/navigation-layout/domains/purchase-orders/purchase-orders.component';
+import {ReceiptsComponent} from './pages/navigation-layout/domains/receipts/receipts.component';
 
 export const routes: Routes = [
   {
@@ -203,6 +204,19 @@ export const routes: Routes = [
             path: ':id',
             component: PurchaseOrderFormComponent
           }
+        ]
+      },
+      {
+        path: 'receipts',
+        component: DomainsComponent,
+        children: [
+          {
+            path: '',
+            data: {
+              breadcrumb: 'Receipts'
+            },
+            component: ReceiptsComponent
+          },
         ]
       },
       {
