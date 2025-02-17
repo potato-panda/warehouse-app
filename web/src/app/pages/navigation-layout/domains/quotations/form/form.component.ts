@@ -14,7 +14,7 @@ import {
   throwError,
   withLatestFrom
 } from 'rxjs';
-import {ProductsResourceResponse, ProductsService} from '../../../../../services/products.service';
+import {ProductsCollectionResourceResponse, ProductsService} from '../../../../../services/products.service';
 import {
   TuiAlertService,
   TuiAppearance,
@@ -43,7 +43,6 @@ import {
   QuoteItemService,
   QuoteItemWithProductResourceResponse
 } from '../../../../../services/quote-item.service';
-import CleanUrl from '../../../../../utils/clean-url';
 import {Product} from '../../../../../interfaces/entities/product';
 import {TuiTextareaModule, TuiTextfieldControllerModule} from '@taiga-ui/legacy';
 
@@ -54,11 +53,7 @@ interface QuoteItemRow {
   discountAmount: FormControl<number | null>;
   price: FormControl<number | null>;
   totalAmount: FormControl<number | null>;
-  quotedProductHref: FormControl<string | null>;
-}
-
-type ProductWithLink = Product & {
-  link: string;
+  productId: FormControl<string | number | null>;
 }
 
 @Component({
@@ -103,7 +98,7 @@ export class FormComponent implements OnInit {
       id: new FormControl<string | number | null | undefined>(''),
       paymentTerms: new FormControl<string | null | undefined>(''),
       shippingAddress: new FormControl<string | null | undefined>(''),
-      companyHref: new FormControl<string>('', [Validators.required, Validators.min(1)]),
+      companyId: new FormControl<string | number | null>(null),
     }),
     quoteItems: new FormArray<FormGroup<QuoteItemRow>>([])
   });
@@ -112,12 +107,12 @@ export class FormComponent implements OnInit {
   protected selectedProducts: Record<string | number, Product | null> = {};
   protected readonly Number = Number;
   private readonly alerts = inject(TuiAlertService);
-  private mappedProducts$ = new BehaviorSubject<Record<string | number, ProductWithLink[]>>({});
+  private mappedProducts$ = new BehaviorSubject<Record<string | number, Product[]>>({});
   private readonly searchProductRequest$ = new Subject<{ index: number, search: string }>();
   private readonly searchCompanyRequest$ = new BehaviorSubject('');
   private mappedCompanies$ = new BehaviorSubject<CompaniesSummaryResourceResponse[]>([]);
   private resolvedCompany$ = new BehaviorSubject<CompaniesSummaryResourceResponse | null>(null);
-  private resolvedProducts$ = new BehaviorSubject<Record<string, ProductWithLink | null>>({});
+  private resolvedProducts$ = new BehaviorSubject<Record<string, Product | null>>({});
 
   constructor(private route: ActivatedRoute,
               private router: Router,
@@ -147,7 +142,7 @@ export class FormComponent implements OnInit {
         this.form.patchValue({
           quotation: {
             ...quotation,
-            companyHref: CleanUrl.transform(company?._links?.self.href) ?? null
+            companyId: company?.id ?? null
           },
         });
 
@@ -155,7 +150,6 @@ export class FormComponent implements OnInit {
 
         this.quotationsService.getQuoteItemsWithProduct(quotation.id!).pipe(
           mergeMap((quoteItemsResponse) => {
-            // get quote items
             const quoteItems = quoteItemsResponse._embedded.quoteItems;
 
             const mapped = quoteItems.reduce((map, quoteItem) => {
@@ -163,11 +157,11 @@ export class FormComponent implements OnInit {
               const id = quoteItem.id as string;
               this.resolvedProducts$.next({
                 ...this.resolvedProducts$.value,
-                [id]: this.mapToProductWithLink(quoteItem)
+                [id]: quoteItem.quotedProduct
               });
               return {
                 ...map,
-                [id]: [this.mapToProductWithLink(quoteItem)]
+                [id]: [quoteItem.quotedProduct]
               };
             }, {});
 
@@ -189,13 +183,13 @@ export class FormComponent implements OnInit {
     });
   }
 
-  protected toCompanyHref: (item: CompaniesSummaryResourceResponse) => string = item => {
+  protected toCompanyId: (item: CompaniesSummaryResourceResponse) => string = item => {
     // console.log('extractCompanyValue',item)
-    return CleanUrl.transform(item._links.self.href) ?? '';
+    return item.id.toString() ?? '';
   };
 
-  protected toProductHref: (item: ProductWithLink) => string = item => {
-    return item.link;
+  protected toProductId: (item: Product) => string = item => {
+    return item.id.toString();
   };
 
   protected addRow(quoteItem?: QuoteItemWithProductResourceResponse) {
@@ -207,15 +201,15 @@ export class FormComponent implements OnInit {
       discountAmount: new FormControl(quoteItem?.discountAmount ?? 0),
       price: new FormControl(quoteItem?.price ?? 0),
       totalAmount: new FormControl(quoteItem?.totalAmount ?? 0),
-      quotedProductHref: new FormControl(quoteItem?._links.quotedProduct.href ?? null, [Validators.required, Validators.min(1)])
+      productId: new FormControl(quoteItem?.quotedProduct.id ?? '', Validators.min(1))
     });
     this.selectedProducts[_d] = quoteItem?.quotedProduct ?? null;
-    row.get('quotedProductHref')?.valueChanges.subscribe(value => {
+    row.get('productId')?.valueChanges.subscribe(value => {
       if (!value) {
         this.selectedProducts[_d] = null;
       }
     });
-    this.resolvedQuotation$.value?.receipt.id && row.disable();
+    this.resolvedQuotation$.value?.receipt?.id && row.disable();
     this.quoteItemsFormArray.push(row);
   }
 
@@ -239,10 +233,10 @@ export class FormComponent implements OnInit {
   protected save(back?: boolean) {
     this.inProgress = true;
     const quotationForm = this.form.get('quotation');
-    const quotationValue = quotationForm?.value;
+    const quotationData = quotationForm?.value;
     const quoteItems = this.quoteItemsFormArray;
 
-    if (!quotationValue) {
+    if (!quotationData) {
       this.inProgress = false;
       return;
     }
@@ -251,34 +245,43 @@ export class FormComponent implements OnInit {
     let quoteItemRequests = [];
 
     if (quotationForm?.dirty && quotationForm.valid) {
-      const companyControl = this.form.get('quotation.companyHref');
-      if (quotationValue?.id) {
-        quotationRequest = this.quotationsService.updateOne(quotationValue).pipe(mergeMap(response => {
-          return companyControl?.value && companyControl.dirty && companyControl.valid ? this.quotationsService.addCompany(response.id as string, companyControl?.value) : of(response);
-        }));
+      const companyControl = this.form.get('quotation.companyId');
+      const {paymentTerms, shippingAddress, id} = quotationData;
+      if (id) {
+        quotationRequest = this.quotationsService.updateOne({
+          paymentTerms, shippingAddress, id
+        })
+          .pipe(mergeMap(quotationResponse =>
+            companyControl?.value && companyControl.dirty && companyControl.valid
+              ? this.quotationsService.addCompany(quotationResponse.id as string, companyControl?.value).pipe(mergeMap(() => of(quotationResponse)))
+              : of(quotationResponse)));
       } else {
-        quotationRequest = this.quotationsService.createOne(quotationValue)
-          .pipe(mergeMap(response => companyControl?.value ? this.quotationsService.addCompany(response.id as string, companyControl?.value) : of(response)));
+        quotationRequest = this.quotationsService.createOne({
+          paymentTerms, shippingAddress
+        })
+          .pipe(mergeMap(quotationResponse =>
+            companyControl?.value
+              ? this.quotationsService.addCompany(quotationResponse.id as string, companyControl?.value).pipe(mergeMap(() => of(quotationResponse)))
+              : of(quotationResponse)));
       }
     } else {
       quotationRequest = this.resolvedQuotation$.pipe(take(1));
     }
 
     for (const control of quoteItems.controls) {
-      const {id, quantity, discountAmount, totalAmount, price, quotedProductHref} = control.value;
-      const hasId = !!control.value.id;
-      const productChange = hasId ? control.get('quotedProduct')?.dirty : true;
+      const {id, quantity, discountAmount, totalAmount, price, productId} = control.value;
+      const productChange = id ? control.get('productId')?.dirty : true;
 
-      const updateProduct = (response: QuoteItemResourceResponse) => {
-        if (productChange && quotedProductHref && response.id) {
-          return this.quoteItemsService.updateProduct(response.id.toString(), quotedProductHref)
-            .pipe(mergeMap(() => of(response)));
+      const updateProduct = (quoteItemResponse: QuoteItemResourceResponse) => {
+        if (quoteItemResponse.id && productChange && productId) {
+          return this.quoteItemsService.updateProduct(quoteItemResponse.id.toString(), productId)
+            .pipe(mergeMap(() => of(quoteItemResponse)));
         }
-        return of(response);
+        return of(quoteItemResponse);
       };
 
       if (control.dirty && control.valid) {
-        const quoteItemRequest = hasId
+        const quoteItemRequest = id
           ? this.quoteItemsService.updateOne(control.value)
             .pipe(mergeMap(updateProduct))
           : this.quoteItemsService.createOne({quantity, discountAmount, totalAmount, price})
@@ -293,7 +296,7 @@ export class FormComponent implements OnInit {
         const [quotation, ...quoteItems] = responses;
         if (!quotation) return throwError(() => new Error('Are you sure Quotation exists?'));
 
-        const updateQuotationRequests = quoteItems.map(quoteItem => this.quoteItemsService.updateQuotation(quoteItem.id as string, quotation._links.self.href));
+        const updateQuotationRequests = quoteItems.map(quoteItem => this.quoteItemsService.updateQuotation(quoteItem.id as string, quotation?.id.toString()));
 
         return (updateQuotationRequests.length > 0)
           ? forkJoin(updateQuotationRequests).pipe(
@@ -329,36 +332,32 @@ export class FormComponent implements OnInit {
     });
   }
 
-  protected stringifyCompany = (companyHref: string) => {
-    const company = this.mappedCompanies$.value.filter(c => CleanUrl.transform(c._links.self.href) === CleanUrl.transform(companyHref))?.[0];
-    return company?.name ?? '';
+  protected stringifyCompany = (companyId?: string | number) => {
+    return companyId ? (this.mappedCompanies$.value.filter(c => c.id === Number(companyId))?.[0])?.name ?? '' : '';
   };
 
-  protected stringifyProduct = (_d: string, id?: string | number | null) => (productHref: string) => {
-    // console.log('stringifyProduct', product);
-    // I hate that I did this
-    const product = this.mappedProducts$.value[id || _d].filter(item => CleanUrl.transform(item.link) === CleanUrl.transform(productHref))?.[0];
-    return product?.name ?? '';
+  protected stringifyProduct = (_d: string, id?: string | number | null) => (productId?: string | number) => {
+    return productId ? (this.mappedProducts$.value[id || _d].filter(p => p.id === Number(productId))?.[0])?.name ?? '' : '';
   };
 
-  protected searchProducts: (_d: string, id?: string | number | null) => (search: string) => Observable<ProductWithLink[]>
+  protected searchProducts: (_d: string, id?: string | number | null) => (search: string) => Observable<Product[]>
     = (_d: string, id?: string | number | null) => (search: string) => {
-    let results: Observable<ProductsResourceResponse[]>;
+    let results: Observable<ProductsCollectionResourceResponse>;
     if (search && search.length && search.length > 0) {
-      results = this.productsService.getPageByName(search).pipe(map(response => response._embedded.products));
+      results = this.productsService.getPageByName(search).pipe();
     } else {
-      results = this.productsService.getPage().pipe(map(response => response._embedded.products));
+      results = this.productsService.getPage();
     }
     return results.pipe(
+      map(response => response._embedded.products),
       mergeMap((products) => {
         const resolvedProducts = this.resolvedProducts$.value[id || _d];
-        const responseProductsMapped = products.map(this.mapToProductWithLink);
-        const uniqueProductsWithLink = UniqueId.filter(resolvedProducts ? [resolvedProducts, ...responseProductsMapped] : responseProductsMapped);
+        const uniqueProducts = UniqueId.filter(resolvedProducts ? [resolvedProducts, ...products] : products);
         this.mappedProducts$.next({
           ...this.mappedProducts$.value,
-          [id || _d]: uniqueProductsWithLink
+          [id || _d]: uniqueProducts
         });
-        return of(uniqueProductsWithLink);
+        return of(uniqueProducts);
       }),
       startWith([]),
     );
@@ -383,17 +382,4 @@ export class FormComponent implements OnInit {
     );
   };
 
-  private mapToProductWithLink(o: ProductsResourceResponse | QuoteItemWithProductResourceResponse): ProductWithLink {
-    if ('quotedProduct' in o) {
-      return {
-        ...o.quotedProduct,
-        link: CleanUrl.transform(o._links.quotedProduct.href),
-      };
-    }
-    // if not quoteItem then it can only be a product
-    return {
-      ...o,
-      link: o._links.self.href,
-    };
-  }
 }

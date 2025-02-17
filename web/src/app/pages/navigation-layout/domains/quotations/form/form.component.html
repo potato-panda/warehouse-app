@@ -36,9 +36,9 @@
 
       <app-combo-box [searchFn]="searchCompanies"
                      [stringify]="stringifyCompany"
-                     [valueFn]="toCompanyHref"
+                     [valueFn]="toCompanyId"
                      class="textfield"
-                     formControlName="companyHref"
+                     formControlName="companyId"
                      label="Company"
                      placeholder="Company" tuiTextfieldSize="m"
       >
@@ -50,7 +50,7 @@
         </ng-template>
       </app-combo-box>
       <tui-error [error]="[] | tuiFieldError | async"
-                 formControlName="companyHref"
+                 formControlName="companyId"
       />
     </form>
 
@@ -124,8 +124,8 @@
                              [stringify]="stringifyProduct(_d ,id)"
                              [tuiTextfieldCleaner]="false"
                              [valueContent]="selected"
-                             [valueFn]="toProductHref"
-                             formControlName="quotedProductHref"
+                             [valueFn]="toProductId"
+                             formControlName="productId"
                              placeholder="Search"
                              tuiTextfieldSize="m">
                 <ng-template #selected>

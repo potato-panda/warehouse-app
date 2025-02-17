@@ -2,12 +2,18 @@ import {Company} from './company';
 import {ResourceRelations} from '../resource';
 import {Receipt} from './receipt';
 
+export type CreateQuotation = Partial<Omit<Quotation, 'id'>>
+
+export type UpdateQuotation = Partial<Quotation> & {
+  id: string | number;
+}
+
 export interface Quotation {
-  id: string | number | null | undefined;
-  paymentTerms: string | null | undefined;
-  shippingAddress: string | null | undefined;
-  quotationDate: string | null | undefined;
-  totalAmount: number | null | undefined;
+  id: string | number;
+  paymentTerms: string | null;
+  shippingAddress: string | null;
+  quotationDate: string | null;
+  totalAmount: number | null;
 }
 
 export interface QuotationWithCompany extends Quotation {

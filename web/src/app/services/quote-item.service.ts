@@ -60,24 +60,27 @@ export class QuoteItemService extends RestService {
     return this.http.delete(`${this.resourceEndpoint}/${id}`);
   }
 
-  addProduct(id: string, productSelfHref: string) {
-    return this.http.put<ResourceResponse>(`${this.resourceEndpoint}/${id}/quotedProduct`, this.cleanURL(productSelfHref), {
+  addProduct(id: string, productId: string | number) {
+    const hrefs = IdToHrefList.transform(productId, resourceEndpoints.products());
+    return this.http.post<ResourceResponse>(`${this.resourceEndpoint}/${id}/quotedProduct`, hrefs, {
       headers: new HttpHeaders({
         'Content-Type': 'text/uri-list',
       })
     });
   }
 
-  updateProduct(id: string, productSelfHref: string) {
-    return this.http.put<ResourceResponse>(`${this.resourceEndpoint}/${id}/quotedProduct`, this.cleanURL(productSelfHref), {
+  updateProduct(id: string, productId: string | number | string[] | number []) {
+    const hrefs = IdToHrefList.transform(productId, resourceEndpoints.products());
+    return this.http.put<ResourceResponse>(`${this.resourceEndpoint}/${id}/quotedProduct`, hrefs, {
       headers: new HttpHeaders({
         'Content-Type': 'text/uri-list',
       })
     });
   }
 
-  updateQuotation(id: string, quotationSelfHref: string) {
-    return this.http.put<ResourceResponse>(`${this.resourceEndpoint}/${id}/quotation`, this.cleanURL(quotationSelfHref), {
+  updateQuotation(id: string, quotationId: string | number) {
+    const hrefs = IdToHrefList.transform(quotationId, resourceEndpoints.quotation());
+    return this.http.put<ResourceResponse>(`${this.resourceEndpoint}/${id}/quotation`, hrefs, {
       headers: new HttpHeaders({
         'Content-Type': 'text/uri-list',
       })

@@ -8,7 +8,6 @@
 >
   <header tuiHeader><h3 tuiTitle>Purchase Order Details</h3></header>
   <!--  @let disabled = this.resolvedPurchaseOrder$.value?.receivedBy;-->
-  @let disabled = false;
   <form class="columns"
         formGroupName="purchaseOrder"
         tuiForm="m"
@@ -16,8 +15,7 @@
     <span class="column"
           tuiForm="m"
     >
-      <app-combo-box [disabled]="!!disabled"
-                     [searchFn]="searchCompanies"
+      <app-combo-box [searchFn]="searchCompanies"
                      [stringify]="stringifyCompany"
                      [valueFn]="toCompanyId"
                      class="textfield"
@@ -38,8 +36,7 @@
 
       <tui-textfield class="textfield">
         <label tuiLabel>Prepared By</label>
-        <input [disabled]="!!disabled"
-               formControlName="preparedBy"
+        <input formControlName="preparedBy"
                placeholder="Prepared By"
                tuiTextfield
         />
@@ -50,8 +47,7 @@
 
       <tui-textfield class="textfield">
         <label tuiLabel>Checked By</label>
-        <input [disabled]="!!disabled"
-               formControlName="checkedBy"
+        <input formControlName="checkedBy"
                placeholder="Checked By"
                tuiTextfield
         />
@@ -66,8 +62,7 @@
     >
       <tui-textfield class="textfield">
         <label tuiLabel>Approved By</label>
-        <input [disabled]="!!disabled"
-               formControlName="approvedBy"
+        <input formControlName="approvedBy"
                placeholder="Approved By"
                tuiTextfield
         />
@@ -78,8 +73,7 @@
 
       <tui-textfield class="textfield">
         <label tuiLabel>Received By</label>
-        <input [disabled]="!!disabled"
-               formControlName="receivedBy"
+        <input formControlName="receivedBy"
                placeholder="Received By"
                tuiTextfield
         />
@@ -127,7 +121,6 @@
             @let id = item.value.id;
             <td *tuiCell="'product'" tuiTd>
               <app-combo-box (value)="selectedProducts[_d]=$event"
-                             [disabled]="!!disabled"
                              [searchFn]="searchProducts(_d ,id)"
                              [stringify]="stringifyProduct(_d ,id)"
                              [tuiTextfieldCleaner]="false"
@@ -154,8 +147,7 @@
             </td>
             <td *tuiCell="'price'" tuiTd>
               <tui-textfield>
-                <input [disabled]="!!disabled"
-                       [style.padding-bottom]="0"
+                <input [style.padding-bottom]="0"
                        class="number"
                        formControlName="price"
                        tuiInputNumber
@@ -165,8 +157,7 @@
             </td>
             <td *tuiCell="'quantity'" tuiTd>
               <tui-textfield>
-                <input [disabled]="!!disabled"
-                       [style.padding-bottom]="0"
+                <input [style.padding-bottom]="0"
                        [tuiNumberFormat]="{precision: 0}"
                        class="number"
                        formControlName="quantity"
@@ -199,7 +190,7 @@
               </tui-textfield>
             </td>
             <td *tuiCell="'actions'" [style.text-align]="'center'" tuiTd>
-              <button (click)="removeRow(_d)" [disabled]="!!disabled" appearance="flat-destructive" size="s"
+              <button (click)="removeRow(_d)" appearance="flat-destructive" size="s"
                       tuiButton
                       tuiIconButton
                       type="button">
@@ -211,29 +202,28 @@
         </tbody>
       </table>
     </tui-scrollbar>
-    <button (click)="addRow()" [disabled]="!!disabled" appearance="primary" size="m" tuiButton type="button">Add Row
+    <button (click)="addRow()" appearance="primary" size="m" tuiButton type="button">Add Row
     </button>
   </form>
 
   <span [style.flex]="'1 1 auto'"></span>
 
   <footer class="footer">
-    <button [disabled]="(form.invalid || inProgress) || !!disabled"
+    <button [disabled]="form.invalid || inProgress"
             tuiButton
             type="submit"
     >
       Save
     </button>
     <button (click)="save(true)"
-            [disabled]="(form.invalid || inProgress) || !!disabled"
+            [disabled]="form.invalid || inProgress"
             tuiButton
             type="button"
     >
       Save and Return
     </button>
     <span [style.flex]="'1 1 auto'"></span>
-    <button [disabled]="!!disabled"
-            [routerLink]="'..'"
+    <button [routerLink]="'..'"
             appearance="flat"
             tuiButton
             type="button"

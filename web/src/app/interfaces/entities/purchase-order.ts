@@ -1,14 +1,9 @@
 import {QuoteItem} from './quoteItem';
 import {Company} from './company';
 
-export interface CreatePurchaseOrder {
-  preparedBy: string | null;
-  checkedBy: string | null;
-  approvedBy: string | null;
-  receivedBy: string | null;
-}
+export type CreatePurchaseOrder = Partial<Omit<PurchaseOrder, 'id'>>
 
-export type UpdatePurchaseOrder = Partial<Omit<CreatePurchaseOrder, 'supplier' | 'quoteItems'>> & {
+export type UpdatePurchaseOrder = Partial<CreatePurchaseOrder> & {
   id: string | number
 };
 

@@ -49,7 +49,7 @@ import {
   withLatestFrom
 } from 'rxjs';
 import {Product} from '../../../../../interfaces/entities/product';
-import {CompanyService} from '../../../../../services/company.service';
+import {CompaniesCollectionResourceResponse, CompanyService} from '../../../../../services/company.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {
   QuoteItemResourceResponse,
@@ -175,7 +175,7 @@ export class FormComponent {
         this.form.patchValue({
           purchaseOrder: {
             ...purchaseOrder,
-            supplierId: supplier?.id ?? null
+            supplierId: supplier?.id ?? null,
           },
         });
 
@@ -191,7 +191,7 @@ export class FormComponent {
               const id = quoteItem.id as string;
               this.resolvedProducts$.next({
                 ...this.resolvedProducts$.value,
-                [id]: quoteItem.quotedProduct
+                [id]: quoteItem.quotedProduct,
               });
               return {...map, [id]: [quoteItem]};
             }, {});
@@ -299,7 +299,7 @@ export class FormComponent {
 
       const updateProduct = (response: QuoteItemResourceResponse) => {
         if (productChange && response.id && productId) {
-          return this.quoteItemsService.updateProduct(response.id.toString(), resourceEndpoints.products(productId as string))
+          return this.quoteItemsService.updateProduct(response.id.toString(), productId)
             .pipe(mergeMap(() => of(response)));
         }
         return of(response);
@@ -389,13 +389,14 @@ export class FormComponent {
 
   protected searchCompanies: (search: string) => Observable<Company[]>
     = (search: string) => {
-    let results: Observable<Company[]>;
+    let results: Observable<CompaniesCollectionResourceResponse>;
     if (search?.length > 0) {
-      results = this.companiesService.getPageByName(search).pipe(map(response => response._embedded.companies));
+      results = this.companiesService.getPageByName(search);
     } else {
-      results = this.companiesService.getPage().pipe(map(response => response._embedded.companies));
+      results = this.companiesService.getPage();
     }
     return results.pipe(
+      map(response => response._embedded.companies),
       withLatestFrom(this.resolvedCompany$),
       mergeMap(([response, resolved]) => {
         const uniqueCompanies = UniqueId.filter(resolved ? [resolved, ...response] : response);

@@ -3,11 +3,19 @@ import {RestService} from './rest.service';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Pageable} from '../interfaces/pageable';
 import {CollectionResource, Resource} from '../interfaces/resource';
-import {Quotation, QuotationRelations, QuotationTable} from '../interfaces/entities/quotation';
+import {
+  CreateQuotation,
+  Quotation,
+  QuotationRelations,
+  QuotationTable,
+  UpdateQuotation
+} from '../interfaces/entities/quotation';
 import {environment} from '../../environments/environment';
 import {QuoteItem} from '../interfaces/entities/quoteItem';
 import {CompaniesResourceResponse} from './company.service';
 import {QuoteItemWithProductCollectionResourceResponse} from './quote-item.service';
+import IdToHrefList from '../utils/id-to-href-list';
+import {resourceEndpoints} from './resource-endpoints';
 
 type ResourceResponse = Resource<Quotation, 'quotation', QuotationRelations>;
 type TableResourceResponse = Resource<QuotationTable, 'quotation', QuotationRelations>;
@@ -76,11 +84,11 @@ export class QuotationService extends RestService {
     return this.http.get<QuoteItemWithProductCollectionResourceResponse>(`${this.resourceEndpoint}/${id}/quoteItems?projection=product`);
   }
 
-  createOne(quotation: Omit<Partial<Quotation>, 'id' | 'quotationDate' | 'totalAmount'>) {
+  createOne(quotation: CreateQuotation) {
     return this.http.post<ResourceResponse>(`${this.resourceEndpoint}`, quotation);
   }
 
-  updateOne(quotation: any) {
+  updateOne(quotation: UpdateQuotation) {
     return this.http.put<ResourceResponse>(`${this.resourceEndpoint}/${quotation.id}`, quotation);
   }
 
@@ -88,28 +96,31 @@ export class QuotationService extends RestService {
     return this.http.delete(`${this.resourceEndpoint}/${id}`);
   }
 
-  addCompany(id: string, companyHref: string | string[]) {
-    return this.http.put<ResourceResponse>(`${this.resourceEndpoint}/${id}/company`, this.cleanURL(companyHref), {
+  addCompany(id: string, companyId: string | number) {
+    const hrefs = IdToHrefList.transform(companyId, resourceEndpoints.company());
+    return this.http.put<ResourceResponse>(`${this.resourceEndpoint}/${id}/company`, hrefs, {
       headers: new HttpHeaders({
         'Content-Type': 'text/uri-list',
       })
     });
   }
 
-  addQuoteItems(id: string, quoteItemSelfHref: string | string[]) {
-    return this.http.post<ResourceResponse>(`${this.resourceEndpoint}/${id}/quotedItems`, this.cleanURL(quoteItemSelfHref), {
+  addQuoteItems(id: string, quoteItemId: string | number | string[] | number []) {
+    const hrefs = IdToHrefList.transform(quoteItemId, resourceEndpoints.quoteItems());
+    return this.http.post<ResourceResponse>(`${this.resourceEndpoint}/${id}/quotedItems`, hrefs, {
       headers: new HttpHeaders({
         'Content-Type': 'text/uri-list',
       })
     });
   }
 
-  removeQuoteItems(id: string, quoteItemSelfHref: string | string[]) {
+  removeQuoteItems(id: string, quoteItemId: string | number | string[] | number []) {
+    const hrefs = IdToHrefList.transform(quoteItemId, resourceEndpoints.quoteItems());
     return this.http.delete<ResourceResponse>(`${this.resourceEndpoint}/${id}/quotedItems`, {
       headers: new HttpHeaders({
         'Content-Type': 'text/uri-list',
       }),
-      body: this.cleanURL(quoteItemSelfHref)
+      body: hrefs
     });
   }
 }
