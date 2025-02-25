@@ -69,7 +69,7 @@ public class CustomerIntegrationTests {
                                                                                    "1234567890",
                                                                                    "john@example.com")));
 
-        mockMvc.perform(post("/api/customers/new").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post("/api/customers/create").contentType(MediaType.APPLICATION_JSON)
                                                   .content(objectMapper.writeValueAsString(requestDTO)))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.id").isNumber())
@@ -203,7 +203,7 @@ public class CustomerIntegrationTests {
                                                                            // Invalid contact
         );
 
-        mockMvc.perform(post("/api/customers/new").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post("/api/customers/create").contentType(MediaType.APPLICATION_JSON)
                                                   .content(objectMapper.writeValueAsString(requestDTO)))
                .andExpect(status().isBadRequest());
     }
