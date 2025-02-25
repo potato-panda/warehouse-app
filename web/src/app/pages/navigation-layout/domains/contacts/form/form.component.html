@@ -6,27 +6,60 @@
       tuiCardLarge
       tuiForm="m"
 >
-  <div [style.margin-top.rem]="1">
-    <header tuiHeader><h6 tuiTitle>Contact Details</h6></header>
+  <header tuiHeader><h6 tuiTitle>Contact Details</h6></header>
 
-    <tui-textfield>
-      <label tuiLabel>Name</label>
-      <input formControlName="name" placeholder="Contact Name" tuiTextfield/>
-    </tui-textfield>
-    <tui-error [error]="[] | tuiFieldError | async" formControlName="name"/>
+  <tui-textfield>
+    <label tuiLabel>Name<sup>*</sup></label>
+    <input formControlName="name" placeholder="Contact Name" tuiTextfield/>
+  </tui-textfield>
+  <tui-error [error]="[] | tuiFieldError | async" formControlName="name"/>
 
-    <tui-textfield>
-      <label tuiLabel>Phone</label>
-      <input formControlName="phone" placeholder="Contact Phone" tuiTextfield/>
-    </tui-textfield>
-    <tui-error [error]="[] | tuiFieldError | async" formControlName="phone"/>
+  <tui-textfield>
+    <label tuiLabel>Phone<sup>*</sup></label>
+    <input formControlName="phone" placeholder="Contact Phone" tuiTextfield/>
+  </tui-textfield>
+  <tui-error [error]="[] | tuiFieldError | async" formControlName="phone"/>
 
-    <tui-textfield>
-      <label tuiLabel>Email</label>
-      <input formControlName="email" placeholder="Contact Email" tuiTextfield/>
-    </tui-textfield>
-    <tui-error [error]="[] | tuiFieldError | async" formControlName="email"/>
-  </div>
+  <tui-textfield>
+    <label tuiLabel>Email</label>
+    <input formControlName="email" placeholder="Contact Email" tuiTextfield/>
+  </tui-textfield>
+  <tui-error [error]="[] | tuiFieldError | async" formControlName="email"/>
+
+  <tui-elastic-container>
+    @let party = resolvedContact?.supplier ?? resolvedContact?.customer;
+    @if (party) {
+      @let partyType = resolvedContact?.supplier ? 'Supplier' : resolvedContact?.customer ? 'Customer' : null;
+      <span tuiHeader><div tuiCaption>{{ partyType }} Details</div></span>
+      <div tuiCell="s">
+        <div tuiTitle>
+          <div tuiSubtitle>Name</div>
+          {{ party?.name }}
+        </div>
+      </div>
+      @if (resolvedContact?.customer) {
+        @let customer = resolvedContact?.customer;
+        <div tuiCell="s">
+          <div tuiTitle>
+            <div tuiSubtitle>Billing Address</div>
+            {{ customer?.billingAddress }}
+          </div>
+        </div>
+        <div tuiCell="s">
+          <div tuiTitle>
+            <div tuiSubtitle>TIN</div>
+            {{ customer?.tin }}
+          </div>
+        </div>
+        <div tuiCell="s">
+          <div tuiTitle>
+            <div tuiSubtitle>Website</div>
+            {{ customer?.website }}
+          </div>
+        </div>
+      }
+    }
+  </tui-elastic-container>
 
   <footer class="footer">
     <tui-loader [inheritColor]="true"

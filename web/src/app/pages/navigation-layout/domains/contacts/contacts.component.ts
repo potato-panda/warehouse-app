@@ -46,12 +46,13 @@ import {
 } from 'rxjs';
 import {toObservable} from '@angular/core/rxjs-interop';
 import {DeleteDialogComponent} from '../../../../components/delete-dialog/delete-dialog.component';
-import {Resource} from '../../../../interfaces/resource';
-import {Contact, ContactRelations} from '../../../../interfaces/entities/contact';
-import {ContactsCollectionResourceResponse, ContactsService} from '../../../../services/contacts.service';
+import {Contact} from '../../../../interfaces/entities/contact';
+import {
+  ContactsCollectionResourceResponse,
+  ContactsResourceResponse,
+  ContactsService
+} from '../../../../services/contacts.service';
 import {RouterLink} from '@angular/router';
-
-type CustomerResourceList = Resource<Contact, 'contact', ContactRelations>[];
 
 @Component({
   selector: 'app-contacts',
@@ -96,11 +97,11 @@ export class ContactsComponent {
   protected readonly size$ = new BehaviorSubject(20);
   protected readonly page$ = new BehaviorSubject(0);
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
-  protected readonly sorter$ = new BehaviorSubject<'name' | 'address' | 'tin' | 'website' | null>(null);
+  protected readonly sorter$ = new BehaviorSubject<'name' | 'phone' | 'email' | null>(null);
   protected readonly refresh$ = new BehaviorSubject<void>(undefined);
   protected nameSearch = model('');
   protected readonly search$ = toObservable(this.nameSearch);
-  protected columns: (keyof Contact | 'actions')[] = ['name', 'email', 'phone', 'actions'];
+  protected columns = ['name', 'phone', 'email', 'party', 'actions'];
   // any changes will trigger a data update, debounced of course
   protected readonly request$ = combineLatest([
     this.search$.pipe(
@@ -123,7 +124,7 @@ export class ContactsComponent {
     map((response) => response.page.totalElements),
     startWith(0),
   );
-  protected readonly data$: Observable<CustomerResourceList> = this.request$.pipe(
+  protected readonly data$: Observable<ContactsResourceResponse[]> = this.request$.pipe(
     filter(tuiIsPresent),
     map((response) => response._embedded.contacts),
     map((items) => items.filter(tuiIsPresent)),
@@ -183,9 +184,9 @@ export class ContactsComponent {
       sort: this.sorter$.value ? this.sorter$.value + (this.direction$.value == 1 ? ',asc' : ',desc') : undefined
     };
     if (search && search.length && search.length > 0) {
-      return this.contactsService.getPageByName(search, pageable).pipe(map(response => response));
+      return this.contactsService.getPageByName(search, pageable);
     }
-    return this.contactsService.getPage(pageable).pipe(map(response => response));
+    return this.contactsService.getPage(pageable);
   }
 
 }
