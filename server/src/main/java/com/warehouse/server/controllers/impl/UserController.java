@@ -1,7 +1,7 @@
 package com.warehouse.server.controllers.impl;
 
-import com.warehouse.server.dtos.requests.CreateUserRequest;
-import com.warehouse.server.dtos.requests.DeleteUserRequest;
+import com.warehouse.server.dtos.requests.user.CreateUserRequestDTO;
+import com.warehouse.server.dtos.requests.user.DeleteUserRequestDTO;
 import com.warehouse.server.exceptions.InvalidInputException;
 import com.warehouse.server.exceptions.NotFoundException;
 import com.warehouse.server.services.impl.UserDetailsService;
@@ -26,8 +26,8 @@ public class UserController {
 
     @PostMapping("/new")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> createUser(@Valid @RequestBody CreateUserRequest createUserRequest) throws InvalidInputException {
-        var newUser = userDetailsService.createUser(createUserRequest);
+    public ResponseEntity<String> createUser(@Valid @RequestBody CreateUserRequestDTO createUserRequestDTO) throws InvalidInputException {
+        var newUser = userDetailsService.createUser(createUserRequestDTO);
         if (newUser != null) {
             return ResponseEntity.status(HttpStatus.CREATED)
                                  .body(newUser.getUsername());
@@ -38,8 +38,8 @@ public class UserController {
 
     @PostMapping("/delete")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> deleteUser(@Valid @RequestBody DeleteUserRequest deleteUserRequest) throws InvalidInputException, NotFoundException {
-        var success = userDetailsService.deleteUser(deleteUserRequest.username());
+    public ResponseEntity<String> deleteUser(@Valid @RequestBody DeleteUserRequestDTO deleteUserRequestDTO) throws InvalidInputException, NotFoundException {
+        var success = userDetailsService.deleteUser(deleteUserRequestDTO.username());
         if (success != null) {
             return ResponseEntity.status(HttpStatus.CREATED)
                                  .body(success);

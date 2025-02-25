@@ -1,6 +1,6 @@
 package com.warehouse.server.services.impl;
 
-import com.warehouse.server.dtos.requests.CreateUserRequest;
+import com.warehouse.server.dtos.requests.user.CreateUserRequestDTO;
 import com.warehouse.server.entities.Authority;
 import com.warehouse.server.entities.User;
 import com.warehouse.server.exceptions.InvalidInputException;
@@ -48,8 +48,8 @@ public class UserDetailsService implements org.springframework.security.core.use
     }
 
     @Transactional
-    public User createUser(CreateUserRequest createUserRequest) throws InvalidInputException {
-        var username = createUserRequest.username();
+    public User createUser(CreateUserRequestDTO createUserRequestDTO) throws InvalidInputException {
+        var username = createUserRequestDTO.username();
 
         var entity = userRepository.getUsersByUsername(username);
         if (entity != null) {
@@ -57,11 +57,11 @@ public class UserDetailsService implements org.springframework.security.core.use
         }
 
         var newUser = new User(username,
-                               passwordEncoder.encode(createUserRequest.password()),
-                               createUserRequest.authorities()
-                                                .stream()
-                                                .map(Authority::new)
-                                                .collect(Collectors.toList()),
+                               passwordEncoder.encode(createUserRequestDTO.password()),
+                               createUserRequestDTO.authorities()
+                                                   .stream()
+                                                   .map(Authority::new)
+                                                   .collect(Collectors.toList()),
                                true);
 
         return userRepository.save(newUser);

@@ -1,8 +1,8 @@
 package com.warehouse.server.services.impl;
 
-import com.warehouse.server.dtos.SuccessfulLogin;
-import com.warehouse.server.dtos.SuccessfulPasswordChange;
-import com.warehouse.server.dtos.responses.LoginResponse;
+import com.warehouse.server.dtos.responses.auth.SuccessfulLoginDTO;
+import com.warehouse.server.dtos.responses.auth.SuccessfulPasswordChangeDTO;
+import com.warehouse.server.dtos.responses.auth.LoginResponseDTO;
 import com.warehouse.server.entities.User;
 import com.warehouse.server.exceptions.InvalidInputException;
 import com.warehouse.server.exceptions.NotFoundException;
@@ -43,7 +43,7 @@ public class AuthService implements com.warehouse.server.services.AuthService {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
-    public SuccessfulLogin login(String username, String password) throws NotFoundException {
+    public SuccessfulLoginDTO login(String username, String password) throws NotFoundException {
 
         var userDetail = userDetailsService.loadUserByUsername(username);
 
@@ -62,16 +62,16 @@ public class AuthService implements com.warehouse.server.services.AuthService {
                 var accessToken  = jwtService.generateToken(user);
                 var refreshToken = jwtService.generateRefreshToken(user);
 
-                return new SuccessfulLogin(accessToken, refreshToken, user);
+                return new SuccessfulLoginDTO(accessToken, refreshToken, user);
             }
         }
         throw new NotFoundException("Username and or password is invalid.");
     }
 
     @Transactional
-    public SuccessfulPasswordChange changePassword(String oldPassword,
-                                                   String newPassword,
-                                                   String newPasswordConfirm) throws NotFoundException,
+    public SuccessfulPasswordChangeDTO changePassword(String oldPassword,
+                                                      String newPassword,
+                                                      String newPasswordConfirm) throws NotFoundException,
             InvalidInputException {
         var auth     = SecurityContextHolder.getContext().getAuthentication();
         var username = auth.getName();
@@ -89,7 +89,7 @@ public class AuthService implements com.warehouse.server.services.AuthService {
                     // invalid old refresh token
                     refreshTokenRepository.invalidateRefreshTokensByUser(user.getUsername());
 
-                    return new SuccessfulPasswordChange(refreshToken, updated);
+                    return new SuccessfulPasswordChangeDTO(refreshToken, updated);
                 }
                 throw new InvalidInputException("Passwords do not match.");
             }
@@ -114,17 +114,17 @@ public class AuthService implements com.warehouse.server.services.AuthService {
     }
 
     @Override
-    public LoginResponse refreshToken(String token) throws UnauthorizedException {
+    public LoginResponseDTO refreshToken(String token) throws UnauthorizedException {
         var refreshToken = refreshTokenRepository.findRefreshTokenByToken(token).getFirst();
         if (refreshToken != null) {
             var isValid = jwtService.isRefreshTokenValid(refreshToken);
             if (isValid) {
                 var user        = refreshToken.getUser();
                 var accessToken = jwtService.generateToken(user);
-                return new LoginResponse(accessToken,
-                                         expirationPeriod,
-                                         user.getUsername(),
-                                         user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
+                return new LoginResponseDTO(accessToken,
+                                            expirationPeriod,
+                                            user.getUsername(),
+                                            user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
             }
 
         }

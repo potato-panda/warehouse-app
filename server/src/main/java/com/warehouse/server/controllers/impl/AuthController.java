@@ -1,9 +1,9 @@
 package com.warehouse.server.controllers.impl;
 
-import com.warehouse.server.dtos.requests.ChangePasswordRequest;
-import com.warehouse.server.dtos.requests.LoginRequest;
-import com.warehouse.server.dtos.responses.CurrentUserResponse;
-import com.warehouse.server.dtos.responses.LoginResponse;
+import com.warehouse.server.dtos.requests.auth.ChangePasswordRequestDTO;
+import com.warehouse.server.dtos.requests.auth.LoginRequestDTO;
+import com.warehouse.server.dtos.responses.auth.CurrentUserResponseDTO;
+import com.warehouse.server.dtos.responses.auth.LoginResponseDTO;
 import com.warehouse.server.exceptions.InvalidInputException;
 import com.warehouse.server.exceptions.NotFoundException;
 import com.warehouse.server.exceptions.UnauthorizedException;
@@ -40,19 +40,19 @@ public class AuthController implements com.warehouse.server.controllers.AuthCont
 
     @Override
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(HttpServletResponse response,
-                                               @Valid @RequestBody LoginRequest loginRequest,
-                                               BindingResult bindingResult) throws NotFoundException {
+    public ResponseEntity<LoginResponseDTO> login(HttpServletResponse response,
+                                                  @Valid @RequestBody LoginRequestDTO loginRequestDTO,
+                                                  BindingResult bindingResult) throws NotFoundException {
         if (bindingResult.hasErrors()) {
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getAllErrors().toString());
         }
-        var login = authService.login(loginRequest.username(), loginRequest.password());
+        var login = authService.login(loginRequestDTO.username(), loginRequestDTO.password());
 
         if (login != null) {
-            var body = new LoginResponse(login.accessToken(),
-                                         expirationPeriod,
-                                         login.user().getUsername(),
-                                         login.user()
+            var body = new LoginResponseDTO(login.accessToken(),
+                                            expirationPeriod,
+                                            login.user().getUsername(),
+                                            login.user()
                                               .getAuthorities()
                                               .stream()
                                               .map(GrantedAuthority::getAuthority)
@@ -71,15 +71,15 @@ public class AuthController implements com.warehouse.server.controllers.AuthCont
     @PostMapping("/change-password")
     @Transactional
     public ResponseEntity<String> changePassword(HttpServletResponse response,
-                                                 @Valid @RequestBody ChangePasswordRequest changePasswordRequest,
+                                                 @Valid @RequestBody ChangePasswordRequestDTO changePasswordRequestDTO,
                                                  BindingResult bindingResult) throws InvalidInputException,
             NotFoundException {
         if (bindingResult.hasErrors()) {
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getAllErrors().toString());
         }
-        var success = authService.changePassword(changePasswordRequest.oldPassword(),
-                                                 changePasswordRequest.password(),
-                                                 changePasswordRequest.confirmPassword());
+        var success = authService.changePassword(changePasswordRequestDTO.oldPassword(),
+                                                 changePasswordRequestDTO.password(),
+                                                 changePasswordRequestDTO.confirmPassword());
         if (success != null) {
             // Header to set refreshToken to cookie
             setSecureCookie(response, success.refreshToken());
@@ -102,11 +102,11 @@ public class AuthController implements com.warehouse.server.controllers.AuthCont
 
     @Override
     @GetMapping("/current-user")
-    public ResponseEntity<CurrentUserResponse> getCurrentUser() {
+    public ResponseEntity<CurrentUserResponseDTO> getCurrentUser() {
         var user = authService.getCurrentUser();
         if (user != null) {
-            var response = new CurrentUserResponse(user.getUsername(),
-                                                   user.getAuthorities()
+            var response = new CurrentUserResponseDTO(user.getUsername(),
+                                                      user.getAuthorities()
                                                        .stream()
                                                        .map(GrantedAuthority::getAuthority)
                                                        .toList());
@@ -117,7 +117,7 @@ public class AuthController implements com.warehouse.server.controllers.AuthCont
 
     @Override
     @PostMapping("/refresh-token")
-    public ResponseEntity<LoginResponse> refreshToken(@CookieValue("refreshToken") String refreshToken) throws UnauthorizedException {
+    public ResponseEntity<LoginResponseDTO> refreshToken(@CookieValue("refreshToken") String refreshToken) throws UnauthorizedException {
         var body = authService.refreshToken(refreshToken);
         if (body != null) {
             return ResponseEntity.ok(body);

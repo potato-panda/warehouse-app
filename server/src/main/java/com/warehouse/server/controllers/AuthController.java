@@ -1,9 +1,9 @@
 package com.warehouse.server.controllers;
 
-import com.warehouse.server.dtos.requests.ChangePasswordRequest;
-import com.warehouse.server.dtos.requests.LoginRequest;
-import com.warehouse.server.dtos.responses.CurrentUserResponse;
-import com.warehouse.server.dtos.responses.LoginResponse;
+import com.warehouse.server.dtos.requests.auth.ChangePasswordRequestDTO;
+import com.warehouse.server.dtos.requests.auth.LoginRequestDTO;
+import com.warehouse.server.dtos.responses.auth.CurrentUserResponseDTO;
+import com.warehouse.server.dtos.responses.auth.LoginResponseDTO;
 import com.warehouse.server.exceptions.InvalidInputException;
 import com.warehouse.server.exceptions.NotFoundException;
 import com.warehouse.server.exceptions.UnauthorizedException;
@@ -12,19 +12,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
 public interface AuthController {
-    ResponseEntity<LoginResponse> login(HttpServletResponse response,
-                                        LoginRequest loginRequest,
-                                        BindingResult bindingResult) throws NotFoundException;
+    ResponseEntity<LoginResponseDTO> login(HttpServletResponse response,
+                                           LoginRequestDTO loginRequestDTO,
+                                           BindingResult bindingResult) throws NotFoundException;
 
     ResponseEntity<String> changePassword(HttpServletResponse response,
-                                          ChangePasswordRequest changePasswordRequest,
+                                          ChangePasswordRequestDTO changePasswordRequestDTO,
                                           BindingResult bindingResult) throws InvalidInputException,
             NotFoundException;
 
     ResponseEntity<Object> logout(String refreshToken);
 
-    ResponseEntity<CurrentUserResponse> getCurrentUser();
+    ResponseEntity<CurrentUserResponseDTO> getCurrentUser();
 
-    ResponseEntity<LoginResponse> refreshToken(String refreshToken) throws UnauthorizedException;
+    ResponseEntity<LoginResponseDTO> refreshToken(String refreshToken) throws UnauthorizedException;
 
 }

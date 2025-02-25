@@ -2,10 +2,10 @@ package com.warehouse.server.integrations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.warehouse.server.configs.TestConfig;
-import com.warehouse.server.dtos.requests.ChangePasswordRequest;
-import com.warehouse.server.dtos.requests.LoginRequest;
-import com.warehouse.server.dtos.responses.CurrentUserResponse;
-import com.warehouse.server.dtos.responses.LoginResponse;
+import com.warehouse.server.dtos.requests.auth.ChangePasswordRequestDTO;
+import com.warehouse.server.dtos.requests.auth.LoginRequestDTO;
+import com.warehouse.server.dtos.responses.auth.CurrentUserResponseDTO;
+import com.warehouse.server.dtos.responses.auth.LoginResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -38,7 +38,7 @@ public class UserAuthIntegrationTests {
     @Test
     public void testLogin() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
-        var          loginJson    = objectMapper.writeValueAsString(new LoginRequest("admin", "admin"));
+        var          loginJson    = objectMapper.writeValueAsString(new LoginRequestDTO("admin", "admin"));
 
         MvcResult result = mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
                                                                   .content(loginJson))
@@ -49,7 +49,7 @@ public class UserAuthIntegrationTests {
 
         assertThat(refreshToken).isNotNull();
 
-        LoginResponse parsedResponse = objectMapper.readValue(response.getContentAsString(), LoginResponse.class);
+        LoginResponseDTO parsedResponse = objectMapper.readValue(response.getContentAsString(), LoginResponseDTO.class);
 
         assertThat(parsedResponse.username()).isEqualTo("admin");
     }
@@ -57,7 +57,7 @@ public class UserAuthIntegrationTests {
     @Test
     public void testAuthenticatedEndpoint() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
-        var          loginJson    = objectMapper.writeValueAsString(new LoginRequest("admin", "admin"));
+        var          loginJson    = objectMapper.writeValueAsString(new LoginRequestDTO("admin", "admin"));
 
         MvcResult loginResult = mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
                                                                        .content(loginJson))
@@ -69,8 +69,8 @@ public class UserAuthIntegrationTests {
 
         assertThat(refreshToken).isNotNull();
 
-        LoginResponse parsedResponse = objectMapper.readValue(loginResultResponse.getContentAsString(),
-                                                              LoginResponse.class);
+        LoginResponseDTO parsedResponse = objectMapper.readValue(loginResultResponse.getContentAsString(),
+                                                                 LoginResponseDTO.class);
 
         assertThat(parsedResponse.username()).isEqualTo("admin");
 
@@ -84,11 +84,11 @@ public class UserAuthIntegrationTests {
                        .andReturn();
 
         var authenticatedResultResponse = authenticatedResult.getResponse();
-        CurrentUserResponse currentUserResponse =
+        CurrentUserResponseDTO currentUserResponseDTO =
                 objectMapper.readValue(authenticatedResultResponse.getContentAsString(),
-                                       CurrentUserResponse.class);
+                                       CurrentUserResponseDTO.class);
 
-        assertThat(currentUserResponse.username()).isEqualTo("admin");
+        assertThat(currentUserResponseDTO.username()).isEqualTo("admin");
 
     }
 
@@ -107,7 +107,7 @@ public class UserAuthIntegrationTests {
     @Test
     public void testChangePasswords() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
-        var          loginJson    = objectMapper.writeValueAsString(new LoginRequest("admin", "admin"));
+        var          loginJson    = objectMapper.writeValueAsString(new LoginRequestDTO("admin", "admin"));
 
         MvcResult loginResult = mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
                                                                        .content(loginJson))
@@ -119,16 +119,16 @@ public class UserAuthIntegrationTests {
 
         assertThat(refreshToken).isNotNull();
 
-        LoginResponse parsedResponse = objectMapper.readValue(loginResultResponse.getContentAsString(),
-                                                              LoginResponse.class);
+        LoginResponseDTO parsedResponse = objectMapper.readValue(loginResultResponse.getContentAsString(),
+                                                                 LoginResponseDTO.class);
 
         assertThat(parsedResponse.username()).isEqualTo("admin");
 
         Thread.sleep(1000);
 
-        var changePasswordJson = objectMapper.writeValueAsString(new ChangePasswordRequest("admin",
-                                                                                           "superadmin",
-                                                                                           "superadmin"));
+        var changePasswordJson = objectMapper.writeValueAsString(new ChangePasswordRequestDTO("admin",
+                                                                                              "superadmin",
+                                                                                              "superadmin"));
         var authHeader = new HttpHeaders();
         authHeader.put("Authorization", List.of("Bearer %s".formatted(parsedResponse.accessToken())));
 

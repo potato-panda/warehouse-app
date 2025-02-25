@@ -1,7 +1,7 @@
 package com.warehouse.server.services;
 
 import com.warehouse.server.configs.TestConfig;
-import com.warehouse.server.dtos.SuccessfulLogin;
+import com.warehouse.server.dtos.responses.auth.SuccessfulLoginDTO;
 import com.warehouse.server.entities.User;
 import com.warehouse.server.exceptions.NotFoundException;
 import com.warehouse.server.repositories.RefreshTokenRepository;
@@ -49,7 +49,7 @@ public class UserAuthServiceTests {
         String username = "admin";
         String password = "admin";
 
-        SuccessfulLogin login = authService.login(username, password);
+        SuccessfulLoginDTO login = authService.login(username, password);
 
         assertNotNull(login);
         assertEquals(username, login.user().getUsername());

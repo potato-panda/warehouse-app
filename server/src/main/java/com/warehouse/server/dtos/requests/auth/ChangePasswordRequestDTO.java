@@ -1,4 +1,4 @@
-package com.warehouse.server.dtos.requests;
+package com.warehouse.server.dtos.requests.auth;
 
 import com.warehouse.server.annotations.FieldsValueMatch;
 import jakarta.validation.constraints.NotNull;
@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotNull;
                 fieldMatch = "confirmPassword"
         )
 })
-public record ChangePasswordRequest(
+public record ChangePasswordRequestDTO(
         @NotNull(message = "Old Password can not be empty.") String oldPassword,
         @NotNull(message = "New Password can not be empty.") String password,
         @NotNull(message = "Password Confirmation can not be empty.") String confirmPassword) {
