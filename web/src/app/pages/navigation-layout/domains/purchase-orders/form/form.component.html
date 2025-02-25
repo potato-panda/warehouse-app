@@ -15,16 +15,16 @@
     <span class="column"
           tuiForm="m"
     >
-      <app-combo-box [searchFn]="searchCompanies"
-                     [stringify]="stringifyCompany"
-                     [valueFn]="toCompanyId"
+      <app-combo-box [searchFn]="searchSupplier"
+                     [stringify]="stringifySupplier"
+                     [valueFn]="toSupplierId"
                      class="textfield"
                      formControlName="supplierId"
                      label="Supplier" placeholder="Supplier"
                      tuiTextfieldSize="m"
       >
-        <ng-template #itemTemplate let-company>
-          <div class="name">{{ company.name }}</div>
+        <ng-template #itemTemplate let-supplier>
+          <div class="name">{{ supplier.name }}</div>
         </ng-template>
         <ng-template #loadingTemplate>
           <tui-loader></tui-loader>

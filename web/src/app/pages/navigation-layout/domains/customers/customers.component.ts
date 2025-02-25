@@ -12,22 +12,24 @@ import {
 } from '@taiga-ui/core';
 import {TuiFade, TuiStatus} from '@taiga-ui/kit';
 import {TuiMainComponent, TuiSubheaderCompactComponent} from '@taiga-ui/layout';
-import {CompaniesCollectionResourceResponse, CompanyService} from '../../../../services/company.service';
+import {CustomersCollectionResourceResponse, CustomersService} from '../../../../services/customers.service';
 import {RouterLink} from '@angular/router';
 import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
 import {Resource} from '../../../../interfaces/resource';
 import {TuiTable, TuiTablePagination, TuiTablePaginationEvent} from '@taiga-ui/addon-table';
 import {DeleteDialogComponent} from '../../../../components/delete-dialog/delete-dialog.component';
-import {Company, CompanyRelations} from '../../../../interfaces/entities/company';
+import {Customer, CustomerRelations} from '../../../../interfaces/entities/customer';
 import {PolymorpheusComponent} from '@taiga-ui/polymorpheus';
 import {
   BehaviorSubject,
   combineLatest,
+  concatMap,
   debounceTime,
   distinctUntilChanged,
   filter,
   map,
   Observable,
+  of,
   share,
   startWith,
   switchMap
@@ -35,7 +37,7 @@ import {
 import {tuiIsFalsy, tuiIsPresent, TuiLet} from '@taiga-ui/cdk';
 import {toObservable} from '@angular/core/rxjs-interop';
 
-type CompanyResourceList = Resource<Company, 'company', CompanyRelations>[];
+type CustomerResourceList = Resource<Customer, 'customer', CustomerRelations>[];
 
 @Component({
   selector: 'app-customers',
@@ -68,12 +70,12 @@ export class CustomersComponent {
   protected readonly page$ = new BehaviorSubject(0);
 
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
-  protected readonly sorter$ = new BehaviorSubject<'name' | 'address' | 'tin' | 'website' | null>(null);
+  protected readonly sorter$ = new BehaviorSubject<'name' | 'billingAddress' | 'tin' | 'website' | null>(null);
 
   protected readonly refresh$ = new BehaviorSubject<void>(undefined);
   protected nameSearch = model('');
   protected readonly search$ = toObservable(this.nameSearch);
-  protected columns = ['name', 'address', 'tin', 'website', 'actions'];
+  protected columns = ['name', 'billingAddress', 'tin', 'website', 'actions'];
   // any changes will trigger a data update, debounced of course
   protected readonly request$ = combineLatest([
     this.search$.pipe(
@@ -98,16 +100,16 @@ export class CustomersComponent {
     map((response) => response.page.totalElements),
     startWith(0),
   );
-  protected readonly data$: Observable<CompanyResourceList> = this.request$.pipe(
+  protected readonly data$: Observable<CustomerResourceList> = this.request$.pipe(
     filter(tuiIsPresent),
-    map((response) => response._embedded.companies),
+    map((response) => response._embedded.customers),
     map((items) => items.filter(tuiIsPresent)),
     startWith([]),
   );
   private readonly dialogs = inject(TuiDialogService);
   private readonly alerts = inject(TuiAlertService);
 
-  constructor(private companyService: CompanyService,
+  constructor(private customerService: CustomersService,
   ) {
   }
 
@@ -120,49 +122,48 @@ export class CustomersComponent {
     this.size$.next(size);
   };
 
-  protected showDeleteDialog({id, name}: Company): void {
+  protected showDeleteDialog({id, name}: Customer): void {
     this.dialogs.open<Observable<any>>(new PolymorpheusComponent(DeleteDialogComponent), {
       dismissible: true,
       closeable: true,
       label: 'Delete?',
       size: 'm',
       data: {
-        subject: name,
-        submit: () => this.companyService.deleteOne(id)
+        subject: name
       }
-    }).subscribe(obs => {
-      obs.subscribe({
-        error: err => {
-          this.alerts.open(context => {
-          }, {
-            appearance: 'negative',
-            label: `Error deleting '${name}'`
-          });
-        },
-        next: response => {
-          this.alerts.open(context => {
-          }, {
-            appearance: 'positive',
-            label: `Successfully deleted '${name}'`
-          }).subscribe();
-        },
-        complete: () => {
-          this.refreshData();
-        }
-      });
+    }).pipe(
+      concatMap(value => value
+        ? this.customerService.deleteOne(id)
+        : of())
+    ).subscribe({
+      error: err => {
+        this.alerts.open(context => {
+        }, {
+          appearance: 'negative',
+          label: `Error deleting '${name}'`
+        });
+      },
+      next: response => {
+        this.alerts.open(context => {
+        }, {
+          appearance: 'positive',
+          label: `Successfully deleted Customer '${name}'`
+        }).subscribe();
+        this.refreshData();
+      }
     });
   }
 
-  private getData(search?: string): Observable<CompaniesCollectionResourceResponse> {
+  private getData(search?: string): Observable<CustomersCollectionResourceResponse> {
     const pageable = {
       page: this.page$.value,
       size: this.size$.value,
       sort: this.sorter$.value ? this.sorter$.value + (this.direction$.value == 1 ? ',asc' : ',desc') : undefined
     };
     if (search && search.length && search.length > 0) {
-      return this.companyService.getPageByName(search, pageable).pipe(map(response => response));
+      return this.customerService.getPageByName(search, pageable).pipe(map(response => response));
     }
-    return this.companyService.getPage(pageable).pipe(map(response => response));
+    return this.customerService.getPage(pageable).pipe(map(response => response));
   }
 
 }

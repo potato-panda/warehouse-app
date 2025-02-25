@@ -91,7 +91,7 @@ export class FormComponent {
   protected productInfo$ = new BehaviorSubject<ProductsResourceResponse | null>(null);
   private readonly alerts = inject(TuiAlertService);
   private mappedProducts$ = new BehaviorSubject<ProductsCollectionResourceResponse['_embedded']['products']>([]);
-  private readonly searchCompanyRequest$ = new BehaviorSubject<string>('');
+  private readonly searchCustomerRequest$ = new BehaviorSubject<string>('');
   private resolvedProduct?: ProductsResourceResponse;
   private destroy$ = new Subject<void>();
 
@@ -168,7 +168,7 @@ export class FormComponent {
   }
 
   searchRequest(search?: string | null) {
-    this.searchCompanyRequest$.next(search ?? '');
+    this.searchCustomerRequest$.next(search ?? '');
 
     return this.searchProductResponse$;
   }
@@ -184,7 +184,7 @@ export class FormComponent {
     return this.productsService.getPage().pipe(map(response => response));
   };
 
-  protected searchProductResponse$: Observable<ProductsCollectionResourceResponse['_embedded']['products']> = this.searchCompanyRequest$.pipe(
+  protected searchProductResponse$: Observable<ProductsCollectionResourceResponse['_embedded']['products']> = this.searchCustomerRequest$.pipe(
     debounceTime(300),
     distinctUntilChanged(),
     switchMap((search) => {

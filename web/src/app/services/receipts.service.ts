@@ -32,8 +32,8 @@ export class ReceiptsService extends RestService {
     });
   }
 
-  getPageByCompany(name: string, pageable: Pageable = {page: 0}) {
-    return this.http.get<CollectionResourceResponse>(`${this.resourceEndpoint()}/search/byCompany`, {
+  getPageByCustomer(name: string, pageable: Pageable = {page: 0}) {
+    return this.http.get<CollectionResourceResponse>(`${this.resourceEndpoint()}/search/byCustomer`, {
       params: {...pageable, name},
     });
   }
@@ -44,8 +44,8 @@ export class ReceiptsService extends RestService {
     });
   }
 
-  getTablePageByCompany(name: string, pageable: Pageable = {page: 0}) {
-    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint()}/search/byCompany`, {
+  getTablePageByCustomer(name: string, pageable: Pageable = {page: 0}) {
+    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint()}/search/byCustomer`, {
       params: {...pageable, name, projection: 'withQuotation'},
     });
   }

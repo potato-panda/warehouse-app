@@ -1,5 +1,5 @@
 import {QuoteItem} from './quoteItem';
-import {Company} from './company';
+import {Supplier} from './supplier';
 
 export type CreatePurchaseOrder = Partial<Omit<PurchaseOrder, 'id'>>
 
@@ -17,7 +17,7 @@ export interface PurchaseOrder {
 }
 
 export interface PurchaseOrderDetail extends PurchaseOrder {
-  supplier: Company | null;
+  supplier: Supplier | null;
   quoteItems: QuoteItem[];
 }
 

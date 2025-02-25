@@ -10,7 +10,7 @@
   <hr>
 
   <tui-textfield iconStart="@tui.search">
-    <label tuiLabel>Search by Company Name</label>
+    <label tuiLabel>Search by Customer Name</label>
     <input [(ngModel)]="nameSearch"
            tuiTextfield
     />
@@ -33,8 +33,8 @@
       >
         <thead tuiThead>
         <tr tuiThGroup>
-          <th *tuiHead="'company'" tuiSortable tuiTh>Company</th>
-          <th *tuiHead="'companyTin'" tuiSortable tuiTh>Tin</th>
+          <th *tuiHead="'customer'" tuiSortable tuiTh>Customer</th>
+          <th *tuiHead="'customerTin'" tuiSortable tuiTh>Tin</th>
           <th *tuiHead="'receivedBy'" tuiSortable tuiTh>Received By</th>
           <th *tuiHead="'receivedDate'" tuiSortable tuiTh>Received Date</th>
           <th *tuiHead="'totalAmount'" tuiSortable tuiTh>Total Amount</th>
@@ -47,11 +47,11 @@
         >
         <tr *ngFor="let receipt of sortedReceipts" tuiTr>
           @let quotation = receipt.quotation;
-          @let company = quotation.company;
-          <td *tuiCell="'company'" tuiTd>
-            <ng-container *ngIf="company">{{ company.name }}</ng-container>
+          @let customer = quotation.customer;
+          <td *tuiCell="'customer'" tuiTd>
+            <ng-container *ngIf="customer">{{ customer.name }}</ng-container>
           </td>
-          <td *tuiCell="'companyTin'" tuiTd>{{ company.tin }}</td>
+          <td *tuiCell="'customerTin'" tuiTd>{{ customer.tin }}</td>
           <td *tuiCell="'paymentTerms'" tuiTd>{{ quotation.paymentTerms }}</td>
           <td *tuiCell="'receivedBy'" tuiTd>{{ receipt.receivedBy }}</td>
           <td *tuiCell="'receivedDate'" tuiTd>{{ receipt.receivedDate | date:'long' }}</td>

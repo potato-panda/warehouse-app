@@ -1,0 +1,113 @@
+<form (ngSubmit)="save()"
+      [formGroup]="form"
+      [style.margin-top.rem]="3"
+      [style.max-width.rem]="35"
+      tuiAppearance="floating"
+      tuiCardLarge
+      tuiForm="m"
+>
+  <form formGroupName="supplier" tuiForm="m">
+    <header tuiHeader><h2 tuiTitle>Supplier Details</h2></header>
+
+    <tui-textfield>
+      <label tuiLabel>Name<sup>*</sup></label>
+      <input formControlName="name" placeholder="Supplier name" tuiTextfield/>
+    </tui-textfield>
+    <tui-error [error]="[] | tuiFieldError | async" formControlName="name"/>
+  </form>
+
+  <form formGroupName="contacts" tuiForm="s">
+    <h2 tuiTitle><b>Contacts</b></h2>
+    <tui-scrollbar waIntersectionRoot>
+      <table [columns]="contactColumns" [size]="'s'" class="table" tuiTable>
+        <thead tuiThead>
+        <tr tuiThGroup>
+          <th *tuiHead="'name'" [sorter]="null" tuiTh>Name<sup>*</sup></th>
+          <th *tuiHead="'phone'" [sorter]="null" tuiTh>Phone<sup>*</sup></th>
+          <th *tuiHead="'email'" [sorter]="null" tuiTh>Email</th>
+          <th *tuiHead="'actions'" [sorter]="null" tuiTh>Actions</th>
+        </tr>
+        </thead>
+
+        <tbody tuiTbody>
+        <ng-container *ngFor="let control of contactsFormArray.controls; let i = index" [formGroupName]="i">
+          @let _d = control.value._d;
+          <tr *ngIf="control.value" tuiTr [ngClass]="{'new': !control.value.id}">
+            <td *tuiCell="'name'" tuiTd>
+              <tui-textfield><input formControlName="name" placeholder="Name" tuiTextfield/></tui-textfield>
+            </td>
+            <td *tuiCell="'phone'" tuiTd>
+              <tui-textfield><input formControlName="phone" placeholder="Phone number" tuiTextfield/></tui-textfield>
+            </td>
+            <td *tuiCell="'email'" tuiTd>
+              <tui-textfield><input formControlName="email" placeholder="Email address" tuiTextfield/></tui-textfield>
+            </td>
+            <td *tuiCell="'actions'" [style.text-align]="'center'" tuiTd>
+              <button (click)="removeContactRow(_d)"
+                      appearance="flat-destructive"
+                      size="xs"
+                      iconStart="@tui.trash"
+                      tuiButton
+                      tuiIconButton
+                      type="button"
+              ></button>
+            </td>
+          </tr>
+        </ng-container>
+        </tbody>
+      </table>
+    </tui-scrollbar>
+    <button (click)="addContactRow()" appearance="primary" size="s" tuiButton type="button">
+      Add Contact
+    </button>
+  </form>
+
+  <form formGroupName="addresses" tuiForm="s">
+    <h2 tuiTitle><b>Addresses</b></h2>
+    <tui-scrollbar waIntersectionRoot>
+      <table [columns]="addressColumns" [size]="'s'" class="table" tuiTable>
+        <thead tuiThead>
+        <tr tuiThGroup>
+          <th *tuiHead="'fullAddress'" [sorter]="null" tuiTh>Name<sup>*</sup></th>
+          <th *tuiHead="'actions'" [sorter]="null" tuiTh>Actions</th>
+        </tr>
+        </thead>
+
+        <tbody tuiTbody>
+        <ng-container *ngFor="let control of addressesFormArray.controls; let i = index" [formGroupName]="i">
+          @let _d = control.value._d;
+          <tr *ngIf="control.value" tuiTr [ngClass]="{'new': !control.value.id}">
+            <td *tuiCell="'fullAddress'" tuiTd>
+              <tui-textfield>
+                <input formControlName="fullAddress" placeholder="Full Address" tuiTextfield/>
+              </tui-textfield>
+            </td>
+            <td *tuiCell="'actions'" [style.text-align]="'center'" tuiTd>
+              <button (click)="removeAddressRow(_d)"
+                      appearance="flat-destructive"
+                      size="xs"
+                      iconStart="@tui.trash"
+                      tuiButton
+                      tuiIconButton
+                      type="button"
+              ></button>
+            </td>
+          </tr>
+        </ng-container>
+        </tbody>
+      </table>
+    </tui-scrollbar>
+    <button (click)="addAddressRow()" appearance="primary" size="s" tuiButton type="button">
+      Add Address
+    </button>
+  </form>
+
+  <footer class="footer">
+    <button [disabled]="form.invalid || inProgress" tuiButton type="submit">
+      Save
+    </button>
+    <button [routerLink]="'..'" appearance="flat" tuiButton type="button">
+      Back
+    </button>
+  </footer>
+</form>

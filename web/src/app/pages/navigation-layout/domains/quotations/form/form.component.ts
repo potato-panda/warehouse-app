@@ -34,7 +34,7 @@ import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
 import {TuiCardLarge, TuiForm, TuiHeader} from '@taiga-ui/layout';
 import {TuiFieldErrorPipe, TuiInputNumber} from '@taiga-ui/kit';
 import {QuotationService, QuotationsTableResourceResponse} from '../../../../../services/quotation.service';
-import {CompaniesSummaryResourceResponse, CompanyService} from '../../../../../services/company.service';
+import {CustomersSummaryResourceResponse, CustomersService} from '../../../../../services/customers.service';
 import {ComboBoxComponent} from '../../../../../components/combo-box/combo-box.component';
 import {WaIntersectionObserver} from '@ng-web-apis/intersection-observer';
 import {TuiTable} from '@taiga-ui/addon-table';
@@ -98,7 +98,7 @@ export class FormComponent implements OnInit {
       id: new FormControl<string | number | null | undefined>(''),
       paymentTerms: new FormControl<string | null | undefined>(''),
       shippingAddress: new FormControl<string | null | undefined>(''),
-      companyId: new FormControl<string | number | null>(null),
+      customerId: new FormControl<string | number | null>(null),
     }),
     quoteItems: new FormArray<FormGroup<QuoteItemRow>>([])
   });
@@ -109,14 +109,14 @@ export class FormComponent implements OnInit {
   private readonly alerts = inject(TuiAlertService);
   private mappedProducts$ = new BehaviorSubject<Record<string | number, Product[]>>({});
   private readonly searchProductRequest$ = new Subject<{ index: number, search: string }>();
-  private readonly searchCompanyRequest$ = new BehaviorSubject('');
-  private mappedCompanies$ = new BehaviorSubject<CompaniesSummaryResourceResponse[]>([]);
-  private resolvedCompany$ = new BehaviorSubject<CompaniesSummaryResourceResponse | null>(null);
+  private readonly searchCustomerRequest$ = new BehaviorSubject('');
+  private mappedCustomers$ = new BehaviorSubject<CustomersSummaryResourceResponse[]>([]);
+  private resolvedCustomer$ = new BehaviorSubject<CustomersSummaryResourceResponse | null>(null);
   private resolvedProducts$ = new BehaviorSubject<Record<string, Product | null>>({});
 
   constructor(private route: ActivatedRoute,
               private router: Router,
-              private companiesService: CompanyService,
+              private customersService: CustomersService,
               private quotationsService: QuotationService,
               private quoteItemsService: QuoteItemService,
               private productsService: ProductsService,
@@ -134,15 +134,15 @@ export class FormComponent implements OnInit {
   ngOnInit() {
     this.route.data.subscribe((data) => {
       if (data['resolved']) {
-        const {quotation, company} = this.route.snapshot.data['resolved'] as ResolvedData;
+        const {quotation, customer} = this.route.snapshot.data['resolved'] as ResolvedData;
 
-        this.resolvedCompany$.next(company);
-        company && this.mappedCompanies$.next([company]);
+        this.resolvedCustomer$.next(customer);
+        customer && this.mappedCustomers$.next([customer]);
 
         this.form.patchValue({
           quotation: {
             ...quotation,
-            companyId: company?.id ?? null
+            customerId: customer?.id ?? null
           },
         });
 
@@ -183,8 +183,7 @@ export class FormComponent implements OnInit {
     });
   }
 
-  protected toCompanyId: (item: CompaniesSummaryResourceResponse) => string = item => {
-    // console.log('extractCompanyValue',item)
+  protected toCustomerId: (item: CustomersSummaryResourceResponse) => string = item => {
     return item.id.toString() ?? '';
   };
 
@@ -245,23 +244,23 @@ export class FormComponent implements OnInit {
     let quoteItemRequests = [];
 
     if (quotationForm?.dirty && quotationForm.valid) {
-      const companyControl = this.form.get('quotation.companyId');
+      const customerControl = this.form.get('quotation.customerId');
       const {paymentTerms, shippingAddress, id} = quotationData;
       if (id) {
         quotationRequest = this.quotationsService.updateOne({
           paymentTerms, shippingAddress, id
         })
           .pipe(mergeMap(quotationResponse =>
-            companyControl?.value && companyControl.dirty && companyControl.valid
-              ? this.quotationsService.addCompany(quotationResponse.id as string, companyControl?.value).pipe(mergeMap(() => of(quotationResponse)))
+            customerControl?.value && customerControl.dirty && customerControl.valid
+              ? this.quotationsService.addCustomer(quotationResponse.id as string, customerControl?.value).pipe(mergeMap(() => of(quotationResponse)))
               : of(quotationResponse)));
       } else {
         quotationRequest = this.quotationsService.createOne({
           paymentTerms, shippingAddress
         })
           .pipe(mergeMap(quotationResponse =>
-            companyControl?.value
-              ? this.quotationsService.addCompany(quotationResponse.id as string, companyControl?.value).pipe(mergeMap(() => of(quotationResponse)))
+            customerControl?.value
+              ? this.quotationsService.addCustomer(quotationResponse.id as string, customerControl?.value).pipe(mergeMap(() => of(quotationResponse)))
               : of(quotationResponse)));
       }
     } else {
@@ -332,8 +331,8 @@ export class FormComponent implements OnInit {
     });
   }
 
-  protected stringifyCompany = (companyId?: string | number) => {
-    return companyId ? (this.mappedCompanies$.value.filter(c => c.id === Number(companyId))?.[0])?.name ?? '' : '';
+  protected stringifyCustomer = (customerId?: string | number) => {
+    return customerId ? (this.mappedCustomers$.value.filter(c => c.id === Number(customerId))?.[0])?.name ?? '' : '';
   };
 
   protected stringifyProduct = (_d: string, id?: string | number | null) => (productId?: string | number) => {
@@ -363,20 +362,20 @@ export class FormComponent implements OnInit {
     );
   };
 
-  protected searchCompanies: (search: string) => Observable<CompaniesSummaryResourceResponse[]>
+  protected searchCustomers: (search: string) => Observable<CustomersSummaryResourceResponse[]>
     = (search: string) => {
-    let results: Observable<CompaniesSummaryResourceResponse[]>;
+    let results: Observable<CustomersSummaryResourceResponse[]>;
     if (search && search.length && search.length > 0) {
-      results = this.companiesService.getPageByName(search).pipe(map(response => response._embedded.companies));
+      results = this.customersService.getPageByName(search).pipe(map(response => response._embedded.customers));
     } else {
-      results = this.companiesService.getPage().pipe(map(response => response._embedded.companies));
+      results = this.customersService.getPage().pipe(map(response => response._embedded.customers));
     }
     return results.pipe(
-      withLatestFrom(this.resolvedCompany$),
+      withLatestFrom(this.resolvedCustomer$),
       mergeMap(([response, resolved]) => {
-        const uniqueCompanies = UniqueId.filter(resolved ? [resolved, ...response] : [...response]);
-        this.mappedCompanies$.next(uniqueCompanies);
-        return of(uniqueCompanies);
+        const uniqueCustomers = UniqueId.filter(resolved ? [resolved, ...response] : [...response]);
+        this.mappedCustomers$.next(uniqueCustomers);
+        return of(uniqueCustomers);
       }),
       startWith([]),
     );

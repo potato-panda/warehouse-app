@@ -98,12 +98,12 @@ export class QuotationComponent {
   protected readonly page$ = new BehaviorSubject(0);
 
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
-  protected readonly sorter$ = new BehaviorSubject<'company' | 'paymentTerms' | 'shippingAddress' | 'quotationDate' | 'receipt' | 'totalAmount' | null>(null);
+  protected readonly sorter$ = new BehaviorSubject<'customer' | 'paymentTerms' | 'shippingAddress' | 'quotationDate' | 'receipt' | 'totalAmount' | null>(null);
 
   protected readonly refresh$ = new BehaviorSubject<void>(undefined);
   protected nameSearch = model('');
   protected readonly search$ = toObservable(this.nameSearch);
-  protected columns = ['company', 'paymentTerms', 'shippingAddress', 'quotationDate', 'receipt', 'totalAmount', 'actions'];
+  protected columns = ['customer', 'paymentTerms', 'shippingAddress', 'quotationDate', 'receipt', 'totalAmount', 'actions'];
 
   protected readonly request$ = combineLatest([
     this.search$.pipe(
@@ -148,8 +148,8 @@ export class QuotationComponent {
     this.size$.next(size);
   };
 
-  protected showDeleteDialog({id, company}: QuotationTable): void {
-    const subject = company?.name;
+  protected showDeleteDialog({id, customer}: QuotationTable): void {
+    const subject = customer?.name;
     this.dialogs.open<Observable<any>>(new PolymorpheusComponent(DeleteDialogComponent), {
       dismissible: true,
       closeable: true,
@@ -189,7 +189,7 @@ export class QuotationComponent {
       sort: this.sorter$.value ? this.sorter$.value + (this.direction$.value == 1 ? ',asc' : ',desc') : undefined
     };
     if (search && search.length && search.length > 0) {
-      return this.quotationsService.getTablePageByCompany(search, pageable).pipe(map(response => response));
+      return this.quotationsService.getTablePageByCustomer(search, pageable).pipe(map(response => response));
     }
     return this.quotationsService.getTablePage(pageable).pipe(map(response => response));
   }

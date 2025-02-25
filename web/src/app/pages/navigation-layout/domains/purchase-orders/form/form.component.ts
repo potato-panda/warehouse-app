@@ -49,7 +49,6 @@ import {
   withLatestFrom
 } from 'rxjs';
 import {Product} from '../../../../../interfaces/entities/product';
-import {CompaniesCollectionResourceResponse, CompanyService} from '../../../../../services/company.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {
   QuoteItemResourceResponse,
@@ -59,10 +58,10 @@ import {
 import {ProductsResourceResponse, ProductsService} from '../../../../../services/products.service';
 import UniqueId from '../../../../../utils/unique-id';
 import {ResolvedData} from './details.resolver';
-import {Company} from '../../../../../interfaces/entities/company';
 import {PurchaseOrderDetail} from '../../../../../interfaces/entities/purchase-order';
 import {PurchaseOrdersService} from '../../../../../services/purchase-orders.service';
-import {resourceEndpoints} from '../../../../../services/resource-endpoints';
+import {Supplier} from '../../../../../interfaces/entities/supplier';
+import {SuppliersCollectionResourceResponse, SuppliersService} from '../../../../../services/suppliers.service';
 
 interface QuoteItemRow {
   _d: FormControl<string>,
@@ -141,14 +140,14 @@ export class FormComponent {
   private readonly alerts = inject(TuiAlertService);
   private mappedProducts$ = new BehaviorSubject<Record<string | number, Product[]>>({});
   private readonly searchProductRequest$ = new Subject<{ index: number, search: string }>();
-  private readonly searchCompanyRequest$ = new BehaviorSubject('');
-  private mappedCompanies$ = new BehaviorSubject<Company[]>([]);
-  private resolvedCompany$ = new BehaviorSubject<Company | null>(null);
+  private readonly searchSupplierRequest$ = new BehaviorSubject('');
+  private mappedSuppliers$ = new BehaviorSubject<Supplier[]>([]);
+  private resolvedSupplier$ = new BehaviorSubject<Supplier | null>(null);
   private resolvedProducts$ = new BehaviorSubject<Record<string, Product | null>>({});
 
   constructor(private route: ActivatedRoute,
               private router: Router,
-              private companiesService: CompanyService,
+              private suppliersService: SuppliersService,
               private purchaseOrdersService: PurchaseOrdersService,
               private quoteItemsService: QuoteItemService,
               private productsService: ProductsService,
@@ -169,8 +168,8 @@ export class FormComponent {
         const {purchaseOrder} = this.route.snapshot.data['resolved'] as ResolvedData;
         const supplier = purchaseOrder?.supplier;
 
-        this.resolvedCompany$.next(supplier);
-        supplier && this.mappedCompanies$.next([supplier]);
+        this.resolvedSupplier$.next(supplier);
+        supplier && this.mappedSuppliers$.next([supplier]);
 
         this.form.patchValue({
           purchaseOrder: {
@@ -212,8 +211,7 @@ export class FormComponent {
     });
   }
 
-  protected toCompanyId: (item: Company) => string = item => {
-    // console.log('extractCompanyValue',item)
+  protected toSupplierId: (item: Supplier) => string = item => {
     return item?.id.toString() ?? '';
   };
 
@@ -357,8 +355,8 @@ export class FormComponent {
     });
   }
 
-  protected stringifyCompany = (companyId?: string | number) => {
-    return companyId ? (this.mappedCompanies$.value.filter(c => c.id === Number(companyId))?.[0])?.name ?? '' : '';
+  protected stringifySupplier = (supplierId?: string | number) => {
+    return supplierId ? (this.mappedSuppliers$.value.filter(c => c.id === Number(supplierId))?.[0])?.name ?? '' : '';
   };
 
   protected stringifyProduct = (_d: string, id?: string | number | null) => (productId?: string | number) => {
@@ -387,21 +385,21 @@ export class FormComponent {
     );
   };
 
-  protected searchCompanies: (search: string) => Observable<Company[]>
+  protected searchSupplier: (search: string) => Observable<Supplier[]>
     = (search: string) => {
-    let results: Observable<CompaniesCollectionResourceResponse>;
+    let results: Observable<SuppliersCollectionResourceResponse>;
     if (search?.length > 0) {
-      results = this.companiesService.getPageByName(search);
+      results = this.suppliersService.getPageByName(search);
     } else {
-      results = this.companiesService.getPage();
+      results = this.suppliersService.getPage();
     }
     return results.pipe(
-      map(response => response._embedded.companies),
-      withLatestFrom(this.resolvedCompany$),
+      map(response => response._embedded.suppliers),
+      withLatestFrom(this.resolvedSupplier$),
       mergeMap(([response, resolved]) => {
-        const uniqueCompanies = UniqueId.filter(resolved ? [resolved, ...response] : response);
-        this.mappedCompanies$.next(uniqueCompanies);
-        return of(uniqueCompanies);
+        const uniqueSuppliers = UniqueId.filter(resolved ? [resolved, ...response] : response);
+        this.mappedSuppliers$.next(uniqueSuppliers);
+        return of(uniqueSuppliers);
       }),
       startWith([]),
     );

@@ -1,5 +1,5 @@
-import {Inject, Injectable} from '@angular/core';
-import {BehaviorSubject, of, switchMap} from 'rxjs';
+import {Inject, Injectable, signal} from '@angular/core';
+import {BehaviorSubject, catchError, of, switchMap, throwError} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../environments/environment';
 import {LoginResponse} from '../interfaces/login-response';
@@ -23,6 +23,8 @@ export class AuthService {
   user: User | null = null;
   isAuthenticated = new BehaviorSubject(this.hasToken());
 
+  isAuthenticating = signal<boolean>(false);
+
   constructor(private http: HttpClient,
               private router: Router,
               @Inject(DOCUMENT) _document: Document) {
@@ -31,9 +33,11 @@ export class AuthService {
   }
 
   loadAuth() {
+    this.isAuthenticating.set(true);
     const currentUser = this.localStorage?.getItem(this.currentUserKey);
     if (currentUser) this.user = JSON.parse(currentUser);
     this.isAuthenticated.next(this.hasToken());
+    this.isAuthenticating.set(false);
   }
 
   hasToken() {
@@ -41,6 +45,7 @@ export class AuthService {
   }
 
   login(username: string, password: string) {
+    this.isAuthenticating.set(true);
     return this.http.post<LoginResponse>(environment.baseApiUrl + '/auth/login', {
       username,
       password
@@ -57,8 +62,13 @@ export class AuthService {
         }));
 
         this.isAuthenticated.next(true);
+        this.isAuthenticating.set(false);
 
         return of(true);
+      }),
+      catchError((err, caught) => {
+        this.isAuthenticating.set(false);
+        return throwError(() => err);
       })
     );
   }

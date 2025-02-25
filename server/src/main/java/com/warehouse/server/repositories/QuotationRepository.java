@@ -10,6 +10,6 @@ import org.springframework.data.rest.core.annotation.RestResource;
 
 @RepositoryRestResource(collectionResourceRel = "quotations", path = "quotations")
 public interface QuotationRepository extends JpaRepository<Quotation, Long> {
-    @RestResource(path = "byCompany", rel = "byCompany")
-    Page<Quotation> getQuotationsByCompany_NameContainingIgnoreCase(@Param("name") String name, Pageable pageable);
+    @RestResource(path = "byCustomer", rel = "byCustomer")
+    Page<Quotation> getQuotationsByCustomer_NameContainingIgnoreCase(@Param("name") String name, Pageable pageable);
 }

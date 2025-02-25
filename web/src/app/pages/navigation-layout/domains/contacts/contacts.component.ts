@@ -51,7 +51,7 @@ import {Contact, ContactRelations} from '../../../../interfaces/entities/contact
 import {ContactsCollectionResourceResponse, ContactsService} from '../../../../services/contacts.service';
 import {RouterLink} from '@angular/router';
 
-type CompanyResourceList = Resource<Contact, 'contact', ContactRelations>[];
+type CustomerResourceList = Resource<Contact, 'contact', ContactRelations>[];
 
 @Component({
   selector: 'app-contacts',
@@ -123,7 +123,7 @@ export class ContactsComponent {
     map((response) => response.page.totalElements),
     startWith(0),
   );
-  protected readonly data$: Observable<CompanyResourceList> = this.request$.pipe(
+  protected readonly data$: Observable<CustomerResourceList> = this.request$.pipe(
     filter(tuiIsPresent),
     map((response) => response._embedded.contacts),
     map((items) => items.filter(tuiIsPresent)),

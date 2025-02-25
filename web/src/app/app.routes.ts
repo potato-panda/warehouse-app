@@ -8,7 +8,7 @@ import {inject} from '@angular/core';
 import {AuthService} from './services/auth.service';
 import {DomainsComponent} from './pages/navigation-layout/domains/domains.component';
 import {
-  detailsResolver as companyDetailsResolver
+  detailsResolver as customerDetailsResolver
 } from './pages/navigation-layout/domains/customers/form/details.resolver';
 import {
   detailsResolver as contactDetailsResolver,
@@ -25,11 +25,15 @@ import {
 import {
   detailsResolver as purchaseOrderDetailsResolver
 } from './pages/navigation-layout/domains/purchase-orders/form/details.resolver';
+import {
+  detailsResolver as supplierDetailsResolver
+} from './pages/navigation-layout/domains/suppliers/form/details.resolver';
 import {ContactsComponent} from './pages/navigation-layout/domains/contacts/contacts.component';
 import {FormComponent as ContactsFormComponent} from './pages/navigation-layout/domains/contacts/form/form.component';
 import {FormComponent as CustomerFormComponent} from './pages/navigation-layout/domains/customers/form/form.component';
 import {FormComponent as ProductsFormComponent} from './pages/navigation-layout/domains/products/form/form.component';
 import {FormComponent as InventoryFormComponent} from './pages/navigation-layout/domains/inventory/form/form.component';
+import {FormComponent as SupplierFormComponent} from './pages/navigation-layout/domains/suppliers/form/form.component';
 import {
   FormComponent as QuotationFormComponent
 } from './pages/navigation-layout/domains/quotations/form/form.component';
@@ -41,6 +45,7 @@ import {InventoryComponent} from './pages/navigation-layout/domains/inventory/in
 import {QuotationComponent} from './pages/navigation-layout/domains/quotations/quotation.component';
 import {PurchaseOrdersComponent} from './pages/navigation-layout/domains/purchase-orders/purchase-orders.component';
 import {ReceiptsComponent} from './pages/navigation-layout/domains/receipts/receipts.component';
+import {SuppliersComponent} from './pages/navigation-layout/domains/suppliers/suppliers.component';
 
 export const routes: Routes = [
   {
@@ -78,10 +83,37 @@ export const routes: Routes = [
           },
           {
             resolve: {
-              resolved: companyDetailsResolver
+              resolved: customerDetailsResolver
             },
             path: ':id',
             component: CustomerFormComponent
+          }
+        ]
+      },
+      {
+        path: 'suppliers',
+        component: DomainsComponent,
+        children: [
+          {
+            path: '',
+            data: {
+              breadcrumb: 'Suppliers'
+            },
+            component: SuppliersComponent
+          },
+          {
+            path: 'create',
+            data: {
+              breadcrumb: 'Create'
+            },
+            component: SupplierFormComponent
+          },
+          {
+            resolve: {
+              resolved: supplierDetailsResolver
+            },
+            path: ':id',
+            component: SupplierFormComponent
           }
         ]
       },

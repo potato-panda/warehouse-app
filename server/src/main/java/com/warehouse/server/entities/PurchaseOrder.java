@@ -12,8 +12,8 @@ public class PurchaseOrder {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "company_id")
-    private Company supplier;
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
 
     @Column(name = "prepared_by")
     private String preparedBy;
@@ -41,11 +41,11 @@ public class PurchaseOrder {
         this.id = id;
     }
 
-    public Company getSupplier() {
+    public Supplier getSupplier() {
         return supplier;
     }
 
-    public void setSupplier(Company supplier) {
+    public void setSupplier(Supplier supplier) {
         this.supplier = supplier;
     }
 
@@ -103,29 +103,15 @@ public class PurchaseOrder {
     }
 
     @Projection(name = "detail", types = {PurchaseOrder.class})
-    public interface PurchaseOrderDetailProjection {
-        Long getId();
-
-        Company getSupplier();
-
-        String getPreparedBy();
-
-        String getCheckedBy();
-
-        String getApprovedBy();
-
-        String getReceivedBy();
-
+    public interface PurchaseOrderDetailProjection extends PurchaseOrderTableProjection {
         Collection<QuoteItem> getQuoteItems();
-
-        Double getTotalAmount();
     }
 
     @Projection(name = "table", types = {PurchaseOrder.class})
     public interface PurchaseOrderTableProjection {
         Long getId();
 
-        Company getSupplier();
+        Supplier getSupplier();
 
         String getPreparedBy();
 

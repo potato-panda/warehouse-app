@@ -85,9 +85,9 @@ export class PurchaseOrdersService extends RestService {
     return this.http.delete(`${this.resourceEndpoint(id)}`);
   }
 
-  addSupplier(id: string, companyId: string | number | string[] | number []) {
+  addSupplier(id: string, supplierId: string | number | string[] | number []) {
     return this.http.put<ResourceResponse>(`${this.resourceEndpoint(id)}/supplier`,
-      IdToHrefList.transform(companyId, resourceEndpoints.company()), {
+      IdToHrefList.transform(supplierId, resourceEndpoints.customers()), {
         headers: new HttpHeaders({
           'Content-Type': 'text/uri-list',
         })

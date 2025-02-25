@@ -1,23 +1,56 @@
 import {Component, inject} from '@angular/core';
-import {AsyncPipe} from '@angular/common';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {AsyncPipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import {FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   TuiAlertService,
   TuiAppearance,
   TuiButton,
   TuiError,
   TuiLabel,
+  TuiScrollbar,
   TuiTextfieldComponent,
   TuiTextfieldDirective,
   TuiTitle
 } from '@taiga-ui/core';
 import {TuiCardLarge, TuiForm, TuiHeader} from '@taiga-ui/layout';
 import {TuiFieldErrorPipe} from '@taiga-ui/kit';
-import {CompaniesSummaryResourceResponse, CompanyService} from '../../../../../services/company.service';
+import {CustomersService, CustomersSummaryResourceResponse} from '../../../../../services/customers.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {ContactsResourceResponse, ContactsService} from '../../../../../services/contacts.service';
+import {ContactsService} from '../../../../../services/contacts.service';
 import {ResolvedData} from './details.resolver';
-import {concatMap, forkJoin, map, mergeMap, Observable, of} from 'rxjs';
+import {Contact} from '../../../../../interfaces/entities/contact';
+import {WaIntersectionRoot} from '@ng-web-apis/intersection-observer';
+import {
+  TuiTable,
+  TuiTableCell,
+  TuiTableDirective,
+  TuiTableTbody,
+  TuiTableTd,
+  TuiTableTh,
+  TuiTableThead,
+  TuiTableThGroup,
+  TuiTableTr
+} from '@taiga-ui/addon-table';
+import {TuiTextfieldControllerModule} from '@taiga-ui/legacy';
+import {Address} from '../../../../../interfaces/entities/address';
+import {CustomerCreateRequest, CustomerUpdateRequest} from '../../../../../interfaces/entities/customer';
+import {concatMap, of} from 'rxjs';
+import {AddressService} from '../../../../../services/address.service';
+
+type ContactFormRow = {
+  _d: FormControl<string>,
+  id: FormControl<string | number | null>,
+  name: FormControl<string>,
+  phone: FormControl<string>,
+  email: FormControl<string | null>
+};
+type ContactFormArray = FormArray<FormGroup<ContactFormRow>>;
+type ShippingAddressRow = {
+  _d: FormControl<string>,
+  id: FormControl<string | number | null>,
+  fullAddress: FormControl<string>,
+};
+type ShippingAddressesFormArray = FormArray<FormGroup<ShippingAddressRow>>;
 
 @Component({
   selector: 'app-form',
@@ -32,152 +65,114 @@ import {concatMap, forkJoin, map, mergeMap, Observable, of} from 'rxjs';
     TuiForm,
     TuiHeader,
     TuiLabel,
+    TuiTableCell,
+    TuiTableDirective,
+    TuiTableTbody,
+    TuiTableTd,
+    TuiTableTh,
+    TuiTableThGroup,
+    TuiTableThead,
+    TuiTableTr,
     TuiTextfieldComponent,
     TuiTextfieldDirective,
     TuiTitle,
-    RouterLink
+    RouterLink,
+    TuiScrollbar,
+    WaIntersectionRoot,
+    TuiTable,
+    NgIf,
+    NgForOf,
+    TuiTextfieldControllerModule,
+    NgClass
   ],
   templateUrl: './form.component.html',
   styleUrl: './form.component.scss'
 })
 export class FormComponent {
-  protected company?: CompaniesSummaryResourceResponse;
   protected inProgress = false;
-  protected readonly companyForm = new FormGroup({
-    name: new FormControl('', Validators.required),
-    address: new FormControl(''),
-    billingAddress: new FormControl(''),
-    tin: new FormControl(''),
-    website: new FormControl(''),
+  protected readonly customerForm = new FormGroup({
+    id: new FormControl<string | number | null>(null),
+    name: new FormControl<string>('', Validators.required),
+    billingAddress: new FormControl<string>('', Validators.required),
+    tin: new FormControl<string | null>(''),
+    website: new FormControl<string | null>(''),
   });
-  protected readonly contactForm = new FormGroup({
-    name: new FormControl('', Validators.required),
-    phone: new FormControl(''),
-    email: new FormControl(''),
+  protected readonly form = new FormGroup({
+    customer: this.customerForm,
+    contacts: new FormArray<FormGroup>([]),
+    shippingAddresses: new FormArray<FormGroup>([])
   });
-  protected readonly mainForm = new FormGroup({
-    company: this.companyForm,
-    contact: this.contactForm
-  });
-  private contact?: ContactsResourceResponse;
+  protected customer?: CustomersSummaryResourceResponse;
+  protected contactColumns = ['name', 'phone', 'email', 'actions'];
+  protected shippingAddressColumns = ['fullAddress', 'actions'];
+
   private readonly alerts = inject(TuiAlertService);
 
   constructor(private route: ActivatedRoute,
               private router: Router,
-              private companyService: CompanyService,
+              private customerService: CustomersService,
               private contactsService: ContactsService,
+              private addressService: AddressService,
   ) {
+  }
+
+  get contactsFormArray() {
+    return this.form.get('contacts') as ContactFormArray;
+  }
+
+  get shippingAddressesFormArray() {
+    return this.form.get('shippingAddresses') as ShippingAddressesFormArray;
   }
 
   ngOnInit() {
     this.route.data.subscribe((data) => {
-      if (data?.['resolved']) {
-        const {company, contact} = data['resolved'] as ResolvedData;
-        if (company) {
-          this.company = company;
-        }
-        if (contact) {
-          this.contact = contact;
-        }
+      const {customer, contacts, shippingAddresses} = data['resolved'] as ResolvedData;
+      this.customer = customer;
+
+      this.customerForm.patchValue(customer ?? {});
+      for (const contact of contacts) {
+        this.addContactRow(contact);
       }
 
-      this.companyForm.patchValue(this.company ?? {});
-      this.contactForm.patchValue(this.contact ?? {});
+      for (const address of shippingAddresses) {
+        this.addShippingAddressRow(address);
+      }
+
+      this.form.updateValueAndValidity();
     });
   }
 
-  save(back?: boolean) {
+  save() {
     this.inProgress = true;
-    const companyForm = this.mainForm.get('company');
-    const contactForm = this.mainForm.get('contact');
+    const customerForm = this.form.get('customer');
+    const contactsForm = this.contactsFormArray;
+    const shippingAddressesForm = this.shippingAddressesFormArray;
 
-    const updatedCompany = {
-      id: this.company?.id,
-      ...companyForm?.value,
-    };
-    const updatedContact = {
-      id: this.contact?.id,
-      ...contactForm?.value,
-    };
+    let request;
 
-    new Observable<{ company: CompaniesSummaryResourceResponse, contact: ContactsResourceResponse }>(subscriber => {
-      const requests: Record<'company' | 'contact', Observable<any>> = {} as any;
-
-      if (companyForm?.dirty) {
-        requests['company'] = !updatedCompany.id
-          ? this.companyService.createOne(updatedCompany)
-          : this.companyService.updateOne(updatedCompany);
-      }
-
-      if (contactForm?.dirty) {
-        requests['contact'] = !updatedContact.id
-          ? this.contactsService.createOne(updatedContact)
-          : this.contactsService.updateOne(updatedContact);
-      }
-
-      if (Object.keys(requests).length === 0) {
-        subscriber.complete();
-        return;
-      }
-
-      let saveProcess$: Observable<any>;
-
-      if (!updatedCompany.id) {
-        // Create company first, then contact
-        saveProcess$ = requests['company'].pipe(
-          concatMap(companySaveResponse => {
-            if (requests['contact']) {
-              return requests['contact'].pipe(
-                mergeMap(contactSaveResponse => {
-                  if ((contactSaveResponse || this.company) && !updatedContact.id) {
-                    return this.contactsService.updateRelation(
-                      contactSaveResponse?._links.resolvedQuotation$.href,
-                      companySaveResponse?._links.selfHrefFromId.href || this.company?._links.self.href
-                    ).pipe(
-                      map(() => ({company: companySaveResponse, contact: contactSaveResponse}))
-                    );
-                  }
-                  return of({company: companySaveResponse, contact: contactSaveResponse});
-                })
-              );
-            }
-            return of({company: companySaveResponse, contact: undefined});
-          })
-        );
+    if (this.form.dirty) {
+      const customer = {
+        ...customerForm!.value,
+        contacts: contactsForm.controls.filter(control => control.dirty && control.valid).map(control => control.value),
+        shippingAddresses: shippingAddressesForm.controls.filter(control => control.dirty && control.valid).map(control => control.value),
+      };
+      if (this.customer?.id && this.customerForm.dirty && this.customerForm.valid) {
+        request = this.customerService.update(customer as CustomerUpdateRequest);
       } else {
-        // Company already exists, update both at the same time
-        saveProcess$ = forkJoin(requests).pipe(
-          mergeMap(responseMap => {
-            const companySaveResponse = responseMap['company'];
-            const contactSaveResponse = responseMap['contact'];
-
-            if ((contactSaveResponse || this.company) && !updatedContact.id) {
-              return this.contactsService.updateRelation(
-                contactSaveResponse?._links.resolvedQuotation$.href,
-                companySaveResponse?._links.selfHrefFromId.href || this.company?._links.self.href
-              ).pipe(
-                map(() => ({company: companySaveResponse, contact: contactSaveResponse}))
-              );
-            }
-            return of({company: companySaveResponse, contact: contactSaveResponse});
-          })
-        );
+        request = this.customerService.create(customer as CustomerCreateRequest);
       }
-      saveProcess$.subscribe({
-        next: value => {
-          subscriber.next(value);
-          subscriber.complete();
-        }
-      });
-    }).subscribe({
+    }
+
+    request && request.pipe(concatMap(res => {
+      if (!res) throw Error('Error Response');
+      return of(res);
+    })).subscribe({
       error: err => {
         this.alerts.open(context => 'Please try again later.',
           {
             appearance: 'negative',
             label: 'Save failed'
-          }).subscribe(() => {
-          this.inProgress = false;
-        });
+          }).subscribe({complete: () => this.inProgress = false});
       },
       next: (value) => {
         this.alerts.open(context => {
@@ -185,18 +180,61 @@ export class FormComponent {
           {
             appearance: 'positive',
             label: 'Save successful!',
-          }).subscribe(() => {
-          this.inProgress = false;
-        });
+          }).subscribe({complete: () => this.inProgress = false});
 
-        if (back) {
-          this.router.navigate(['..'], {relativeTo: this.route}).then();
-        }
-        if (value?.company) {
-          this.router.navigate(['..', `${value.company.id}`], {relativeTo: this.route}).then();
-        }
+        this.router.navigate(['..'], {relativeTo: this.route}).then();
       },
       complete: () => this.inProgress = false
     });
+
+  }
+
+  protected addContactRow(contact?: Contact) {
+    const _d = 'id' + Math.random().toString(16).slice(2);
+    const row = new FormGroup({
+      _d: new FormControl(_d, {nonNullable: true}),
+      id: new FormControl(contact?.id ?? null,),
+      name: new FormControl(contact?.name ?? '', {validators: [Validators.required], nonNullable: true}),
+      phone: new FormControl(contact?.phone ?? '', {validators: [Validators.required], nonNullable: true}),
+      email: new FormControl(contact?.email ?? '', {validators: [Validators.email]}),
+    });
+    this.contactsFormArray.push(row);
+  }
+
+  protected removeContactRow(_d?: string) {
+    const index = this.contactsFormArray.controls.findIndex(fc => fc.value._d === _d);
+    if (index != -1) {
+      const id = this.contactsFormArray.controls[index]?.value?.id;
+      if (id) {
+        this.contactsService.deleteOne(id.toString()).subscribe();
+      }
+
+      this.contactsFormArray.removeAt(index);
+    }
+  }
+
+  protected addShippingAddressRow(address?: Address) {
+    const _d = 'id' + Math.random().toString(16).slice(2);
+    const row = new FormGroup({
+      _d: new FormControl(_d, {nonNullable: true}),
+      id: new FormControl(address?.id ?? null,),
+      fullAddress: new FormControl(address?.fullAddress ?? '', {
+        validators: [Validators.required],
+        nonNullable: true
+      }),
+    });
+    this.shippingAddressesFormArray.push(row);
+  }
+
+  protected removeShippingAddressRow(_d?: string) {
+    const index = this.shippingAddressesFormArray.controls.findIndex(fc => fc.value._d === _d);
+    if (index != -1) {
+      const id = this.shippingAddressesFormArray.controls[index]?.value?.id;
+      if (id) {
+        this.addressService.deleteOne(id.toString()).subscribe();
+      }
+
+      this.shippingAddressesFormArray.removeAt(index);
+    }
   }
 }

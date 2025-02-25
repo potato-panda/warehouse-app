@@ -3,8 +3,6 @@ package com.warehouse.server.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.rest.core.config.Projection;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -19,8 +17,8 @@ public class Quotation {
     private Collection<QuoteItem> quoteItems;
 
     @ManyToOne
-    @JoinColumn(name = "company_id")
-    private Company company;
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 
     //    users will manually input
     @Column(name = "payment_terms")
@@ -28,9 +26,10 @@ public class Quotation {
     private String paymentTerms;
 
     //    users will manually input
-    @Column(name = "shipping_address")
+    @OneToOne
+    @JoinColumn(name = "shipping_address")
     @NotNull
-    private String shippingAddress;
+    private Address shippingAddress;
 
     @Column(name = "quotation_date")
     @NotNull
@@ -42,70 +41,6 @@ public class Quotation {
     @Transient
     private Double totalAmount;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Collection<QuoteItem> getQuoteItems() {
-        return quoteItems;
-    }
-
-    public void setQuoteItems(Collection<QuoteItem> quoteItems) {
-        this.quoteItems = quoteItems;
-    }
-
-    public Company getCompany() {
-        return company;
-    }
-
-    public void setCompany(Company company) {
-        this.company = company;
-    }
-
-    public String getPaymentTerms() {
-        return paymentTerms;
-    }
-
-    public void setPaymentTerms(String paymentTerms) {
-        this.paymentTerms = paymentTerms;
-    }
-
-    public String getShippingAddress() {
-        return shippingAddress;
-    }
-
-    public void setShippingAddress(String shippingAddress) {
-        this.shippingAddress = shippingAddress;
-    }
-
-    public Timestamp getQuotationDate() {
-        return quotationDate;
-    }
-
-    public void setQuotationDate(Timestamp quotationDate) {
-        this.quotationDate = quotationDate;
-    }
-
-    public Receipt getReceipt() {
-        return receipt;
-    }
-
-    public void setReceipt(Receipt receipt) {
-        this.receipt = receipt;
-    }
-
-    public Double getTotalAmount() {
-        return totalAmount;
-    }
-
-    public void setTotalAmount(Double totalAmount) {
-        this.totalAmount = totalAmount;
-    }
-
     @PrePersist
     public void addQuotationDate() {
         quotationDate = new Timestamp(System.currentTimeMillis());
@@ -116,23 +51,47 @@ public class Quotation {
         this.totalAmount = getQuoteItems().stream().mapToDouble(QuoteItem::getTotalAmount).sum();
     }
 
-    @PreUpdate
-    public void blockIfReceiptExists() {
-        if (getReceipt() != null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                                              "You can't update this quotation. It is already paid.");
-        }
-    }
+    public Long getId() {return id;}
+
+    public void setId(Long id) {this.id = id;}
+
+    public Collection<QuoteItem> getQuoteItems() {return quoteItems;}
+
+    public void setQuoteItems(Collection<QuoteItem> quoteItems) {this.quoteItems = quoteItems;}
+
+    public Customer getCustomer() {return customer;}
+
+    public void setCustomer(Customer customer) {this.customer = customer;}
+
+    public String getPaymentTerms() {return paymentTerms;}
+
+    public void setPaymentTerms(String paymentTerms) {this.paymentTerms = paymentTerms;}
+
+    public Address getShippingAddress() {return shippingAddress;}
+
+    public void setShippingAddress(Address shippingAddress) {this.shippingAddress = shippingAddress;}
+
+    public Timestamp getQuotationDate() {return quotationDate;}
+
+    public void setQuotationDate(Timestamp quotationDate) {this.quotationDate = quotationDate;}
+
+    public Receipt getReceipt() {return receipt;}
+
+    public void setReceipt(Receipt receipt) {this.receipt = receipt;}
+
+    public Double getTotalAmount() {return totalAmount;}
+
+    public void setTotalAmount(Double totalAmount) {this.totalAmount = totalAmount;}
 
     @Projection(name = "inReceipt", types = {Quotation.class})
     public interface QuotationInReceiptProjection {
         Long getId();
 
-        Company.CompanySummaryProjection getCompany();
+        Customer.CustomerSummaryProjection getCustomer();
 
         String getPaymentTerms();
 
-        String getShippingAddress();
+        Address getShippingAddress();
 
         Timestamp getQuotationDate();
 
@@ -140,19 +99,7 @@ public class Quotation {
     }
 
     @Projection(name = "table", types = {Quotation.class})
-    public interface QuotationTableReceiptProjection {
-        Long getId();
-
-        Company getCompany();
-
-        String getPaymentTerms();
-
-        String getShippingAddress();
-
-        Timestamp getQuotationDate();
-
+    public interface QuotationTableReceiptProjection extends QuotationInReceiptProjection {
         Receipt getReceipt();
-
-        Double getTotalAmount();
     }
 }

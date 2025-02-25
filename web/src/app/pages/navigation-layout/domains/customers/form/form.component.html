@@ -1,162 +1,130 @@
-<form
-  (ngSubmit)="save()"
-  [formGroup]="mainForm"
-  [style.margin-top.rem]="3"
-  [style.max-width.rem]="35"
-  tuiAppearance="floating"
-  tuiCardLarge
-  tuiForm="m"
+<form (ngSubmit)="save()"
+      [formGroup]="form"
+      [style.margin-top.rem]="3"
+      [style.max-width.rem]="35"
+      tuiAppearance="floating"
+      tuiCardLarge
+      tuiForm="m"
 >
-  <form
-    formGroupName="company"
-    tuiForm="m"
-  >
-    <header tuiHeader>
-      <h3 tuiTitle>
-        Edit Company Details
-      </h3>
-    </header>
+  <form formGroupName="customer" tuiForm="m">
+    <header tuiHeader><h2 tuiTitle>Customer Details</h2></header>
 
     <tui-textfield>
-      <label tuiLabel>Name</label>
-      <input
-        formControlName="name"
-        placeholder="Company name"
-        tuiTextfield
-      />
+      <label tuiLabel>Name<sup>*</sup></label>
+      <input formControlName="name" placeholder="Customer name" tuiTextfield/>
     </tui-textfield>
-    <tui-error
-      [error]="[] | tuiFieldError | async"
-      formControlName="name"
-    />
+    <tui-error [error]="[] | tuiFieldError | async" formControlName="name"/>
 
     <tui-textfield>
-      <label tuiLabel>Address</label>
-      <input
-        formControlName="address"
-        placeholder="Company address"
-        tuiTextfield
-      />
+      <label tuiLabel>Billing Address<sup>*</sup></label>
+      <input formControlName="billingAddress" placeholder="Customer Billing Address" tuiTextfield/>
     </tui-textfield>
-    <tui-error
-      [error]="[] | tuiFieldError | async"
-      formControlName="address"
-    />
-
-    <tui-textfield>
-      <label tuiLabel>Billing Address</label>
-      <input
-        formControlName="billingAddress"
-        placeholder="Company Billing Address"
-        tuiTextfield
-      />
-    </tui-textfield>
-    <tui-error
-      [error]="[] | tuiFieldError | async"
-      formControlName="billingAddress"
-    />
+    <tui-error [error]="[] | tuiFieldError | async" formControlName="billingAddress"/>
 
     <tui-textfield>
       <label tuiLabel>TIN</label>
-      <input
-        formControlName="tin"
-        placeholder="Company TIN"
-        tuiTextfield
-      />
+      <input formControlName="tin" placeholder="Customer TIN" tuiTextfield/>
     </tui-textfield>
-    <tui-error
-      [error]="[] | tuiFieldError | async"
-      formControlName="tin"
-    />
+    <tui-error [error]="[] | tuiFieldError | async" formControlName="tin"/>
 
     <tui-textfield>
       <label tuiLabel>Website</label>
-      <input
-        formControlName="website"
-        placeholder="Company Website"
-        tuiTextfield
-      />
+      <input formControlName="website" placeholder="Customer Website" tuiTextfield/>
     </tui-textfield>
-    <tui-error
-      [error]="[] | tuiFieldError | async"
-      formControlName="website"
-    />
+    <tui-error [error]="[] | tuiFieldError | async" formControlName="website"/>
   </form>
 
-  <form
-    [style.margin-top.rem]="1"
-    formGroupName="contact"
-    tuiForm="m"
-  >
-    <header tuiHeader>
-      <h6 tuiTitle>
-        Edit Contact Details
-      </h6>
-    </header>
+  <form formGroupName="contacts" tuiForm="s">
+    <h2 tuiTitle><b>Contacts</b></h2>
+    <tui-scrollbar waIntersectionRoot>
+      <table [columns]="contactColumns" [size]="'s'" class="table" tuiTable>
+        <thead tuiThead>
+        <tr tuiThGroup>
+          <th *tuiHead="'name'" [sorter]="null" tuiTh>Name<sup>*</sup></th>
+          <th *tuiHead="'phone'" [sorter]="null" tuiTh>Phone<sup>*</sup></th>
+          <th *tuiHead="'email'" [sorter]="null" tuiTh>Email</th>
+          <th *tuiHead="'actions'" [sorter]="null" tuiTh>Actions</th>
+        </tr>
+        </thead>
 
-    <tui-textfield>
-      <label tuiLabel>Name</label>
-      <input
-        formControlName="name"
-        placeholder="Contact name"
-        tuiTextfield
-      />
-    </tui-textfield>
-    <tui-error
-      [error]="[] | tuiFieldError | async"
-      formControlName="name"
-    />
+        <tbody tuiTbody>
+        <ng-container *ngFor="let control of contactsFormArray.controls; let i = index" [formGroupName]="i">
+          @let _d = control.value._d;
+          <tr *ngIf="control.value" tuiTr [ngClass]="{'new': !control.value.id}">
+            <td *tuiCell="'name'" tuiTd>
+              <tui-textfield><input formControlName="name" placeholder="Name" tuiTextfield/></tui-textfield>
+            </td>
+            <td *tuiCell="'phone'" tuiTd>
+              <tui-textfield><input formControlName="phone" placeholder="Phone number" tuiTextfield/></tui-textfield>
+            </td>
+            <td *tuiCell="'email'" tuiTd>
+              <tui-textfield><input formControlName="email" placeholder="Email address" tuiTextfield/></tui-textfield>
+            </td>
+            <td *tuiCell="'actions'" [style.text-align]="'center'" tuiTd>
+              <button (click)="removeContactRow(_d)"
+                      appearance="flat-destructive"
+                      size="xs"
+                      iconStart="@tui.trash"
+                      tuiButton
+                      tuiIconButton
+                      type="button"
+              ></button>
+            </td>
+          </tr>
+        </ng-container>
+        </tbody>
+      </table>
+    </tui-scrollbar>
+    <button (click)="addContactRow()" appearance="primary" size="s" tuiButton type="button">
+      Add Contact
+    </button>
+  </form>
 
-    <tui-textfield>
-      <label tuiLabel>Phone</label>
-      <input
-        formControlName="phone"
-        placeholder="Contact phone"
-        tuiTextfield
-      />
-    </tui-textfield>
-    <tui-error
-      [error]="[] | tuiFieldError | async"
-      formControlName="phone"
-    />
+  <form formGroupName="shippingAddresses" tuiForm="s">
+    <h2 tuiTitle><b>Shipping Addresses</b></h2>
+    <tui-scrollbar waIntersectionRoot>
+      <table [columns]="shippingAddressColumns" [size]="'s'" class="table" tuiTable>
+        <thead tuiThead>
+        <tr tuiThGroup>
+          <th *tuiHead="'fullAddress'" [sorter]="null" tuiTh>Name<sup>*</sup></th>
+          <th *tuiHead="'actions'" [sorter]="null" tuiTh>Actions</th>
+        </tr>
+        </thead>
 
-    <tui-textfield>
-      <label tuiLabel>Email</label>
-      <input
-        formControlName="email"
-        placeholder="Contact Email"
-        tuiTextfield
-      />
-    </tui-textfield>
-    <tui-error
-      [error]="[] | tuiFieldError | async"
-      formControlName="email"
-    />
-
+        <tbody tuiTbody>
+        <ng-container *ngFor="let control of shippingAddressesFormArray.controls; let i = index" [formGroupName]="i">
+          @let _d = control.value._d;
+          <tr *ngIf="control.value" tuiTr [ngClass]="{'new': !control.value.id}">
+            <td *tuiCell="'fullAddress'" tuiTd>
+              <tui-textfield>
+                <input formControlName="fullAddress" placeholder="Full Shipping Address" tuiTextfield/>
+              </tui-textfield>
+            </td>
+            <td *tuiCell="'actions'" [style.text-align]="'center'" tuiTd>
+              <button (click)="removeShippingAddressRow(_d)"
+                      appearance="flat-destructive"
+                      size="xs"
+                      iconStart="@tui.trash"
+                      tuiButton
+                      tuiIconButton
+                      type="button"
+              ></button>
+            </td>
+          </tr>
+        </ng-container>
+        </tbody>
+      </table>
+    </tui-scrollbar>
+    <button (click)="addShippingAddressRow()" appearance="primary" size="s" tuiButton type="button">
+      Add Shipping Address
+    </button>
   </form>
 
   <footer class="footer">
-    <button
-      [disabled]="mainForm.invalid || inProgress"
-      tuiButton
-      type="submit"
-    >
+    <button [disabled]="form.invalid || inProgress" tuiButton type="submit">
       Save
     </button>
-    <button
-      (click)="save(true)"
-      [disabled]="mainForm.invalid || inProgress"
-      tuiButton
-      type="button"
-    >
-      Save and Return
-    </button>
-    <button
-      [routerLink]="'..'"
-      appearance="flat"
-      tuiButton
-      type="button"
-    >
+    <button [routerLink]="'..'" appearance="flat" tuiButton type="button">
       Back
     </button>
   </footer>

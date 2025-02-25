@@ -1,8 +1,7 @@
 <main tuiNavigationMain>
-  <nav
-    [style.position]="'sticky'"
-    compact
-    tuiSubheader
+  <nav [style.position]="'sticky'"
+       compact
+       tuiSubheader
   >
     <!--    <tui-breadcrumbs [itemsLimit]="10">-->
     <!--      <ng-container *ngFor="let item of ['Client']; let last = last">-->
@@ -16,98 +15,82 @@
     <!--        </ng-container>-->
     <!--      </ng-container>-->
     <!--    </tui-breadcrumbs>-->
-    <strong
-      tuiFade
-    >
+    <strong tuiFade>
       Customers
     </strong>
 
     <hr>
     <!--    <button [routerLink]="['clients',1]">:1</button>-->
 
-    <button
-      [routerLink]="'create'"
-      tuiButton
-      type="button"
+    <button [routerLink]="'create'"
+            tuiButton
+            type="button"
     >
       Add Customer
     </button>
   </nav>
   <hr>
 
-  <tui-textfield
-    iconStart="@tui.search"
-  >
+  <tui-textfield iconStart="@tui.search">
     <label tuiLabel>Search by Name</label>
-    <input
-      [(ngModel)]="nameSearch"
-      tuiTextfield
-    />
+    <input [(ngModel)]="nameSearch" tuiTextfield/>
     <!--    <tui-icon tuiTooltip="Search by Name"/>-->
   </tui-textfield>
 
-  <div
-    class="content">
-    <tui-loader
-      [overlay]="true"
-      [showLoader]="!!(loading$ | async)"
+  <div class="content">
+    <tui-loader [overlay]="true"
+                [showLoader]="!!(loading$ | async)"
     >
-      <table
-        (directionChange)="direction$.next($event)"
-        (tuiSortByChange)="sorter$.next($event!)"
-        *ngIf="data$ | async as data"
-        [columns]="columns"
-        [direction]="(direction$ | async) || 1"
-        [size]="'s'"
-        [tuiSortBy]="sorter$ | async"
-        class="table"
-        tuiTable
+      <table (directionChange)="direction$.next($event)"
+             (tuiSortByChange)="sorter$.next($event!)"
+             *ngIf="data$ | async as data"
+             [columns]="columns"
+             [direction]="(direction$ | async) || 1"
+             [size]="'s'"
+             [tuiSortBy]="sorter$ | async"
+             class="table"
+             tuiTable
       >
         <thead tuiThead>
         <tr tuiThGroup>
-          <th *tuiHead="'name'" tuiSortable tuiTh>Name</th>
-          <th *tuiHead="'address'" tuiSortable tuiTh>Address</th>
+          <th *tuiHead="'name'" tuiSortable tuiTh>Contact</th>
+          <th *tuiHead="'billingAddress'" tuiSortable tuiTh>Billing Address</th>
           <th *tuiHead="'tin'" tuiSortable tuiTh>TIN</th>
           <th *tuiHead="'website'" tuiSortable tuiTh>Website</th>
           <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
         </tr>
         </thead>
-        <tbody
-          *tuiLet="data as sortedData"
-          [data]="sortedData"
-          tuiTbody
+        <tbody *tuiLet="data as sortedData"
+               [data]="sortedData"
+               tuiTbody
         >
         <tr *ngFor="let item of sortedData" tuiTr>
           <td *tuiCell="'name'" tuiTd>
-            <a [routerLink]="[item.id]"
-               tuiLink
-            >
+            <a [routerLink]="[item.id]" tuiLink>
               {{ item.name }}
             </a>
           </td>
-          <td *tuiCell="'address'" tuiTd>{{ item.address }}</td>
+          <td *tuiCell="'billingAddress'" tuiTd>{{ item.billingAddress }}</td>
           <td *tuiCell="'tin'" tuiTd>{{ item.tin }}</td>
           <td *tuiCell="'website'" tuiTd>{{ item.website }}</td>
           <td *tuiCell="'actions'" tuiTd>
           <span tuiStatus>
-          <button
-            [routerLink]="[item.id]"
-            appearance="action"
-            iconStart="@tui.pencil"
-            size="xs"
-            tuiIconButton
-            type="button"
+          <button [routerLink]="[item.id]"
+                  appearance="action"
+                  iconStart="@tui.pencil"
+                  size="xs"
+                  tuiIconButton
+                  type="button"
           >
             Edit
           </button>
-          <button
-            [tuiDropdown]="content"
-            appearance="action"
-            iconStart="@tui.ellipsis"
-            size="xs"
-            tuiDropdownOpen
-            tuiIconButton
-            type="button"
+          <button [tuiDropdown]="content"
+                  appearance="action"
+                  iconStart="@tui.ellipsis"
+                  size="xs"
+                  tuiDropdownOpen
+                  tuiIconButton
+                  type="button"
           >
             More
           </button>
@@ -128,12 +111,11 @@
         <tfoot>
         <tr>
           <td [colSpan]="columns.length">
-            <tui-table-pagination
-              (paginationChange)="onPagination($event)"
-              [page]="(page$ | async) || 0"
-              [size]="(size$ | async) || 20"
-              [total]="(total$ | async) || 0"
-              class="tui-space_top-2"
+            <tui-table-pagination (paginationChange)="onPagination($event)"
+                                  [page]="(page$ | async) || 0"
+                                  [size]="(size$ | async) || 20"
+                                  [total]="(total$ | async) || 0"
+                                  class="tui-space_top-2"
             />
           </td>
         </tr>

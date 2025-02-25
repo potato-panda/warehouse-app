@@ -1,5 +1,5 @@
 import {ResourceRelations} from '../resource';
-import {QuotationWithCompany} from './quotation';
+import {QuotationWithCustomer} from './quotation';
 
 export interface CreateReceipt {
   receivedDate: string;
@@ -13,7 +13,7 @@ export interface Receipt {
 }
 
 export interface ReceiptTable extends Receipt {
-  quotation: QuotationWithCompany;
+  quotation: QuotationWithCustomer;
 }
 
 export type ReceiptRelations = ResourceRelations<['quotation']>;

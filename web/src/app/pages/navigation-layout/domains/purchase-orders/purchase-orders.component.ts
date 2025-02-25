@@ -151,22 +151,20 @@ export class PurchaseOrdersComponent {
   };
 
   protected showDeleteDialog({id, supplier}: PurchaseOrderTable): void {
-    const subject = supplier?.name;
+    const subject = `Purchase Order${supplier?.name ? ' for ' + supplier.name : ''}`;
     this.dialogs.open<Observable<any>>(new PolymorpheusComponent(DeleteDialogComponent), {
       dismissible: true,
       closeable: true,
       label: 'Delete?',
       size: 'm',
-      data: {
-        subject: `quotation for ${subject}`
-      }
+      data: {subject}
     }).pipe(mergeMap(value => value ? this.purchaseOrdersService.deleteOne(id as string) : of()))
       .subscribe({
         error: err => {
           this.alerts.open(context => {
           }, {
             appearance: 'negative',
-            label: `Error deleting quotation`
+            label: `Error deleting ${subject}`
           });
         },
         next: response => {
@@ -174,7 +172,7 @@ export class PurchaseOrdersComponent {
             this.alerts.open(context => {
             }, {
               appearance: 'positive',
-              label: `Successfully deleted quotation`
+              label: `Successfully deleted ${subject}`
             }).subscribe();
             this.refreshData();
           }

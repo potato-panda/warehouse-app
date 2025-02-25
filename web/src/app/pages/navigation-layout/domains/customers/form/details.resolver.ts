@@ -1,40 +1,39 @@
 import {ResolveFn} from '@angular/router';
 import {inject} from '@angular/core';
-import {CompaniesSummaryResourceResponse, CompanyService} from '../../../../../services/company.service';
-import {catchError, concatMap, EMPTY, mergeMap, of} from 'rxjs';
-import {ContactsCollectionResourceResponse, ContactsResourceResponse} from '../../../../../services/contacts.service';
+import {CustomersService, CustomersSummaryResourceResponse} from '../../../../../services/customers.service';
+import {catchError, concatMap, EMPTY, forkJoin, mergeMap, of} from 'rxjs';
+import {ContactsResourceResponse} from '../../../../../services/contacts.service';
+import {AddressesResourceResponse} from '../../../../../services/address.service';
 
 export type ResolvedData = {
-  contact: ContactsResourceResponse | null,
-  company: CompaniesSummaryResourceResponse
+  contacts: ContactsResourceResponse[],
+  customer: CustomersSummaryResourceResponse,
+  shippingAddresses: AddressesResourceResponse[],
 }
 
 export const detailsResolver: ResolveFn<ResolvedData> = (route, state) => {
-  const companyService = inject(CompanyService);
+  const customerService = inject(CustomersService);
   const id = route.params['id'];
   if (id) {
-    return companyService.getOne(id)
+    return customerService.getOne(id)
       .pipe(
-        concatMap((companyResponse) => {
-          const contactsUrl = companyResponse._links.contacts.href;
-
-          return companyService.follow<ContactsCollectionResourceResponse>(contactsUrl)
+        concatMap((customerResponse) =>
+          forkJoin([customerService.getContacts(id), customerService.getShippingAddresses(id)])
             .pipe(
-              mergeMap((contactsCollectionResponse) => {
-                if (contactsCollectionResponse && contactsCollectionResponse?._embedded?.contacts?.length > 0) {
-                  return of<ResolvedData>({
-                    company: companyResponse,
-                    contact: contactsCollectionResponse._embedded.contacts[0]
-                  });
-                }
-                throw new Error();
+              mergeMap(([contactsCollectionResponse, shippingAddressesCollectionResource]) => {
+                return of<ResolvedData>({
+                  contacts: contactsCollectionResponse._embedded.contacts,
+                  customer: customerResponse,
+                  shippingAddresses: shippingAddressesCollectionResource._embedded.addresses,
+                });
               }),
               catchError(() => of<ResolvedData>({
-                company: companyResponse,
-                contact: null
+                contacts: [],
+                customer: customerResponse,
+                shippingAddresses: [],
               })),
-            );
-        }),
+            )
+        ),
         catchError(() => EMPTY)
       );
   }

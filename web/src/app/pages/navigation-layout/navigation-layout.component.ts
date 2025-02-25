@@ -29,6 +29,7 @@ export class NavigationLayoutComponent extends TuiPortals {
   protected open = false;
   protected readonly routes: any = {
     customers: '/customers',
+    suppliers: '/suppliers',
     contacts: '/contacts',
     products: '/products',
     inventories: '/inventories',

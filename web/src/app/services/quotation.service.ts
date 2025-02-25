@@ -12,7 +12,7 @@ import {
 } from '../interfaces/entities/quotation';
 import {environment} from '../../environments/environment';
 import {QuoteItem} from '../interfaces/entities/quoteItem';
-import {CompaniesResourceResponse} from './company.service';
+import {CustomersResourceResponse} from './customers.service';
 import {QuoteItemWithProductCollectionResourceResponse} from './quote-item.service';
 import IdToHrefList from '../utils/id-to-href-list';
 import {resourceEndpoints} from './resource-endpoints';
@@ -46,8 +46,8 @@ export class QuotationService extends RestService {
     });
   }
 
-  getPageByCompany(name: string, pageable: Pageable = {page: 0}) {
-    return this.http.get<CollectionResourceResponse>(`${this.resourceEndpoint}/search/byCompany`, {
+  getPageByCustomer(name: string, pageable: Pageable = {page: 0}) {
+    return this.http.get<CollectionResourceResponse>(`${this.resourceEndpoint}/search/byCustomer`, {
       params: {...pageable, name},
     });
   }
@@ -58,8 +58,8 @@ export class QuotationService extends RestService {
     });
   }
 
-  getTablePageByCompany(name: string, pageable: Pageable = {page: 0}) {
-    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint}/search/byCompany`, {
+  getTablePageByCustomer(name: string, pageable: Pageable = {page: 0}) {
+    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint}/search/byCustomer`, {
       params: {...pageable, name, projection: 'table'},
     });
   }
@@ -72,8 +72,8 @@ export class QuotationService extends RestService {
     return this.http.get<TableResourceResponse>(`${this.resourceEndpoint}/${id}?projection=table`);
   }
 
-  getCompany(id: string | number) {
-    return this.http.get<CompaniesResourceResponse>(`${this.resourceEndpoint}/${id}/company`);
+  getCustomer(id: string | number) {
+    return this.http.get<CustomersResourceResponse>(`${this.resourceEndpoint}/${id}/customer`);
   }
 
   getQuoteItems(id: string | number) {
@@ -96,9 +96,9 @@ export class QuotationService extends RestService {
     return this.http.delete(`${this.resourceEndpoint}/${id}`);
   }
 
-  addCompany(id: string, companyId: string | number) {
-    const hrefs = IdToHrefList.transform(companyId, resourceEndpoints.company());
-    return this.http.put<ResourceResponse>(`${this.resourceEndpoint}/${id}/company`, hrefs, {
+  addCustomer(id: string, customerId: string | number) {
+    const hrefs = IdToHrefList.transform(customerId, resourceEndpoints.customers());
+    return this.http.put<ResourceResponse>(`${this.resourceEndpoint}/${id}/customer`, hrefs, {
       headers: new HttpHeaders({
         'Content-Type': 'text/uri-list',
       })

@@ -76,11 +76,11 @@ export class ReceiptsComponent {
   protected readonly page$ = new BehaviorSubject(0);
 
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
-  protected readonly sorter$ = new BehaviorSubject<'company' | 'companyTin' | 'receivedBy' | 'receivedDate' | 'totalAmount' | null>(null);
+  protected readonly sorter$ = new BehaviorSubject<'customer' | 'customerTin' | 'receivedBy' | 'receivedDate' | 'totalAmount' | null>(null);
 
   protected nameSearch = model('');
   protected readonly search$ = toObservable(this.nameSearch);
-  protected columns = ['company', 'companyTin', 'receivedBy', 'receivedDate', 'totalAmount', 'actions'];
+  protected columns = ['customer', 'customerTin', 'receivedBy', 'receivedDate', 'totalAmount', 'actions'];
 
   protected readonly request$ = combineLatest([
     this.search$.pipe(
@@ -125,7 +125,7 @@ export class ReceiptsComponent {
       sort: this.sorter$.value ? this.sorter$.value + (this.direction$.value == 1 ? ',asc' : ',desc') : undefined
     };
     if (search && search.length && search.length > 0) {
-      return this.receiptsService.getTablePageByCompany(search, pageable).pipe(map(response => response));
+      return this.receiptsService.getTablePageByCustomer(search, pageable).pipe(map(response => response));
     }
     return this.receiptsService.getTablePage(pageable).pipe(map(response => response));
   }

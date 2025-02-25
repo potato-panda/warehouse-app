@@ -34,23 +34,23 @@
                  formControlName="shippingAddress"
       />
 
-      <app-combo-box [searchFn]="searchCompanies"
-                     [stringify]="stringifyCompany"
-                     [valueFn]="toCompanyId"
+      <app-combo-box [searchFn]="searchCustomers"
+                     [stringify]="stringifyCustomer"
+                     [valueFn]="toCustomerId"
                      class="textfield"
-                     formControlName="companyId"
-                     label="Company"
-                     placeholder="Company" tuiTextfieldSize="m"
+                     formControlName="customerId"
+                     label="Customer"
+                     placeholder="Customer" tuiTextfieldSize="m"
       >
-        <ng-template #itemTemplate let-company>
-          <div class="name">{{ company.name }}</div>
+        <ng-template #itemTemplate let-customer>
+          <div class="name">{{ customer.name }}</div>
         </ng-template>
         <ng-template #loadingTemplate>
           <tui-loader></tui-loader>
         </ng-template>
       </app-combo-box>
       <tui-error [error]="[] | tuiFieldError | async"
-                 formControlName="companyId"
+                 formControlName="customerId"
       />
     </form>
 
@@ -84,9 +84,7 @@
 
   </div>
 
-  <form formGroupName="quoteItems"
-        tuiForm="m"
-  >
+  <form formGroupName="quoteItems" tuiForm="m">
     <tui-scrollbar class="scrollbar" waIntersectionRoot>
       <table (directionChange)="direction$.next($event)"
              (tuiSortByChange)="sorter$.next($event!)"
@@ -95,7 +93,6 @@
              [size]="'s'"
              [tuiSortBy]="sorter$ | async"
              class="table"
-             size="s"
              tuiTable
       >
         <thead tuiThead>
@@ -189,7 +186,7 @@
               </tui-textfield>
             </td>
             <td *tuiCell="'actions'" [style.text-align]="'center'" tuiTd>
-              <button (click)="removeRow(_d)" [disabled]="!!receipt?.id"
+              <button (click)="removeRow(_d)"
                       appearance="flat-destructive"
                       size="s"
                       tuiButton
@@ -202,33 +199,17 @@
         </tbody>
       </table>
     </tui-scrollbar>
-    <button (click)="addRow()" [disabled]="!!receipt?.id" appearance="primary" size="m" tuiButton
-            type="button">Add Row
-    </button>
+    <button (click)="addRow()" appearance="primary" size="m" tuiButton type="button">Add Row</button>
   </form>
 
   <span [style.flex]="'1 1 auto'"></span>
 
   <footer class="footer">
-    <button [disabled]="form.invalid || inProgress || !!receipt?.id"
-            tuiButton
-            type="submit"
-    >
+    <button [disabled]="form.invalid || inProgress" tuiButton type="submit">
       Save
     </button>
-    <button (click)="save(true)"
-            [disabled]="form.invalid || inProgress || !!receipt?.id"
-            tuiButton
-            type="button"
-    >
-      Save and Return
-    </button>
     <span [style.flex]="'1 1 auto'"></span>
-    <button [routerLink]="'..'"
-            appearance="flat"
-            tuiButton
-            type="button"
-    >
+    <button [routerLink]="'..'" appearance="flat" tuiButton type="button">
       Back
     </button>
   </footer>

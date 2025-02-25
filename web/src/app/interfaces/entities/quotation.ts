@@ -1,4 +1,4 @@
-import {Company} from './company';
+import {Customer} from './customer';
 import {ResourceRelations} from '../resource';
 import {Receipt} from './receipt';
 
@@ -16,12 +16,12 @@ export interface Quotation {
   totalAmount: number | null;
 }
 
-export interface QuotationWithCompany extends Quotation {
-  company: Company;
+export interface QuotationWithCustomer extends Quotation {
+  customer: Customer;
 }
 
-export interface QuotationTable extends QuotationWithCompany {
+export interface QuotationTable extends QuotationWithCustomer {
   receipt: Receipt;
 }
 
-export type QuotationRelations = ResourceRelations<['company', 'receipt', 'quoteItems']>;
+export type QuotationRelations = ResourceRelations<['customer', 'receipt', 'quoteItems']>;

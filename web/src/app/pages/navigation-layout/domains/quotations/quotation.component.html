@@ -17,7 +17,7 @@
   <hr>
 
   <tui-textfield iconStart="@tui.search">
-    <label tuiLabel>Search by Company Name</label>
+    <label tuiLabel>Search by Customer Name</label>
     <input [(ngModel)]="nameSearch"
            tuiTextfield
     />
@@ -40,7 +40,7 @@
       >
         <thead tuiThead>
         <tr tuiThGroup>
-          <th *tuiHead="'company'" tuiSortable tuiTh>Company</th>
+          <th *tuiHead="'customer'" tuiSortable tuiTh>Customer</th>
           <th *tuiHead="'paymentTerms'" tuiSortable tuiTh>Payment Terms</th>
           <th *tuiHead="'shippingAddress'" tuiSortable tuiTh>Shipping Address</th>
           <th *tuiHead="'quotationDate'" tuiSortable tuiTh>Quotation Date</th>
@@ -49,32 +49,32 @@
           <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
         </tr>
         </thead>
-        <tbody *tuiLet="data as sortedData"
-               [data]="sortedData"
+        <tbody *tuiLet="data as sortedQuotation"
+               [data]="sortedQuotation"
                tuiTbody
         >
-        <tr *ngFor="let item of sortedData" tuiTr>
-          <td *tuiCell="'company'" tuiTd>
-            <ng-container *ngIf="item.company">
-              {{ item.company.name }}
+        <tr *ngFor="let quotation of sortedQuotation" tuiTr>
+          <td *tuiCell="'customer'" tuiTd>
+            <ng-container *ngIf="quotation.customer">
+              {{ quotation.customer.name }}
             </ng-container>
           </td>
-          <td *tuiCell="'paymentTerms'" tuiTd>{{ item.paymentTerms }}</td>
-          <td *tuiCell="'shippingAddress'" tuiTd>{{ item.shippingAddress }}</td>
-          <td *tuiCell="'quotationDate'" tuiTd>{{ item.quotationDate | date:'long' }}</td>
+          <td *tuiCell="'paymentTerms'" tuiTd>{{ quotation.paymentTerms }}</td>
+          <td *tuiCell="'shippingAddress'" tuiTd>{{ quotation.shippingAddress }}</td>
+          <td *tuiCell="'quotationDate'" tuiTd>{{ quotation.quotationDate | date:'long' }}</td>
           <td *tuiCell="'receipt'" tuiTd>
-            <ng-container *ngIf="item.receipt; else noReceipt"
+            <ng-container *ngIf="quotation.receipt; else noReceipt"
             >
-              Received by <strong>{{ item.receipt.receivedBy }}</strong> on
-              <strong>{{ item.receipt.receivedDate | date:'long' }}</strong>
+              Received by <strong>{{ quotation.receipt.receivedBy }}</strong> on
+              <strong>{{ quotation.receipt.receivedDate | date:'long' }}</strong>
             </ng-container>
             <ng-template #noReceipt>
             </ng-template>
           </td>
-          <td *tuiCell="'totalAmount'" tuiTd>{{ item.totalAmount }}</td>
+          <td *tuiCell="'totalAmount'" tuiTd>{{ quotation.totalAmount }}</td>
           <td *tuiCell="'actions'" tuiTd>
           <span tuiStatus>
-          <button [routerLink]="[item.id]"
+          <button [routerLink]="[quotation.id]"
                   appearance="action"
                   iconStart="@tui.pencil"
                   size="xs"
@@ -99,8 +99,8 @@
                 iconStart="@tui.trash"
                 tuiLink
                 type="button"
-                (click)="showDeleteDialog(item)"
-                [disabled]="!!item?.receipt?.id"
+                (click)="showDeleteDialog(quotation)"
+                [disabled]="!!quotation?.receipt?.id"
               >
               Delete
               </button>

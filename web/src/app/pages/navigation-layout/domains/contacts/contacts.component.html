@@ -68,7 +68,7 @@
           <th *tuiHead="'name'" tuiSortable tuiTh>Name</th>
           <th *tuiHead="'phone'" tuiSortable tuiTh>Email</th>
           <th *tuiHead="'email'" tuiSortable tuiTh>Phone</th>
-          <th *tuiHead="'company'" tuiSortable tuiTh>Company</th>
+          <th *tuiHead="'customer'" tuiSortable tuiTh>Customer</th>
           <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
         </tr>
         </thead>
@@ -87,7 +87,7 @@
           </td>
           <td *tuiCell="'phone'" tuiTd>{{ item.phone }}</td>
           <td *tuiCell="'email'" tuiTd>{{ item.email }}</td>
-          <td *tuiCell="'company'" tuiTd>{{ item._embedded?.company?.name ?? '' }}</td>
+          <td *tuiCell="'customer'" tuiTd>{{ item._embedded?.customer?.name ?? '' }}</td>
           <td *tuiCell="'actions'" tuiTd>
           <span tuiStatus>
           <button
