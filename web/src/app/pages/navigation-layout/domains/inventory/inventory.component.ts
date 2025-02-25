@@ -95,12 +95,12 @@ export class InventoryComponent {
   protected readonly page$ = new BehaviorSubject(0);
 
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
-  protected readonly sorter$ = new BehaviorSubject<'address' | 'quantity' | 'product.name' | 'product.sku' | 'product.itemCode' | 'product.description' | 'product.um' | 'product.umAmount' | null>(null);
+  protected readonly sorter$ = new BehaviorSubject<'address' | 'quantity' | 'product.name' | 'product.sku' | 'product.itemCode' | 'product.description' | 'product.um' | null>(null);
 
   protected readonly refresh$ = new BehaviorSubject<void>(undefined);
   protected nameSearch = model('');
   protected readonly search$ = toObservable(this.nameSearch);
-  protected columns = ['address', 'quantity', 'name', 'sku', 'itemCode', 'description', 'um', 'umAmount', 'actions'];
+  protected columns = ['address', 'quantity', 'name', 'sku', 'itemCode', 'description', 'um', 'actions'];
 
   protected readonly request$ = combineLatest([
     this.search$.pipe(

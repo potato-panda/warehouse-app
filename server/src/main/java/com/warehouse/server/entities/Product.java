@@ -40,10 +40,6 @@ public class Product {
     @NotNull
     private String um;
 
-    @Column(name = "um_amount")
-    @NotNull
-    private Double umAmount;
-
     @OneToMany(mappedBy = "quotedProduct")
     private Collection<QuoteItem> quoteItems;
 

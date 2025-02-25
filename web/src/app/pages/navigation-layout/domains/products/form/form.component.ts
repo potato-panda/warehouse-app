@@ -1,16 +1,7 @@
 import {Component, inject} from '@angular/core';
 import {AsyncPipe} from '@angular/common';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {
-  TuiAlertService,
-  TuiAppearance,
-  TuiButton,
-  TuiError,
-  TuiLabel,
-  TuiTextfieldComponent,
-  TuiTextfieldDirective,
-  TuiTitle
-} from '@taiga-ui/core';
+import {TuiAlertService, TuiAppearance, TuiButton, TuiError, TuiLabel, TuiTextfield, TuiTitle} from '@taiga-ui/core';
 import {TuiCardLarge, TuiForm, TuiHeader} from '@taiga-ui/layout';
 import {TuiFieldErrorPipe} from '@taiga-ui/kit';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
@@ -33,12 +24,11 @@ import {Product} from '../../../../../interfaces/entities/product';
     TuiForm,
     TuiHeader,
     TuiLabel,
-    TuiTextfieldComponent,
-    TuiTextfieldDirective,
     TuiTitle,
     RouterLink,
     TuiTextareaModule,
-    TuiTextfieldControllerModule
+    TuiTextfieldControllerModule,
+    TuiTextfield
   ],
   templateUrl: './form.component.html',
   styleUrl: './form.component.scss'
@@ -53,7 +43,6 @@ export class FormComponent {
     itemCode: new FormControl(''),
     description: new FormControl(''),
     um: new FormControl(''),
-    umAmount: new FormControl(0),
   });
 
   private readonly alerts = inject(TuiAlertService);

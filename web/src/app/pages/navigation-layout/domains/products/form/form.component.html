@@ -9,7 +9,7 @@
   <header tuiHeader><h3 tuiTitle>Product Details</h3></header>
 
   <tui-textfield>
-    <label tuiLabel>Name</label>
+    <label tuiLabel>Name<sup>*</sup></label>
     <input formControlName="name"
            placeholder="Product name"
            tuiTextfield
@@ -48,7 +48,6 @@
                 tuiTextfieldSize="m"
   >
     <label tuiLabel>Product Description</label>
-    <textarea tuiTextfieldLegacy></textarea>
   </tui-textarea>
   <tui-error [error]="[] | tuiFieldError | async"
              formControlName="description"
@@ -63,17 +62,6 @@
   </tui-textfield>
   <tui-error [error]="[] | tuiFieldError | async"
              formControlName="um"
-  />
-
-  <tui-textfield>
-    <label tuiLabel>UM Amount</label>
-    <input formControlName="umAmount"
-           placeholder="UM Amount"
-           tuiTextfield
-    />
-  </tui-textfield>
-  <tui-error [error]="[] | tuiFieldError | async"
-             formControlName="umAmount"
   />
 
   <footer class="footer">

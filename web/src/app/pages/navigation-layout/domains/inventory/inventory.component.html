@@ -47,7 +47,6 @@
           <th *tuiHead="'itemCode'" tuiSortable tuiTh>Item Code</th>
           <th *tuiHead="'description'" [tuiSortable]="false" tuiTh>Description</th>
           <th *tuiHead="'um'" tuiSortable tuiTh>UM</th>
-          <th *tuiHead="'umAmount'" tuiSortable tuiTh>UM Amount</th>
           <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
         </tr>
         </thead>
@@ -63,7 +62,6 @@
           <td *tuiCell="'itemCode'" tuiTd>{{ item?.product?.itemCode }}</td>
           <td *tuiCell="'description'" tuiTd>{{ item?.product?.description }}</td>
           <td *tuiCell="'um'" tuiTd>{{ item?.product?.um }}</td>
-          <td *tuiCell="'umAmount'" tuiTd>{{ item?.product?.umAmount }}</td>
           <td *tuiCell="'actions'" tuiTd>
           <span tuiStatus>
           <button [routerLink]="[item.id]"

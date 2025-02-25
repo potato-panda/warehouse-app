@@ -6,8 +6,7 @@ export interface Product {
   itemCode: string,
   name: string,
   description: string,
-  um: string,
-  umAmount: number,
+  um: string
 }
 
 export type ProductRelations = ResourceRelations<['inventory', 'quoteItem']>;
