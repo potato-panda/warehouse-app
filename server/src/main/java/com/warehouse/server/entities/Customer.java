@@ -3,12 +3,21 @@ package com.warehouse.server.entities;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.rest.core.config.Projection;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity(name = "customers")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "customers")
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,38 +47,6 @@ public class Customer {
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Quotation> quotations = new ArrayList<>();
-
-    public Long getId() {return id;}
-
-    public void setId(Long id) {this.id = id;}
-
-    public String getName() {return name;}
-
-    public void setName(String name) {this.name = name;}
-
-    public String getBillingAddress() {return billingAddress;}
-
-    public void setBillingAddress(String billingAddress) {this.billingAddress = billingAddress;}
-
-    public List<Address> getShippingAddresses() {return shippingAddresses;}
-
-    public void setShippingAddresses(List<Address> shippingAddresses) {this.shippingAddresses = shippingAddresses;}
-
-    public List<Contact> getContacts() {return contacts;}
-
-    public void setContacts(List<Contact> contacts) {this.contacts = contacts;}
-
-    public String getWebsite() {return website;}
-
-    public void setWebsite(String website) {this.website = website;}
-
-    public String getTin() {return tin;}
-
-    public void setTin(String tin) {this.tin = tin;}
-
-    public List<Quotation> getQuotations() {return quotations;}
-
-    public void setQuotations(List<Quotation> quotations) {this.quotations = quotations;}
 
     @Projection(name = "detail", types = {Customer.class})
     public interface CustomerDetailProjection extends CustomerSummaryProjection {

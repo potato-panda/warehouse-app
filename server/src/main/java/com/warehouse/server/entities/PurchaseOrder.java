@@ -1,11 +1,20 @@
 package com.warehouse.server.entities;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.rest.core.config.Projection;
 
 import java.util.Collection;
 
-@Entity(name = "purchase_orders")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "purchase_orders")
 public class PurchaseOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,70 +41,6 @@ public class PurchaseOrder {
 
     @Transient
     private Double totalAmount;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Supplier getSupplier() {
-        return supplier;
-    }
-
-    public void setSupplier(Supplier supplier) {
-        this.supplier = supplier;
-    }
-
-    public String getPreparedBy() {
-        return preparedBy;
-    }
-
-    public void setPreparedBy(String preparedBy) {
-        this.preparedBy = preparedBy;
-    }
-
-    public String getCheckedBy() {
-        return checkedBy;
-    }
-
-    public void setCheckedBy(String checkedBy) {
-        this.checkedBy = checkedBy;
-    }
-
-    public String getApprovedBy() {
-        return approvedBy;
-    }
-
-    public void setApprovedBy(String approvedBy) {
-        this.approvedBy = approvedBy;
-    }
-
-    public String getReceivedBy() {
-        return receivedBy;
-    }
-
-    public void setReceivedBy(String receivedBy) {
-        this.receivedBy = receivedBy;
-    }
-
-    public Collection<QuoteItem> getQuoteItems() {
-        return quoteItems;
-    }
-
-    public void setQuoteItems(Collection<QuoteItem> quoteItems) {
-        this.quoteItems = quoteItems;
-    }
-
-    public Double getTotalAmount() {
-        return totalAmount;
-    }
-
-    public void setTotalAmount(Double totalAmount) {
-        this.totalAmount = totalAmount;
-    }
 
     @PostLoad
     public void calculateTotalAmount() {

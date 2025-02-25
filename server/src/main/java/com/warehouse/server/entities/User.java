@@ -2,23 +2,30 @@ package com.warehouse.server.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.security.core.GrantedAuthority;
+import lombok.*;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
+    @Setter
     @Id
     @Column(unique = true, nullable = false)
     @NotNull
     private String username;
 
+    @Setter
     @Column(nullable = false)
     @NotNull
     private String password;
 
+    @Setter
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_authorities",
@@ -29,46 +36,6 @@ public class User implements UserDetails {
 
     @Column(name = "is_enabled")
     private Boolean isEnabled;
-
-    public User(String username,
-                String password,
-                Collection<Authority> authorities,
-                Boolean isEnabled) {
-        this.username    = username;
-        this.password    = password;
-        this.authorities = authorities;
-        this.isEnabled   = isEnabled;
-    }
-
-    protected User() {
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
-    }
-
-    public void setAuthorities(Collection<Authority> authorities) {
-        this.authorities = authorities;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
     @Override
     public boolean isAccountNonExpired() {
@@ -88,13 +55,5 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return isEnabled;
-    }
-
-    public Boolean getEnabled() {
-        return isEnabled;
-    }
-
-    public void setEnabled(Boolean enabled) {
-        isEnabled = enabled;
     }
 }

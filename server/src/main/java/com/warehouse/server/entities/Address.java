@@ -2,8 +2,16 @@ package com.warehouse.server.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.rest.core.config.Projection;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "addresses")
 public class Address {
@@ -23,22 +31,6 @@ public class Address {
     @JoinColumn(name = "customer_id")
     @JsonBackReference
     Customer customer;
-
-    public Long getId() {return id;}
-
-    public void setId(Long id) {this.id = id;}
-
-    public String getFullAddress() {return fullAddress;}
-
-    public void setFullAddress(String fullAddress) {this.fullAddress = fullAddress;}
-
-    public Supplier getSupplier() {return supplier;}
-
-    public void setSupplier(Supplier supplier) {this.supplier = supplier;}
-
-    public Customer getCustomer() {return customer;}
-
-    public void setCustomer(Customer customer) {this.customer = customer;}
 
     @Projection(name = "basic", types = {Address.class})
     public interface AddressBasicProjection {

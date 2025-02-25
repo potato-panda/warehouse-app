@@ -13,6 +13,6 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
     @EntityGraph(attributePaths = {"product"})
-    @Query("SELECT i FROM inventories i WHERE LOWER(i.product.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    @Query("SELECT i FROM Inventory i WHERE LOWER(i.product.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     Page<Inventory> findByProductName(@Param("name") String name, Pageable pageable);
 }

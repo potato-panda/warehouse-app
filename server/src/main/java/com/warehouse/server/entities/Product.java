@@ -2,10 +2,19 @@ package com.warehouse.server.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Collection;
 
-@Entity(name = "products")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "products")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,75 +47,4 @@ public class Product {
     @OneToMany(mappedBy = "quotedProduct")
     private Collection<QuoteItem> quoteItems;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Collection<Inventory> getInventory() {
-        return inventory;
-    }
-
-    public void setInventory(Collection<Inventory> inventory) {
-        this.inventory = inventory;
-    }
-
-    public String getSku() {
-        return sku;
-    }
-
-    public void setSku(String sku) {
-        this.sku = sku;
-    }
-
-    public String getItemCode() {
-        return itemCode;
-    }
-
-    public void setItemCode(String itemCode) {
-        this.itemCode = itemCode;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getUm() {
-        return um;
-    }
-
-    public void setUm(String um) {
-        this.um = um;
-    }
-
-    public Double getUmAmount() {
-        return umAmount;
-    }
-
-    public void setUmAmount(Double umAmount) {
-        this.umAmount = umAmount;
-    }
-
-    public Collection<QuoteItem> getQuoteItems() {
-        return quoteItems;
-    }
-
-    public void setQuoteItems(Collection<QuoteItem> quotation) {
-        this.quoteItems = quotation;
-    }
 }

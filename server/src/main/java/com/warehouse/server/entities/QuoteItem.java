@@ -2,11 +2,20 @@ package com.warehouse.server.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.rest.core.config.Projection;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-@Entity(name = "quote_item")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "quote_items")
 public class QuoteItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,58 +45,6 @@ public class QuoteItem {
 
     @Transient
     private Double totalAmount;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Quotation getQuotation() {
-        return quotation;
-    }
-
-    public void setQuotation(Quotation quotation) {
-        this.quotation = quotation;
-    }
-
-    public PurchaseOrder getPurchaseOrder() {
-        return purchaseOrder;
-    }
-
-    public void setPurchaseOrder(PurchaseOrder purchaseOrder) {
-        this.purchaseOrder = purchaseOrder;
-    }
-
-    public Product getQuotedProduct() {
-        return quotedProduct;
-    }
-
-    public void setQuotedProduct(Product quotedProduct) {
-        this.quotedProduct = quotedProduct;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
-    public Double getPrice() {return price;}
-
-    public void setPrice(Double price) {this.price = price;}
-
-    public Double getDiscountAmount() {return discountAmount;}
-
-    public void setDiscountAmount(Double discountAmount) {this.discountAmount = discountAmount;}
-
-    public Double getTotalAmount() {return totalAmount;}
-
-    public void setTotalAmount(Double totalAmount) {this.totalAmount = totalAmount;}
 
     @PostLoad
     public void calculateTotalAmount() {
