@@ -26,7 +26,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-public class JwtService implements com.warehouse.server.services.JwtService {
+public class JwtServiceImpl implements com.warehouse.server.services.JwtService {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private       SecretKey              secretKey;
@@ -44,7 +44,7 @@ public class JwtService implements com.warehouse.server.services.JwtService {
     private String issuer;
 
     @Autowired
-    public JwtService(RefreshTokenRepository refreshTokenRepository) {
+    public JwtServiceImpl(RefreshTokenRepository refreshTokenRepository) {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 

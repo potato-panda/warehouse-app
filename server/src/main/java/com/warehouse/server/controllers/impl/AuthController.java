@@ -7,7 +7,7 @@ import com.warehouse.server.dtos.responses.auth.LoginResponseDTO;
 import com.warehouse.server.exceptions.InvalidInputException;
 import com.warehouse.server.exceptions.NotFoundException;
 import com.warehouse.server.exceptions.UnauthorizedException;
-import com.warehouse.server.services.impl.AuthService;
+import com.warehouse.server.services.impl.AuthServiceImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +28,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 @BasePathAwareController("/auth")
 public class AuthController implements com.warehouse.server.controllers.AuthController {
 
-    private final AuthService authService;
+    private final AuthServiceImpl authService;
 
     @Value("${security.jwt.expirationPeriod}")
     private long expirationPeriod;
 
     @Autowired
-    public AuthController(AuthService authService) {
+    public AuthController(AuthServiceImpl authService) {
         this.authService = authService;
     }
 

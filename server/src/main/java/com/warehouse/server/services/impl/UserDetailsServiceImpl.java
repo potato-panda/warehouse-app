@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,13 +20,13 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Service
-public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
+public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository  userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserDetailsService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserDetailsServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository  = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -34,11 +35,11 @@ public class UserDetailsService implements org.springframework.security.core.use
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         var entity = userRepository.getUsersByUsername(username);
 
-        return org.springframework.security.core.userdetails.User.builder()
-                                                                 .username(entity.getUsername())
-                                                                 .password(entity.getPassword())
-                                                                 .authorities(entity.getAuthorities())
-                                                                 .build();
+        return User.builder()
+                   .username(entity.getUsername())
+                   .password(entity.getPassword())
+                   .authorities(entity.getAuthorities())
+                   .build();
     }
 
     public Collection<? extends GrantedAuthority> getRoles() {

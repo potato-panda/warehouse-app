@@ -6,9 +6,9 @@ import com.warehouse.server.entities.User;
 import com.warehouse.server.exceptions.NotFoundException;
 import com.warehouse.server.repositories.RefreshTokenRepository;
 import com.warehouse.server.repositories.UserRepository;
-import com.warehouse.server.services.impl.AuthService;
-import com.warehouse.server.services.impl.JwtService;
-import com.warehouse.server.services.impl.UserDetailsService;
+import com.warehouse.server.services.impl.AuthServiceImpl;
+import com.warehouse.server.services.impl.JwtServiceImpl;
+import com.warehouse.server.services.impl.UserDetailsServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,20 +28,20 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @Import(TestConfig.class)
 public class UserAuthServiceTests {
 
-    private final AuthService    authService;
-    private final UserRepository userRepository;
+    private final AuthServiceImpl authService;
+    private final UserRepository  userRepository;
 
     @Autowired
     public UserAuthServiceTests(UserRepository userRepository,
                                 PasswordEncoder passwordEncoder,
-                                JwtService jwtService,
+                                JwtServiceImpl jwtService,
                                 RefreshTokenRepository refreshTokenRepository) {
         this.userRepository = userRepository;
-        this.authService    = new AuthService(passwordEncoder,
-                                              new UserDetailsService(userRepository, passwordEncoder),
-                                              userRepository,
-                                              jwtService,
-                                              refreshTokenRepository);
+        this.authService    = new AuthServiceImpl(passwordEncoder,
+                                                  new UserDetailsServiceImpl(userRepository, passwordEncoder),
+                                                  userRepository,
+                                                  jwtService,
+                                                  refreshTokenRepository);
     }
 
     @Test

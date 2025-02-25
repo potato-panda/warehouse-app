@@ -19,23 +19,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class AuthService implements com.warehouse.server.services.AuthService {
+public class AuthServiceImpl implements com.warehouse.server.services.AuthService {
 
     private final PasswordEncoder        passwordEncoder;
-    private final UserDetailsService     userDetailsService;
+    private final UserDetailsServiceImpl userDetailsService;
     private final UserRepository         userRepository;
-    private final JwtService             jwtService;
+    private final JwtServiceImpl         jwtService;
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${security.jwt.expirationPeriod}")
     private long expirationPeriod;
 
     @Autowired
-    public AuthService(PasswordEncoder passwordEncoder,
-                       UserDetailsService userDetailsService,
-                       UserRepository userRepository,
-                       JwtService jwtService,
-                       RefreshTokenRepository refreshTokenRepository) {
+    public AuthServiceImpl(PasswordEncoder passwordEncoder,
+                           UserDetailsServiceImpl userDetailsService,
+                           UserRepository userRepository,
+                           JwtServiceImpl jwtService,
+                           RefreshTokenRepository refreshTokenRepository) {
         this.passwordEncoder        = passwordEncoder;
         this.userDetailsService     = userDetailsService;
         this.userRepository         = userRepository;

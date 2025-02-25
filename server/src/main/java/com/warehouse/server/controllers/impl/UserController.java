@@ -4,7 +4,7 @@ import com.warehouse.server.dtos.requests.user.CreateUserRequestDTO;
 import com.warehouse.server.dtos.requests.user.DeleteUserRequestDTO;
 import com.warehouse.server.exceptions.InvalidInputException;
 import com.warehouse.server.exceptions.NotFoundException;
-import com.warehouse.server.services.impl.UserDetailsService;
+import com.warehouse.server.services.impl.UserDetailsServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.BasePathAwareController;
@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 @BasePathAwareController("/users")
 public class UserController {
 
-    private final UserDetailsService userDetailsService;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Autowired
-    public UserController(UserDetailsService userDetailsService) {
+    public UserController(UserDetailsServiceImpl userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 

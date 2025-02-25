@@ -1,7 +1,7 @@
 package com.warehouse.server.configs;
 
 import com.warehouse.server.filters.JwtAuthenticationFilter;
-import com.warehouse.server.services.impl.UserDetailsService;
+import com.warehouse.server.services.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,12 +22,12 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 public class SecurityConfig {
 
-    private final UserDetailsService      userDetailsService;
-    private final PasswordEncoder         passwordEncoder;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final PasswordEncoder        passwordEncoder;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Autowired
-    public SecurityConfig(UserDetailsService userDetailsService,
+    public SecurityConfig(UserDetailsServiceImpl userDetailsService,
                           PasswordEncoder passwordEncoder,
                           JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.userDetailsService      = userDetailsService;
