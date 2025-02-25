@@ -27,14 +27,17 @@ public class Supplier {
     private String name;
 
     @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     @JsonManagedReference
     private List<Address> addresses = new ArrayList<>();
 
     @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     @JsonManagedReference
     private List<Contact> contacts = new ArrayList<>();
 
     @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<PurchaseOrder> purchaseOrders = new ArrayList<>();
 
     @Projection(name = "detail", types = {Supplier.class})

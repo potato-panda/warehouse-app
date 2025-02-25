@@ -31,10 +31,12 @@ public class Customer {
     private String billingAddress;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     @JsonManagedReference
     private List<Address> shippingAddresses = new ArrayList<>();
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     @JsonManagedReference
     private List<Contact> contacts = new ArrayList<>();
 
@@ -46,6 +48,7 @@ public class Customer {
     private String tin;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Quotation> quotations = new ArrayList<>();
 
     @Projection(name = "detail", types = {Customer.class})
