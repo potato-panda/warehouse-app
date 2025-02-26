@@ -98,12 +98,12 @@ export class QuotationComponent {
   protected readonly page$ = new BehaviorSubject(0);
 
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
-  protected readonly sorter$ = new BehaviorSubject<'customer' | 'paymentTerms' | 'shippingAddress' | 'quotationDate' | 'receipt' | 'totalAmount' | null>(null);
+  protected readonly sorter$ = new BehaviorSubject<'customer' | 'paymentTerms' | 'shippingAddress' | 'quotationDate' | 'totalAmount' | null>(null);
 
   protected readonly refresh$ = new BehaviorSubject<void>(undefined);
   protected nameSearch = model('');
   protected readonly search$ = toObservable(this.nameSearch);
-  protected columns = ['customer', 'paymentTerms', 'shippingAddress', 'quotationDate', 'receipt', 'totalAmount', 'actions'];
+  protected columns = ['customer', 'paymentTerms', 'shippingAddress', 'quotationDate', 'totalAmount', 'actions'];
 
   protected readonly request$ = combineLatest([
     this.search$.pipe(

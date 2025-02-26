@@ -1,6 +1,5 @@
 import {Customer} from './customer';
 import {ResourceRelations} from '../resource';
-import {Receipt} from './receipt';
 
 export type CreateQuotation = Partial<Omit<Quotation, 'id'>>
 
@@ -21,7 +20,6 @@ export interface QuotationWithCustomer extends Quotation {
 }
 
 export interface QuotationTable extends QuotationWithCustomer {
-  receipt: Receipt;
 }
 
-export type QuotationRelations = ResourceRelations<['customer', 'receipt', 'quoteItems']>;
+export type QuotationRelations = ResourceRelations<['customer', 'quoteItems']>;

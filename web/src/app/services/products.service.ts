@@ -50,4 +50,8 @@ export class ProductsService extends RestService {
   deleteOne(id: string | number) {
     return this.http.delete(`${this.resourceEndpoint}/${id}`);
   }
+
+  doesItemCodeExists(itemCode: string) {
+    return this.http.get(`${this.resourceEndpoint}/search/existsByItemCode?itemCode=${itemCode}`);
+  }
 }

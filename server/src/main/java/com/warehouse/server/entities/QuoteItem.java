@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.rest.core.config.Projection;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 @Data
 @NoArgsConstructor
@@ -49,14 +47,6 @@ public class QuoteItem {
     @PostLoad
     public void calculateTotalAmount() {
         this.totalAmount = (getQuantity() * getPrice()) - getDiscountAmount();
-    }
-
-    @PreUpdate
-    public void blockIfReceiptExists() {
-        if (getQuotation() != null && getQuotation().getReceipt() != null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                                              "You can't update this quote item. It is already paid.");
-        }
     }
 
     @Projection(name = "product", types = {QuoteItem.class})

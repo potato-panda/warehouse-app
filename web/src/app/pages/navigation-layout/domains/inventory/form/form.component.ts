@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {
   ProductsCollectionResourceResponse,
   ProductsResourceResponse,
@@ -77,7 +77,7 @@ import UniqueId from '../../../../../utils/unique-id';
   templateUrl: './form.component.html',
   styleUrl: './form.component.scss'
 })
-export class FormComponent {
+export class FormComponent implements OnInit {
   protected resolvedInventory!: InventoryWithProductResourceResponse;
   protected inProgress = false;
 
@@ -201,9 +201,9 @@ export class FormComponent {
     share()
   );
 
-  private ngOnInit() {
-    this.route.data.subscribe((data) => {
+  ngOnInit() {
 
+    this.route.data.subscribe((data) => {
       if (data['resolved']) {
         const {inventory, product} = this.route.snapshot.data['resolved'] as ResolvedData;
         if (product) {
@@ -229,7 +229,6 @@ export class FormComponent {
         this.form.updateValueAndValidity();
       }
     });
-
   }
 
   private ngOnDestroy() {

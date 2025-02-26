@@ -18,16 +18,11 @@
 
   <tui-textfield iconStart="@tui.search">
     <label tuiLabel>Search by Customer Name</label>
-    <input [(ngModel)]="nameSearch"
-           tuiTextfield
-    />
+    <input [(ngModel)]="nameSearch" tuiTextfield/>
   </tui-textfield>
 
-  <div
-    class="content">
-    <tui-loader [overlay]="true"
-                [showLoader]="!!(loading$ | async)"
-    >
+  <div class="content">
+    <tui-loader [overlay]="true" [showLoader]="!!(loading$ | async)">
       <table (directionChange)="direction$.next($event)"
              (tuiSortByChange)="sorter$.next($event!)"
              *ngIf="data$ | async as data"
@@ -44,7 +39,6 @@
           <th *tuiHead="'paymentTerms'" tuiSortable tuiTh>Payment Terms</th>
           <th *tuiHead="'shippingAddress'" tuiSortable tuiTh>Shipping Address</th>
           <th *tuiHead="'quotationDate'" tuiSortable tuiTh>Quotation Date</th>
-          <th *tuiHead="'receipt'" [tuiSortable]="false" tuiTh>Receipt</th>
           <th *tuiHead="'totalAmount'" tuiSortable tuiTh>Total Amount</th>
           <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
         </tr>
@@ -62,15 +56,6 @@
           <td *tuiCell="'paymentTerms'" tuiTd>{{ quotation.paymentTerms }}</td>
           <td *tuiCell="'shippingAddress'" tuiTd>{{ quotation.shippingAddress }}</td>
           <td *tuiCell="'quotationDate'" tuiTd>{{ quotation.quotationDate | date:'long' }}</td>
-          <td *tuiCell="'receipt'" tuiTd>
-            <ng-container *ngIf="quotation.receipt; else noReceipt"
-            >
-              Received by <strong>{{ quotation.receipt.receivedBy }}</strong> on
-              <strong>{{ quotation.receipt.receivedDate | date:'long' }}</strong>
-            </ng-container>
-            <ng-template #noReceipt>
-            </ng-template>
-          </td>
           <td *tuiCell="'totalAmount'" tuiTd>{{ quotation.totalAmount }}</td>
           <td *tuiCell="'actions'" tuiTd>
           <span tuiStatus>
@@ -95,12 +80,10 @@
           </button>
           <ng-template #content>
             <tui-data-list role="menu">
-              <button
-                iconStart="@tui.trash"
-                tuiLink
-                type="button"
-                (click)="showDeleteDialog(quotation)"
-                [disabled]="!!quotation?.receipt?.id"
+              <button (click)="showDeleteDialog(quotation)"
+                      iconStart="@tui.trash"
+                      tuiLink
+                      type="button"
               >
               Delete
               </button>

@@ -1,3 +1,4 @@
+
 .table {
   width: 100%;
 }
@@ -39,3 +40,10 @@
   }
 }
 
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-left: gray 1.5px solid;
+  padding: 1em 1.25rem;
+}

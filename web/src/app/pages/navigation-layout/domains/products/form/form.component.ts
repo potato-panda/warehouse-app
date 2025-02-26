@@ -1,15 +1,24 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, Injectable, OnInit} from '@angular/core';
 import {AsyncPipe} from '@angular/common';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {
+  AbstractControl,
+  AsyncValidator,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators
+} from '@angular/forms';
 import {TuiAlertService, TuiAppearance, TuiButton, TuiError, TuiLabel, TuiTextfield, TuiTitle} from '@taiga-ui/core';
 import {TuiCardLarge, TuiForm, TuiHeader} from '@taiga-ui/layout';
 import {TuiFieldErrorPipe} from '@taiga-ui/kit';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ResolvedData} from './details.resolver';
-import {Observable} from 'rxjs';
+import {catchError, map, Observable, of} from 'rxjs';
 import {ProductsResourceResponse, ProductsService} from '../../../../../services/products.service';
 import {TuiTextareaModule, TuiTextfieldControllerModule} from '@taiga-ui/legacy';
 import {Product} from '../../../../../interfaces/entities/product';
+import {HttpErrorResponse} from '@angular/common/http';
 
 @Component({
   selector: 'app-form',
@@ -33,27 +42,33 @@ import {Product} from '../../../../../interfaces/entities/product';
   templateUrl: './form.component.html',
   styleUrl: './form.component.scss'
 })
-export class FormComponent {
+export class FormComponent implements OnInit {
   protected resolvedProduct!: ProductsResourceResponse;
   protected inProgress = false;
 
-  protected readonly productForm = new FormGroup({
-    name: new FormControl('', Validators.required),
-    sku: new FormControl(''),
-    itemCode: new FormControl(''),
-    description: new FormControl(''),
-    um: new FormControl(''),
-  });
+  protected productForm!: FormGroup;
 
   private readonly alerts = inject(TuiAlertService);
 
   constructor(private route: ActivatedRoute,
               private router: Router,
               private productsService: ProductsService,
+              private uniqueItemCodeValidator: UniqueItemCodeValidator
   ) {
   }
 
   ngOnInit() {
+    this.productForm = new FormGroup({
+      name: new FormControl('', Validators.required),
+      sku: new FormControl(''),
+      itemCode: new FormControl('', {
+        asyncValidators: [this.uniqueItemCodeValidator.validate.bind(this)],
+        updateOn: 'blur'
+      }),
+      description: new FormControl(''),
+      um: new FormControl(''),
+    });
+
     this.route.data.subscribe((data) => {
       if (data['resolved']) {
         this.resolvedProduct = data['resolved'] as ResolvedData;
@@ -62,7 +77,7 @@ export class FormComponent {
     });
   }
 
-  save(back?: boolean) {
+  save() {
     this.inProgress = true;
     const value = this.productForm.value;
 
@@ -80,14 +95,13 @@ export class FormComponent {
     }
 
     saveRequest$.subscribe({
-      error: err => {
+      error: (err: HttpErrorResponse) => {
         this.alerts.open(context => 'Please try again later.',
           {
             appearance: 'negative',
             label: 'Save failed'
-          }).subscribe(() => {
-          this.inProgress = false;
-        });
+          }).subscribe();
+        this.inProgress = false;
       },
       next: (value) => {
         this.alerts.open(context => {
@@ -95,18 +109,26 @@ export class FormComponent {
           {
             appearance: 'positive',
             label: 'Save successful!',
-          }).subscribe(() => {
-          this.inProgress = false;
-        });
+          }).subscribe();
+        this.inProgress = false;
 
-        if (back) {
-          this.router.navigate(['..'], {relativeTo: this.route}).then();
-        }
-        if (value.id) {
-          this.router.navigate(['..', `${value.id}`], {relativeTo: this.route}).then();
-        }
+        this.router.navigate(['..'], {relativeTo: this.route}).then();
       },
       complete: () => this.inProgress = false
     });
+  }
+}
+
+@Injectable({providedIn: 'root'})
+export class UniqueItemCodeValidator implements AsyncValidator {
+
+  constructor(private productsService: ProductsService) {
+  }
+
+  validate(control: AbstractControl): Observable<ValidationErrors | null> {
+    return this.productsService.doesItemCodeExists(control.value).pipe(
+      map((exists) => (exists ? {unique: 'Item code already exists'} : null)),
+      catchError(() => of(null)),
+    );
   }
 }

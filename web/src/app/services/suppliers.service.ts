@@ -49,7 +49,7 @@ export class SuppliersService extends RestService {
   }
 
   getDetailOne(id: string | number) {
-    return this.http.get<ResourceResponse>(this.resourceEndpoint(id), {params: {projection: 'detail'}});
+    return this.http.get<DetailResourceResponse>(this.resourceEndpoint(id), {params: {projection: 'detail'}});
   }
 
   getContacts(id: string | number, pageable: Pageable = {page: 0}) {

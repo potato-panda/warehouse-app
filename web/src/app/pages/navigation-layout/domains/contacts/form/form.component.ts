@@ -13,36 +13,35 @@ import {
 import {ContactsResourceResponse, ContactsService,} from '../../../../../services/contacts.service';
 import {TuiCardLarge, TuiCell, TuiForm, TuiHeader} from '@taiga-ui/layout';
 import {TuiElasticContainer, TuiFieldErrorPipe} from '@taiga-ui/kit';
-import {AsyncPipe, NgIf} from '@angular/common';
+import {AsyncPipe} from '@angular/common';
 import {TuiComboBoxModule, TuiTextfieldControllerModule} from '@taiga-ui/legacy';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {ResolvedData} from './details.resolver';
 
 @Component({
   selector: 'app-form',
-    imports: [
-        ReactiveFormsModule,
-        TuiForm,
-        TuiAppearance,
-        TuiCardLarge,
-        TuiHeader,
-        TuiTitle,
-        TuiLabel,
-        TuiTextfield,
-        TuiError,
-        TuiFieldErrorPipe,
-        AsyncPipe,
-        TuiLoader,
-        TuiButton,
-        RouterLink,
-        TuiComboBoxModule,
-        TuiTextfieldControllerModule,
-        TuiTextfield,
-        NgIf,
-        TuiCell,
-        TuiElasticContainer,
+  imports: [
+    ReactiveFormsModule,
+    TuiForm,
+    TuiAppearance,
+    TuiCardLarge,
+    TuiHeader,
+    TuiTitle,
+    TuiLabel,
+    TuiTextfield,
+    TuiError,
+    TuiFieldErrorPipe,
+    AsyncPipe,
+    TuiLoader,
+    TuiButton,
+    RouterLink,
+    TuiComboBoxModule,
+    TuiTextfieldControllerModule,
+    TuiTextfield,
+    TuiCell,
+    TuiElasticContainer,
 
-    ],
+  ],
   templateUrl: './form.component.html',
   styleUrl: './form.component.scss'
 })
@@ -54,9 +53,8 @@ export class FormComponent {
     phone: new FormControl(''),
     email: new FormControl(''),
   });
-
-  private readonly alerts = inject(TuiAlertService);
   protected resolvedContact?: ContactsResourceResponse;
+  private readonly alerts = inject(TuiAlertService);
 
   constructor(private route: ActivatedRoute, private contactsService: ContactsService) {
   }

@@ -1,6 +1,6 @@
 import {Contact} from './contact';
 import {ResourceRelations} from '../resource';
-import {PurchaseOrder} from './purchase-order';
+import {Address} from './address';
 
 export interface Supplier {
   id: string | number;
@@ -16,7 +16,7 @@ export interface SupplierWithContacts extends Supplier {
 }
 
 export interface SupplierDetail extends SupplierWithContacts {
-  purchaseOrders: PurchaseOrder[],
+  addresses: Address[];
 }
 
 

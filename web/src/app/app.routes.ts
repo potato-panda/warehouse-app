@@ -44,7 +44,7 @@ import {ProductsComponent} from './pages/navigation-layout/domains/products/prod
 import {InventoryComponent} from './pages/navigation-layout/domains/inventory/inventory.component';
 import {QuotationComponent} from './pages/navigation-layout/domains/quotations/quotation.component';
 import {PurchaseOrdersComponent} from './pages/navigation-layout/domains/purchase-orders/purchase-orders.component';
-import {ReceiptsComponent} from './pages/navigation-layout/domains/receipts/receipts.component';
+import {DeliveryReceiptsComponent} from './pages/navigation-layout/domains/delivery-receipts/delivery-receipts.component';
 import {SuppliersComponent} from './pages/navigation-layout/domains/suppliers/suppliers.component';
 
 export const routes: Routes = [
@@ -239,15 +239,15 @@ export const routes: Routes = [
         ]
       },
       {
-        path: 'receipts',
+        path: 'deliveryReceipts',
         component: DomainsComponent,
         children: [
           {
             path: '',
             data: {
-              breadcrumb: 'Receipts'
+              breadcrumb: 'Delivery Receipts'
             },
-            component: ReceiptsComponent
+            component: DeliveryReceiptsComponent
           },
         ]
       },

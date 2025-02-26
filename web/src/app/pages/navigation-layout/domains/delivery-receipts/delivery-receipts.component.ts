@@ -33,11 +33,14 @@ import {
   switchMap
 } from 'rxjs';
 import {toObservable} from '@angular/core/rxjs-interop';
-import {ReceiptsService, ReceiptsTableCollectionResourceResponse} from '../../../../services/receipts.service';
+import {
+  DeliveryReceiptsService,
+  DeliveryReceiptsTableCollectionResourceResponse
+} from '../../../../services/delivery-receipts.service';
 import {RouterLink} from '@angular/router';
 
 @Component({
-  selector: 'app-receipts',
+  selector: 'app-delivery-receipts',
   imports: [
     AsyncPipe,
     DatePipe,
@@ -68,19 +71,19 @@ import {RouterLink} from '@angular/router';
     TuiTable,
     RouterLink
   ],
-  templateUrl: './receipts.component.html',
-  styleUrl: './receipts.component.scss'
+  templateUrl: './delivery-receipts.component.html',
+  styleUrl: './delivery-receipts.component.scss'
 })
-export class ReceiptsComponent {
+export class DeliveryReceiptsComponent {
   protected readonly size$ = new BehaviorSubject(20);
   protected readonly page$ = new BehaviorSubject(0);
 
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
-  protected readonly sorter$ = new BehaviorSubject<'customer' | 'customerTin' | 'receivedBy' | 'receivedDate' | 'totalAmount' | null>(null);
+  protected readonly sorter$ = new BehaviorSubject<'supplier' | 'receivedBy' | 'receivedDate' | 'totalAmount' | null>(null);
 
   protected nameSearch = model('');
   protected readonly search$ = toObservable(this.nameSearch);
-  protected columns = ['customer', 'customerTin', 'receivedBy', 'receivedDate', 'totalAmount', 'actions'];
+  protected columns = ['supplier', 'receivedBy', 'receivedDate', 'totalAmount', 'actions'];
 
   protected readonly request$ = combineLatest([
     this.search$.pipe(
@@ -102,14 +105,14 @@ export class ReceiptsComponent {
     map((response) => response.page.totalElements),
     startWith(0),
   );
-  protected readonly data$: Observable<ReceiptsTableCollectionResourceResponse['_embedded']['receipts']> = this.request$.pipe(
+  protected readonly data$: Observable<DeliveryReceiptsTableCollectionResourceResponse['_embedded']['deliveryReceipts']> = this.request$.pipe(
     filter(tuiIsPresent),
-    map((response) => response._embedded.receipts),
+    map((response) => response._embedded.deliveryReceipts),
     map((items) => items.filter(tuiIsPresent)),
     startWith([]),
   );
 
-  constructor(private receiptsService: ReceiptsService,
+  constructor(private receiptsService: DeliveryReceiptsService,
   ) {
   }
 
@@ -118,7 +121,7 @@ export class ReceiptsComponent {
     this.size$.next(size);
   };
 
-  private getData(search?: string): Observable<ReceiptsTableCollectionResourceResponse> {
+  private getData(search?: string): Observable<DeliveryReceiptsTableCollectionResourceResponse> {
     const pageable = {
       page: this.page$.value,
       size: this.size$.value,

@@ -1,4 +1,4 @@
-<p>form works!</p>
+@let resolvedPurchaseOrder = resolvedPurchaseOrder$.value;
 <form (ngSubmit)="save()"
       [formGroup]="form"
       [style.margin-top.rem]="3"
@@ -7,7 +7,6 @@
       tuiForm="m"
 >
   <header tuiHeader><h3 tuiTitle>Purchase Order Details</h3></header>
-  <!--  @let disabled = this.resolvedPurchaseOrder$.value?.receivedBy;-->
   <form class="columns"
         formGroupName="purchaseOrder"
         tuiForm="m"
@@ -34,27 +33,58 @@
                  formControlName="supplierId"
       />
 
-      <tui-textfield class="textfield">
-        <label tuiLabel>Prepared By</label>
-        <input formControlName="preparedBy"
-               placeholder="Prepared By"
-               tuiTextfield
-        />
-      </tui-textfield>
-      <tui-error [error]="[] | tuiFieldError | async"
-                 formControlName="preparedBy"
-      />
+      <tui-elastic-container *ngIf="selectedSupplier$ | async as supplier">
+        <span tuiHeader>
+          <div tuiCaption>Supplier Details</div>
+        </span>
+        <div tuiCell="s">
+          <div tuiTitle>
+            <div tuiSubtitle>Name</div>
+            {{ supplier?.name }}
+          </div>
+        </div>
+        <div tuiForm="s">
+          <div tuiCell="s"><span tuiTitle><span tuiSubtitle>Contacts</span></span></div>
+          <tui-scrollbar waIntersectionRoot><table [columns]="['name','phone','email']" [size]="'s'" tuiTable><thead
+            tuiThead>
+          <tr tuiThGroup>
+            <th *tuiHead="'name'" [sorter]="null" tuiTh>Name</th>
+            <th *tuiHead="'phone'" [sorter]="null" tuiTh>Phone</th>
+            <th *tuiHead="'email'" [sorter]="null" tuiTh>Email</th>
+          </tr>
+          </thead><tbody tuiTbody>
+          <ng-container *ngFor="let contact of supplier.contacts; let i = index">
+            <tr tuiTr>
+              <td *tuiCell="'name'" tuiTd>{{ contact?.name }}</td>
+              <td *tuiCell="'phone'" tuiTd>{{ contact?.phone }}</td>
+              <td *tuiCell="'email'" tuiTd>{{ contact?.email }}</td>
+              </tr>
+            </ng-container>
+            </tbody>
+          </table>
+          </tui-scrollbar>
+        </div>
 
-      <tui-textfield class="textfield">
-        <label tuiLabel>Checked By</label>
-        <input formControlName="checkedBy"
-               placeholder="Checked By"
-               tuiTextfield
-        />
-      </tui-textfield>
-      <tui-error [error]="[] | tuiFieldError | async"
-                 formControlName="checkedBy"
-      />
+        <div tuiForm="s">
+          <div tuiCell="s"><div tuiTitle><div tuiSubtitle>Addresses</div></div></div>
+            <tui-scrollbar waIntersectionRoot>
+              <table [columns]="['fullAddress']" [size]="'s'" tuiTable>
+                <thead tuiThead>
+                <tr tuiThGroup>
+                  <th *tuiHead="'fullAddress'" [sorter]="null" tuiTh>Address</th>
+                </tr>
+                </thead>
+                <tbody tuiTbody>
+                <ng-container *ngFor="let address of supplier.addresses; let i = index">
+                  <tr tuiTr>
+                    <td *tuiCell="'fullAddress'" tuiTd>{{ address?.fullAddress }}</td>
+                  </tr>
+                </ng-container>
+                </tbody>
+              </table>
+          </tui-scrollbar>
+        </div>
+      </tui-elastic-container>
     </span>
 
     <span class="column"
@@ -82,7 +112,45 @@
                  formControlName="receivedBy"
       />
 
+      <tui-textfield class="textfield">
+        <label tuiLabel>Prepared By</label>
+        <input formControlName="preparedBy"
+               placeholder="Prepared By"
+               tuiTextfield
+        />
+      </tui-textfield>
+      <tui-error [error]="[] | tuiFieldError | async"
+                 formControlName="preparedBy"
+      />
+
+      <tui-textfield class="textfield">
+        <label tuiLabel>Checked By</label>
+        <input formControlName="checkedBy"
+               placeholder="Checked By"
+               tuiTextfield
+        />
+      </tui-textfield>
+      <tui-error [error]="[] | tuiFieldError | async"
+                 formControlName="checkedBy"
+      />
     </span>
+
+    @if (resolvedPurchaseOrder?.id && resolvedPurchaseOrder?.deliveryReceipt?.id) {
+      @let receipt = resolvedPurchaseOrder?.deliveryReceipt;
+      <span class="column side">
+        <div tuiTitle="s">Delivery Receipt Details</div>
+
+        <tui-textfield class="textfield">
+          <label tuiLabel>Received Date</label>
+          <input tuiTextfield [value]="receipt?.receivedDate | date:'long'" disabled/>
+        </tui-textfield>
+
+        <tui-textfield class="textfield">
+          <label tuiLabel>Received By</label>
+          <input tuiTextfield [value]="receipt?.receivedBy" disabled/>
+        </tui-textfield>
+      </span>
+    }
   </form>
 
   <form formGroupName="quoteItems"
@@ -209,21 +277,25 @@
   <span [style.flex]="'1 1 auto'"></span>
 
   <footer class="footer">
-    <button [disabled]="form.invalid || inProgress"
+    <button [disabled]="!form.dirty || form.invalid || inProgress"
             tuiButton
             type="submit"
     >
       Save
     </button>
-    <button (click)="save(true)"
-            [disabled]="form.invalid || inProgress"
-            tuiButton
-            type="button"
-    >
-      Save and Return
-    </button>
     <span [style.flex]="'1 1 auto'"></span>
-    <button [routerLink]="'..'"
+    @if (resolvedPurchaseOrder?.id && !resolvedPurchaseOrder?.deliveryReceipt?.id) {
+      <button (click)="createDeliveryReceipt()"
+              [disabled]="!resolvedPurchaseOrder?.id || resolvedPurchaseOrder?.deliveryReceipt?.id || inProgress"
+              appearance="secondary"
+              tuiButton
+              type="button"
+      >
+        Create Delivery Receipt
+      </button>
+    }
+    <span [style.flex]="'1 1 auto'"></span>
+    <button [routerLink]="'/purchaseOrders'"
             appearance="flat"
             tuiButton
             type="button"

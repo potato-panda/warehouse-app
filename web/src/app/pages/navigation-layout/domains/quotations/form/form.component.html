@@ -6,7 +6,6 @@
       tuiForm="m"
 >
   @let resolvedQuotation = (resolvedQuotation$ | async);
-  @let receipt = resolvedQuotation?.receipt;
   <header tuiHeader><h3 tuiTitle>Quotation Details</h3></header>
 
   <div class="columns">
@@ -64,22 +63,6 @@
                tuiTextfield
         />
       </tui-textfield>
-      @if (receipt) {
-        <tui-textfield class="textfield">
-        <label tuiLabel>Receipt received by</label>
-        <input tuiTextfield
-               disabled
-               [value]="receipt.receivedBy"
-        />
-      </tui-textfield>
-        <tui-textfield class="textfield">
-        <label tuiLabel>Receipt received on</label>
-        <input tuiTextfield
-               disabled
-               [value]="receipt.receivedDate | date:'long'"
-        />
-      </tui-textfield>
-      }
     </span>
 
   </div>

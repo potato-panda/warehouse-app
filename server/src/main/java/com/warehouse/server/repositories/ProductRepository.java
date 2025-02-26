@@ -12,4 +12,6 @@ import org.springframework.data.rest.core.annotation.RestResource;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     @RestResource(path = "byName", rel = "byName")
     Page<Product> findProductsByNameContainingIgnoreCase(@NotNull String name, Pageable pageable);
+
+    Boolean existsByItemCode(@NotNull String itemCode);
 }

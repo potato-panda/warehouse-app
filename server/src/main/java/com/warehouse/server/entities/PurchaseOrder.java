@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.rest.core.config.Projection;
 
-import java.util.Collection;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -24,6 +24,10 @@ public class PurchaseOrder {
     @JoinColumn(name = "supplier_id")
     private Supplier supplier;
 
+    @OneToOne
+    @JoinColumn(name = "delivery_receipt_id")
+    private DeliveryReceipt deliveryReceipt;
+
     @Column(name = "prepared_by")
     private String preparedBy;
 
@@ -36,8 +40,8 @@ public class PurchaseOrder {
     @Column(name = "received_by")
     private String receivedBy;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "purchaseOrder", orphanRemoval = true)
-    private Collection<QuoteItem> quoteItems;
+    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QuoteItem> quoteItems;
 
     @Transient
     private Double totalAmount;
@@ -49,7 +53,9 @@ public class PurchaseOrder {
 
     @Projection(name = "detail", types = {PurchaseOrder.class})
     public interface PurchaseOrderDetailProjection extends PurchaseOrderTableProjection {
-        Collection<QuoteItem> getQuoteItems();
+        List<QuoteItem> getQuoteItems();
+
+        DeliveryReceipt getDeliveryReceipt();
     }
 
     @Projection(name = "table", types = {PurchaseOrder.class})

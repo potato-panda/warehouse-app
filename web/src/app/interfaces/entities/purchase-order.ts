@@ -1,5 +1,6 @@
 import {QuoteItem} from './quoteItem';
 import {Supplier} from './supplier';
+import {DeliveryReceipt} from './delivery-receipt';
 
 export type CreatePurchaseOrder = Partial<Omit<PurchaseOrder, 'id'>>
 
@@ -16,9 +17,11 @@ export interface PurchaseOrder {
   totalAmount: number | null;
 }
 
-export interface PurchaseOrderDetail extends PurchaseOrder {
-  supplier: Supplier | null;
+export interface PurchaseOrderDetail extends PurchaseOrderTable {
   quoteItems: QuoteItem[];
+  deliveryReceipt: DeliveryReceipt;
 }
 
-export type PurchaseOrderTable = Omit<PurchaseOrderDetail, 'quoteItems'>;
+export interface PurchaseOrderTable extends PurchaseOrder {
+  supplier: Supplier | null;
+}

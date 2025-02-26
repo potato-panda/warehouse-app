@@ -44,19 +44,19 @@ export class PurchaseOrdersService extends RestService {
   }
 
   getPageTable(pageable: Pageable = {page: 0}) {
-    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint()}?projection=table`, {
+    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint()}?projection=detail`, {
       params: {...pageable},
     });
   }
 
   getPageTableBySupplier(name: string, pageable: Pageable = {page: 0}) {
-    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint()}/search/bySupplier?projection=table`, {
+    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint()}/search/bySupplier?projection=detail`, {
       params: {...pageable, name},
     });
   }
 
   getPageTableByApprover(name: string, pageable: Pageable = {page: 0}) {
-    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint()}/search/byApprover?projection=table`, {
+    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint()}/search/byApprover?projection=detail`, {
       params: {...pageable, name},
     });
   }
@@ -86,7 +86,7 @@ export class PurchaseOrdersService extends RestService {
   }
 
   addSupplier(id: string, supplierId: string | number | string[] | number []) {
-    return this.http.put<ResourceResponse>(`${this.resourceEndpoint(id)}/supplier`,
+    return this.http.put<void>(`${this.resourceEndpoint(id)}/supplier`,
       IdToHrefList.transform(supplierId, resourceEndpoints.customers()), {
         headers: new HttpHeaders({
           'Content-Type': 'text/uri-list',
@@ -95,7 +95,7 @@ export class PurchaseOrdersService extends RestService {
   }
 
   addQuoteItems(id: string, quoteItemId: string | number | string[] | number []) {
-    return this.http.post<ResourceResponse>(`${this.resourceEndpoint}/${id}/quotedItems`,
+    return this.http.post<void>(`${this.resourceEndpoint}/${id}/quotedItems`,
       IdToHrefList.transform(quoteItemId, resourceEndpoints.quoteItems()), {
         headers: new HttpHeaders({
           'Content-Type': 'text/uri-list',
@@ -103,8 +103,18 @@ export class PurchaseOrdersService extends RestService {
       });
   }
 
+
+  addDeliveryReceipt(id: string, deliveryReceiptId: string | number | string[] | number []) {
+    const hrefs = IdToHrefList.transform(deliveryReceiptId, resourceEndpoints.deliveryReceipts());
+    return this.http.put<ResourceResponse>(`${this.resourceEndpoint(id)}/deliveryReceipt`, hrefs, {
+      headers: new HttpHeaders({
+        'Content-Type': 'text/uri-list',
+      })
+    });
+  }
+
   removeQuoteItems(id: string, quoteItemId: string | number | string[] | number []) {
-    return this.http.delete<ResourceResponse>(`${this.resourceEndpoint}/${id}/quotedItems`, {
+    return this.http.delete<void>(`${this.resourceEndpoint}/${id}/quotedItems`, {
       headers: new HttpHeaders({
         'Content-Type': 'text/uri-list',
       }),

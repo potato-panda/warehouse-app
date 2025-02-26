@@ -9,6 +9,6 @@ export const resourceEndpoints = {
   products: (id?: string | number) => `${baseApiUrl}/products${id ? '/' + id.toString().trim() : ''}`,
   quotation: (id?: string | number) => `${baseApiUrl}/quotation${id ? '/' + id.toString().trim() : ''}`,
   quoteItems: (id?: string | number) => `${baseApiUrl}/quoteItems${id ? '/' + id.toString().trim() : ''}`,
-  receipts: (id?: string | number) => `${baseApiUrl}/receipts${id ? '/' + id.toString().trim() : ''}`,
+  deliveryReceipts: (id?: string | number) => `${baseApiUrl}/deliveryReceipts${id ? '/' + id.toString().trim() : ''}`,
   suppliers: (id?: string | number) => `${baseApiUrl}/suppliers${id ? '/' + id.toString().trim() : ''}`
 };

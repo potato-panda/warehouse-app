@@ -31,7 +31,7 @@
   />
 
   <tui-textfield>
-    <label tuiLabel>Item Code</label>
+    <label tuiLabel>Item Code<sup>*</sup></label>
     <input formControlName="itemCode"
            placeholder="Product Item Code"
            tuiTextfield
@@ -56,7 +56,7 @@
   <tui-textfield>
     <label tuiLabel>UM (Unit of Measurement)</label>
     <input formControlName="um"
-           placeholder="UM (Unit of Measurement)"
+           placeholder="e.g. ml, l, g, kg"
            tuiTextfield
     />
   </tui-textfield>
@@ -65,18 +65,12 @@
   />
 
   <footer class="footer">
-    <button [disabled]="productForm.invalid || inProgress"
-            tuiButton
-            type="submit"
-    >
-      Save
-    </button>
-    <button (click)="save(true)"
+    <button (click)="save()"
             [disabled]="productForm.invalid || inProgress"
             tuiButton
             type="button"
     >
-      Save and Return
+      Save
     </button>
     <button [routerLink]="'..'"
             appearance="flat"

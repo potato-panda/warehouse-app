@@ -34,7 +34,7 @@ import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
 import {TuiCardLarge, TuiForm, TuiHeader} from '@taiga-ui/layout';
 import {TuiFieldErrorPipe, TuiInputNumber} from '@taiga-ui/kit';
 import {QuotationService, QuotationsTableResourceResponse} from '../../../../../services/quotation.service';
-import {CustomersSummaryResourceResponse, CustomersService} from '../../../../../services/customers.service';
+import {CustomersService, CustomersSummaryResourceResponse} from '../../../../../services/customers.service';
 import {ComboBoxComponent} from '../../../../../components/combo-box/combo-box.component';
 import {WaIntersectionObserver} from '@ng-web-apis/intersection-observer';
 import {TuiTable} from '@taiga-ui/addon-table';
@@ -177,8 +177,6 @@ export class FormComponent implements OnInit {
         });
 
         this.form.updateValueAndValidity();
-
-        quotation?.receipt?.id && this.form.disable();
       }
     });
   }
@@ -208,7 +206,6 @@ export class FormComponent implements OnInit {
         this.selectedProducts[_d] = null;
       }
     });
-    this.resolvedQuotation$.value?.receipt?.id && row.disable();
     this.quoteItemsFormArray.push(row);
   }
 

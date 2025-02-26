@@ -44,9 +44,6 @@ public class Quotation {
     @NotNull
     private Timestamp quotationDate;
 
-    @OneToOne(mappedBy = "quotation")
-    private Receipt receipt;
-
     @Transient
     private Double totalAmount;
 
@@ -77,6 +74,5 @@ public class Quotation {
 
     @Projection(name = "table", types = {Quotation.class})
     public interface QuotationTableReceiptProjection extends QuotationInReceiptProjection {
-        Receipt getReceipt();
     }
 }

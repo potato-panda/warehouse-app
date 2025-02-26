@@ -15,15 +15,15 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "receipts")
-public class Receipt {
+@Table(name = "delivery_receipts")
+public class DeliveryReceipt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
-    @JoinColumn(name = "quotation_id")
-    private Quotation quotation;
+    @OneToOne(mappedBy = "deliveryReceipt", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH,
+            CascadeType.PERSIST})
+    private PurchaseOrder purchaseOrder;
 
     @Column(name = "received_date")
     @NotNull
@@ -33,11 +33,11 @@ public class Receipt {
     @NotNull
     private String receivedBy;
 
-    @Projection(name = "withQuotation", types = {Receipt.class})
-    public interface ReceiptWithQuotationProjection {
+    @Projection(name = "withPurchaseOrder", types = {DeliveryReceipt.class})
+    public interface DeliveryReceiptWithPurchaseOrderProjection {
         Long getId();
 
-        Quotation.QuotationInReceiptProjection getQuotation();
+        PurchaseOrder.PurchaseOrderTableProjection getPurchaseOrder();
 
         Timestamp getReceivedDate();
 

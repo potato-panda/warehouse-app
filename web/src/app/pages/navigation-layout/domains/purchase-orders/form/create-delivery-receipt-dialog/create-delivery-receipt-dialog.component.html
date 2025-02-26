@@ -1,0 +1,32 @@
+<form [formGroup]="form" tuiForm="m" (ngSubmit)="submit()">
+
+  <tui-input-date formControlName="receivedDate" tuiTextfieldSize="m">
+    Received Date
+  </tui-input-date>
+  <tui-error
+    formControlName="receivedDate"
+    [error]="[] | tuiFieldError | async"
+  />
+
+  <tui-textfield class="textfield">
+    <label tuiLabel>Received By</label>
+    <input formControlName="receivedBy"
+           placeholder="Received By"
+           tuiTextfield
+    />
+  </tui-textfield>
+  <tui-error [error]="[] | tuiFieldError | async"
+             formControlName="receivedBy"
+  />
+
+  <footer class="footer">
+    <button (click)="submit()"
+            [disabled]="!form?.dirty || !form.valid"
+            appearance="primary"
+            size="m"
+            tuiButton
+    >
+      Create
+    </button>
+  </footer>
+</form>
