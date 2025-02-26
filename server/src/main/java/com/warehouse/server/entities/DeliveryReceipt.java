@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.rest.core.config.Projection;
 
 import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 
 @Data
 @NoArgsConstructor
@@ -33,14 +34,31 @@ public class DeliveryReceipt {
     @NotNull
     private String receivedBy;
 
-    @Projection(name = "withPurchaseOrder", types = {DeliveryReceipt.class})
-    public interface DeliveryReceiptWithPurchaseOrderProjection {
-        Long getId();
+    @Column(name = "payment_due_date")
+    private ZonedDateTime paymentDueDate;
 
-        PurchaseOrder.PurchaseOrderTableProjection getPurchaseOrder();
+    @Column(name = "cheque_number")
+    private String chequeNumber;
+
+    @Projection(name = "brief", types = {DeliveryReceipt.class})
+    public interface BriefProjection {
+        Long getId();
 
         Timestamp getReceivedDate();
 
         String getReceivedBy();
+
+    }
+
+    @Projection(name = "payment", types = {DeliveryReceipt.class})
+    public interface PaymentProjection extends BriefProjection {
+        ZonedDateTime getPaymentDueDate();
+
+        String getChequeNumber();
+    }
+
+    @Projection(name = "withPurchaseOrder", types = {DeliveryReceipt.class})
+    public interface WithPurchaseOrderProjection extends BriefProjection {
+        PurchaseOrder.PurchaseOrderTableProjection getPurchaseOrder();
     }
 }

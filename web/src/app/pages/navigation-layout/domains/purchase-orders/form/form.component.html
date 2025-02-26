@@ -135,20 +135,51 @@
       />
     </span>
 
-    @if (resolvedPurchaseOrder?.id && resolvedPurchaseOrder?.deliveryReceipt?.id) {
-      @let receipt = resolvedPurchaseOrder?.deliveryReceipt;
+    @if (resolvedPurchaseOrder?.id) {
+      @let receipt = deliveryReceipt$.value;
       <span class="column side">
-        <div tuiTitle="s">Delivery Receipt Details</div>
+        <div class="flex row title-button">Delivery Receipt Details@if (receipt?.id) {
+          <button (click)="openDeliveryReceiptDialog()"
+                  appearance="primary"
+                  [size]="'xs'"
+                  tuiButton
+                  type="button"
+          >
+            Edit
+          </button>
+        }</div>
 
-        <tui-textfield class="textfield">
+        @if (receipt?.id) {
+          <tui-textfield class="textfield">
           <label tuiLabel>Received Date</label>
-          <input tuiTextfield [value]="receipt?.receivedDate | date:'long'" disabled/>
+          <input tuiTextfield [value]="receipt?.receivedDate ? (receipt?.receivedDate | date:'longDate') : ''" disabled/>
         </tui-textfield>
 
-        <tui-textfield class="textfield">
+          <tui-textfield class="textfield">
           <label tuiLabel>Received By</label>
           <input tuiTextfield [value]="receipt?.receivedBy" disabled/>
         </tui-textfield>
+
+          <tui-textfield class="textfield">
+          <label tuiLabel>Payment Due Date</label>
+          <input tuiTextfield [value]="receipt?.paymentDueDate ? (receipt?.paymentDueDate | date:'longDate') : ''"
+                 disabled/>
+        </tui-textfield>
+
+          <tui-textfield class="textfield">
+          <label tuiLabel>Cheque Number</label>
+          <input tuiTextfield [value]="receipt?.chequeNumber" disabled/>
+        </tui-textfield>
+        } @else if (!receipt?.id) {
+          <hr>
+          <button (click)="openDeliveryReceiptDialog()"
+                  appearance="secondary"
+                  tuiButton
+                  type="button"
+          >
+            Create Delivery Receipt
+          </button>
+        }
       </span>
     }
   </form>
@@ -285,7 +316,7 @@
     </button>
     <span [style.flex]="'1 1 auto'"></span>
     @if (resolvedPurchaseOrder?.id && !resolvedPurchaseOrder?.deliveryReceipt?.id) {
-      <button (click)="createDeliveryReceipt()"
+      <button (click)="openDeliveryReceiptDialog()"
               [disabled]="!resolvedPurchaseOrder?.id || resolvedPurchaseOrder?.deliveryReceipt?.id || inProgress"
               appearance="secondary"
               tuiButton

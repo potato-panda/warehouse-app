@@ -51,7 +51,7 @@
             <ng-container *ngIf="supplier">{{ supplier.name }}</ng-container>
           </td>
           <td *tuiCell="'receivedBy'" tuiTd>{{ receipt.receivedBy }}</td>
-          <td *tuiCell="'receivedDate'" tuiTd>{{ receipt.receivedDate | date:'long' }}</td>
+          <td *tuiCell="'receivedDate'" tuiTd>{{ receipt.receivedDate | date:'longDate' }}</td>
           <td *tuiCell="'totalAmount'" tuiTd>{{ purchaseOrder?.totalAmount }}</td>
           <td *tuiCell="'actions'" tuiTd>
             <span tuiStatus>

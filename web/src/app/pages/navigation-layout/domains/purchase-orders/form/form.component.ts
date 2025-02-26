@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
 import {ComboBoxComponent} from '../../../../../components/combo-box/combo-box.component';
 import {FormArray, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
@@ -65,10 +65,8 @@ import {Supplier, SupplierDetail} from '../../../../../interfaces/entities/suppl
 import {SuppliersCollectionResourceResponse, SuppliersService} from '../../../../../services/suppliers.service';
 import {DeliveryReceiptsService} from '../../../../../services/delivery-receipts.service';
 import {PolymorpheusComponent} from '@taiga-ui/polymorpheus';
-import {
-  CreateDeliveryReceiptDialogComponent
-} from './create-delivery-receipt-dialog/create-delivery-receipt-dialog.component';
-import {DeliveryReceiptCreateRequest} from '../../../../../interfaces/entities/delivery-receipt';
+import {DeliveryReceiptDialogComponent} from './delivery-receipt-dialog/delivery-receipt-dialog.component';
+import {DeliveryReceipt, DeliveryReceiptCreateRequest} from '../../../../../interfaces/entities/delivery-receipt';
 
 interface QuoteItemRow {
   _d: FormControl<string>,
@@ -128,21 +126,12 @@ interface QuoteItemRow {
   templateUrl: './form.component.html',
   styleUrl: './form.component.scss'
 })
-export class FormComponent {
+export class FormComponent implements OnInit {
   readonly columns = ['product', 'price', 'quantity', 'unit', 'total', 'actions'];
   protected resolvedPurchaseOrder$ = new BehaviorSubject<PurchaseOrderDetail | null>(null);
+  protected deliveryReceipt$ = new BehaviorSubject<DeliveryReceipt | null>(null);
   protected inProgress = false;
-  protected readonly form = new FormGroup({
-    purchaseOrder: new FormGroup({
-      id: new FormControl<string | number | null>(null),
-      preparedBy: new FormControl<string | null>(null),
-      checkedBy: new FormControl<string | null>(null),
-      approvedBy: new FormControl<string | null>(null),
-      receivedBy: new FormControl<string | null>(null),
-      supplierId: new FormControl<string | number | null>(null, Validators.required),
-    }),
-    quoteItems: new FormArray<FormGroup<QuoteItemRow>>([])
-  });
+  protected form!: FormGroup;
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
   protected readonly sorter$ = new BehaviorSubject<'product' | 'price' | 'quantity' | 'unit' | 'total' | null>(null);
   protected selectedProducts: Record<string | number, Product | null> = {};
@@ -179,8 +168,20 @@ export class FormComponent {
     return this.quoteItemsFormArray.length > 1;
   }
 
-  ngOnInit() {
-    this.purchaseOrderForm?.get('supplierId')?.valueChanges.subscribe(id => {
+  initForm() {
+    const initForm = new FormGroup({
+      purchaseOrder: new FormGroup({
+        id: new FormControl<string | number | null>(null),
+        preparedBy: new FormControl<string | null>(null),
+        checkedBy: new FormControl<string | null>(null),
+        approvedBy: new FormControl<string | null>(null),
+        receivedBy: new FormControl<string | null>(null),
+        supplierId: new FormControl<string | number | null>(null, Validators.required),
+      }),
+      quoteItems: new FormArray<FormGroup<QuoteItemRow>>([])
+    });
+
+    initForm?.get('purchaseOrder.supplierId')?.valueChanges.subscribe(id => {
       if (id) {
         this.suppliersService.getDetailOne(id).subscribe(detail => this.selectedSupplier$.next(detail));
       } else {
@@ -188,13 +189,20 @@ export class FormComponent {
       }
     });
 
+    this.form = initForm;
+  }
+
+  ngOnInit() {
     this.route.data.subscribe((data) => {
+      this.initForm();
       if (data['resolved']) {
         const {purchaseOrder} = this.route.snapshot.data['resolved'] as ResolvedData;
         const supplier = purchaseOrder?.supplier;
 
         this.resolvedSupplier$.next(supplier);
         supplier && this.mappedSuppliers$.next([supplier]);
+
+        this.deliveryReceipt$.next(purchaseOrder.deliveryReceipt);
 
         this.form.patchValue({
           purchaseOrder: {
@@ -236,40 +244,49 @@ export class FormComponent {
     });
   }
 
-  createDeliveryReceipt() {
-    const id = this.resolvedPurchaseOrder$.value?.id;
+  openDeliveryReceiptDialog() {
+    const purchaseOrder = this.resolvedPurchaseOrder$.value;
+    if (purchaseOrder) {
+      const {id: purchaseOrderId} = purchaseOrder;
+      const deliveryReceipt = this.deliveryReceipt$.value;
 
-    this.dialogs.open<DeliveryReceiptCreateRequest>(new PolymorpheusComponent(CreateDeliveryReceiptDialogComponent), {
-      dismissible: true,
-      closeable: true,
-      label: 'Create Delivery Receipt',
-      size: 'm'
-    }).pipe(
-      mergeMap(requestData => requestData
-        ? this.deliveryReceiptsService.createOne(requestData).pipe(
-          mergeMap(response => this.purchaseOrdersService.addDeliveryReceipt(String(id), response.id.toString())))
-        : of()
-      )
-    ).subscribe({
-      error: err => {
-        this.alerts.open(context => 'Please try again later.',
-          {
-            appearance: 'negative',
-            label: 'Save failed'
+      this.dialogs.open<DeliveryReceiptCreateRequest | DeliveryReceipt>(new PolymorpheusComponent(DeliveryReceiptDialogComponent), {
+        dismissible: true,
+        closeable: true,
+        label: `${deliveryReceipt?.id ? 'Update' : 'Create'} Delivery Receipt`,
+        data: {deliveryReceipt},
+        size: 'm'
+      }).pipe(
+        mergeMap(requestData => requestData
+          ? deliveryReceipt?.id
+            ? this.deliveryReceiptsService.updateOne(requestData as DeliveryReceipt)
+            : this.deliveryReceiptsService.createOne(requestData).pipe(
+              mergeMap(response => this.purchaseOrdersService.addDeliveryReceipt(String(purchaseOrderId), response.id.toString()).pipe(mergeMap(() => of(response))))
+            )
+          : of()
+        )
+      ).subscribe({
+        error: err => {
+          this.alerts.open(context => 'Please try again later.',
+            {
+              appearance: 'negative',
+              label: 'Save failed'
+            }).subscribe();
+          this.inProgress = false;
+        },
+        next: value => {
+          this.alerts.open(() => 'Save successful!', {
+            appearance: 'positive',
+            label: 'Success',
           }).subscribe();
-        this.inProgress = false;
-      },
-      next: value => {
-        this.alerts.open(() => 'Save successful!', {
-          appearance: 'positive',
-          label: 'Success',
-        }).subscribe();
-        this.inProgress = false;
-        this.router.navigate(['..'], {skipLocationChange: true}).then();
-      },
-      complete: () => {
-      }
-    });
+          this.inProgress = false;
+
+          this.deliveryReceipt$.next(value);
+        },
+        complete: () => {
+        }
+      });
+    }
   }
 
   protected toSupplierId: (item: Supplier) => string = item => {

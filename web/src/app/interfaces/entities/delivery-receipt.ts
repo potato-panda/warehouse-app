@@ -4,12 +4,16 @@ import {PurchaseOrderDetail} from './purchase-order';
 export interface DeliveryReceiptCreateRequest {
   receivedDate: string;
   receivedBy: string;
+  paymentDueDate: string;
+  chequeNumber: string;
 }
 
 export interface DeliveryReceipt {
   id: string | number;
   receivedDate: string;
   receivedBy: string;
+  paymentDueDate: string;
+  chequeNumber: string;
 }
 
 export interface DeliveryReceiptTable extends DeliveryReceipt {

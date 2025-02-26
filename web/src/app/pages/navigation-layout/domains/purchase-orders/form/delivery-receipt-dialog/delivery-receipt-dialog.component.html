@@ -1,0 +1,51 @@
+<form [formGroup]="form" tuiForm="m" (ngSubmit)="submit()">
+  @let deliveryReceipt = this.data.deliveryReceipt;
+  <tui-input-date [tuiDateFormat]="{separator: '/', mode: 'MDY'}" formControlName="receivedDate" tuiTextfieldSize="m">
+    Received Date<sup>*</sup>
+    <input tuiTextfieldLegacy />
+  </tui-input-date>
+  <tui-error formControlName="receivedDate"
+             [error]="[] | tuiFieldError | async"
+  />
+
+  <tui-textfield class="textfield">
+    <label tuiLabel>Received By<sup>*</sup></label>
+    <input formControlName="receivedBy"
+           placeholder="Received By"
+           tuiTextfield
+    />
+  </tui-textfield>
+  <tui-error [error]="[] | tuiFieldError | async"
+             formControlName="receivedBy"
+  />
+
+  <tui-input-date [tuiDateFormat]="{separator: '/', mode: 'MDY'}" formControlName="paymentDueDate" tuiTextfieldSize="m">
+    Payment Due Date
+    <input tuiTextfieldLegacy />
+  </tui-input-date>
+  <tui-error formControlName="paymentDueDate"
+             [error]="[] | tuiFieldError | async"
+  />
+
+  <tui-textfield class="textfield">
+    <label tuiLabel>Cheque Number</label>
+    <input formControlName="chequeNumber"
+           placeholder="Cheque Number"
+           tuiTextfield
+    />
+  </tui-textfield>
+  <tui-error [error]="[] | tuiFieldError | async"
+             formControlName="chequeNumber"
+  />
+
+  <footer class="footer">
+    <button (click)="submit()"
+            [disabled]="!form.dirty || !form.valid"
+            appearance="primary"
+            size="m"
+            tuiButton
+    >
+      {{ deliveryReceipt?.id ? 'Update' : 'Create' }}
+    </button>
+  </footer>
+</form>

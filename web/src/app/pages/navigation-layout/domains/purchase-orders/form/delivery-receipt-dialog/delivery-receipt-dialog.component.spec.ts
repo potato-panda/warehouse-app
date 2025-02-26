@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CreateDeliveryReceiptDialogComponent } from './create-delivery-receipt-dialog.component';
+import { DeliveryReceiptDialogComponent } from './delivery-receipt-dialog.component';
 
 describe('CreateDeliveryReceiptDialogComponent', () => {
-  let component: CreateDeliveryReceiptDialogComponent;
-  let fixture: ComponentFixture<CreateDeliveryReceiptDialogComponent>;
+  let component: DeliveryReceiptDialogComponent;
+  let fixture: ComponentFixture<DeliveryReceiptDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CreateDeliveryReceiptDialogComponent]
+      imports: [DeliveryReceiptDialogComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CreateDeliveryReceiptDialogComponent);
+    fixture = TestBed.createComponent(DeliveryReceiptDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
