@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.rest.core.config.Projection;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Data
@@ -23,7 +24,12 @@ public class Quotation {
     private Long id;
 
     @OneToMany(mappedBy = "quotation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Collection<QuoteItem> quoteItems;
+    @Builder.Default
+    private Collection<QuoteItem> quoteItems = new ArrayList<>();
+
+    @OneToOne
+    @JoinColumn(name = "delivery_receipt_id")
+    private DeliveryReceipt deliveryReceipt;
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
@@ -34,45 +40,82 @@ public class Quotation {
     @NotNull
     private String paymentTerms;
 
-    //    users will manually input
-    @OneToOne
-    @JoinColumn(name = "shipping_address")
     @NotNull
-    private Address shippingAddress;
+    private String shippingAddress;
 
     @Column(name = "quotation_date")
-    @NotNull
     private Timestamp quotationDate;
 
+    @Column(name = "vat_inclusive")
+    @NotNull
+    @Builder.Default
+    private Boolean vatInclusive = true;
+
+    @Column(name = "delivery_charge")
+    @NotNull
+    @Builder.Default
+    private Double deliveryCharge = 0.0;
+
     @Transient
-    private Double totalAmount;
+    @Builder.Default
+    private Double deliverySubtotal = 0.0;
+
+    @Transient
+    @Builder.Default
+    private Double discountSubtotal = 0.0;
+
+    @Transient
+    @Builder.Default
+    private Double subtotal = 0.0;
+
+    @Transient
+    @Builder.Default
+    private Double totalAmount = 0.0;
 
     @PrePersist
     public void addQuotationDate() {
-        quotationDate = new Timestamp(System.currentTimeMillis());
+        if (quotationDate == null) {
+            quotationDate = new Timestamp(System.currentTimeMillis());
+        }
     }
 
     @PostLoad
-    public void calculateTotalAmount() {
-        this.totalAmount = getQuoteItems().stream().mapToDouble(QuoteItem::getTotalAmount).sum();
+    public void postLoad() {
+        this.deliverySubtotal = getDeliveryCharge();
+        this.subtotal         = getQuoteItems().stream().mapToDouble(QuoteItem::getSubtotal).sum();
+        this.discountSubtotal = getQuoteItems().stream()
+                                               .mapToDouble(item -> item.getSubtotal() * item.getDiscountAmount() / 100.0)
+                                               .sum();
+        this.totalAmount      = subtotal - discountSubtotal + deliverySubtotal;
     }
 
-    @Projection(name = "inReceipt", types = {Quotation.class})
-    public interface QuotationInReceiptProjection {
+    @Projection(name = "detail", types = {Quotation.class})
+    public interface QuotationDetailProjection extends QuotationTableReceiptProjection {
+        DeliveryReceipt getDeliveryReceipt();
+
+        Boolean getVatInclusive();
+
+        Double getDeliveryCharge();
+
+        Double getDeliverySubtotal();
+
+        Double getDiscountSubtotal();
+
+        Double getSubtotal();
+    }
+
+    @Projection(name = "table", types = {Quotation.class})
+    public interface QuotationTableReceiptProjection {
         Long getId();
 
         Customer.CustomerSummaryProjection getCustomer();
 
         String getPaymentTerms();
 
-        Address getShippingAddress();
+        String getShippingAddress();
 
         Timestamp getQuotationDate();
 
         Double getTotalAmount();
-    }
-
-    @Projection(name = "table", types = {Quotation.class})
-    public interface QuotationTableReceiptProjection extends QuotationInReceiptProjection {
     }
 }

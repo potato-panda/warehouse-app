@@ -10,7 +10,7 @@
   <hr>
 
   <tui-textfield iconStart="@tui.search">
-    <label tuiLabel>Search by Supplier Name</label>
+    <label tuiLabel>Search by Customer Name</label>
     <input [(ngModel)]="nameSearch"
            tuiTextfield
     />
@@ -45,17 +45,18 @@
                tuiTbody
         >
         <tr *ngFor="let receipt of sortedReceipts" tuiTr>
-          @let purchaseOrder = receipt.purchaseOrder;
-          @let supplier = purchaseOrder?.supplier;
+          @let quotation = receipt.quotation;
+          @let customer = quotation?.customer;
           <td *tuiCell="'supplier'" tuiTd>
-            <ng-container *ngIf="supplier">{{ supplier.name }}</ng-container>
+            <ng-container *ngIf="customer">{{ customer.name }}</ng-container>
           </td>
           <td *tuiCell="'receivedBy'" tuiTd>{{ receipt.receivedBy }}</td>
           <td *tuiCell="'receivedDate'" tuiTd>{{ receipt.receivedDate | date:'longDate' }}</td>
-          <td *tuiCell="'totalAmount'" tuiTd>{{ purchaseOrder?.totalAmount }}</td>
+          <td *tuiCell="'totalAmount'" tuiTd>{{ quotation?.totalAmount }}</td>
           <td *tuiCell="'actions'" tuiTd>
-            <span tuiStatus>
-              <button [routerLink]="['/purchaseOrders', purchaseOrder?.id]"
+            @if (quotation?.id) {
+              <span tuiStatus>
+              <button [routerLink]="['/quotations', quotation?.id]"
                       appearance="action"
                       iconStart="@tui.arrow-up-right"
                       size="xs"
@@ -65,6 +66,7 @@
               View
               </button>
             </span>
+            }
           </td>
         </tr>
         </tbody>

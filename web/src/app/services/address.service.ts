@@ -37,4 +37,21 @@ export class AddressService extends RestService {
   deleteOne(id: string | number) {
     return this.http.delete(this.resourceEndpoint(id));
   }
+
+  getAddressesByCustomer(customerId: string | number) {
+    return this.http.get<CollectionResourceResponse>(this.resourceEndpoint() + '/search/byCustomerId', {
+      params: {
+        customerId
+      }
+    });
+  }
+
+  findAddressesByCustomerAndName(customerId: string | number, fullAddress: string) {
+    return this.http.get<CollectionResourceResponse>(this.resourceEndpoint() + '/search/byCustomerIdAndAddressName', {
+      params: {
+        customerId,
+        fullAddress
+      }
+    });
+  }
 }

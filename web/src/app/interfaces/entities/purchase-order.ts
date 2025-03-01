@@ -19,7 +19,6 @@ export interface PurchaseOrder {
 
 export interface PurchaseOrderDetail extends PurchaseOrderTable {
   quoteItems: QuoteItem[];
-  deliveryReceipt: DeliveryReceipt;
 }
 
 export interface PurchaseOrderTable extends PurchaseOrder {

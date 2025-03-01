@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {RestService} from './rest.service';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {Pageable} from '../interfaces/pageable';
 import {CollectionResource, Resource} from '../interfaces/resource';
 import {
@@ -10,7 +10,6 @@ import {
   DeliveryReceiptTable
 } from '../interfaces/entities/delivery-receipt';
 import {resourceEndpoints} from './resource-endpoints';
-import IdToHrefList from '../utils/id-to-href-list';
 
 type ResourceResponse = Resource<DeliveryReceipt, 'deliveryReceipt', DeliveryReceiptRelations>;
 type TableResourceResponse = Resource<DeliveryReceiptTable, 'deliveryReceipt', DeliveryReceiptRelations>;
@@ -45,14 +44,14 @@ export class DeliveryReceiptsService extends RestService {
   }
 
   getTablePage(pageable: Pageable = {page: 0}) {
-    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint()}?projection=withPurchaseOrder`, {
+    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint()}?projection=withQuotation`, {
       params: {...pageable},
     });
   }
 
   getTablePageByCustomer(name: string, pageable: Pageable = {page: 0}) {
-    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint()}/search/byCustomer?projection=withPurchaseOrder`, {
-      params: {...pageable, name, projection: 'withPurchaseOrder'},
+    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint()}/search/byCustomer?projection=withQuotation`, {
+      params: {...pageable, name},
     });
   }
 
@@ -61,7 +60,7 @@ export class DeliveryReceiptsService extends RestService {
   }
 
   getTableOne(id: string | number) {
-    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint(id)}?projection=withPurchaseOrder`);
+    return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint(id)}?projection=withQuotation`);
   }
 
   createOne(receipt: DeliveryReceiptCreateRequest) {

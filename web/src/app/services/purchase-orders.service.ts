@@ -103,16 +103,6 @@ export class PurchaseOrdersService extends RestService {
       });
   }
 
-
-  addDeliveryReceipt(id: string, deliveryReceiptId: string | number | string[] | number []) {
-    const hrefs = IdToHrefList.transform(deliveryReceiptId, resourceEndpoints.deliveryReceipts());
-    return this.http.put<ResourceResponse>(`${this.resourceEndpoint(id)}/deliveryReceipt`, hrefs, {
-      headers: new HttpHeaders({
-        'Content-Type': 'text/uri-list',
-      })
-    });
-  }
-
   removeQuoteItems(id: string, quoteItemId: string | number | string[] | number []) {
     return this.http.delete<void>(`${this.resourceEndpoint}/${id}/quotedItems`, {
       headers: new HttpHeaders({

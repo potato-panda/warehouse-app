@@ -24,10 +24,6 @@ public class PurchaseOrder {
     @JoinColumn(name = "supplier_id")
     private Supplier supplier;
 
-    @OneToOne
-    @JoinColumn(name = "delivery_receipt_id")
-    private DeliveryReceipt deliveryReceipt;
-
     @Column(name = "prepared_by")
     private String preparedBy;
 
@@ -54,8 +50,6 @@ public class PurchaseOrder {
     @Projection(name = "detail", types = {PurchaseOrder.class})
     public interface PurchaseOrderDetailProjection extends PurchaseOrderTableProjection {
         List<QuoteItem> getQuoteItems();
-
-        DeliveryReceipt getDeliveryReceipt();
     }
 
     @Projection(name = "table", types = {PurchaseOrder.class})

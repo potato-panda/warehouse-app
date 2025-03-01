@@ -1,5 +1,5 @@
 import {Component, inject, OnInit} from '@angular/core';
-import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
+import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
 import {ComboBoxComponent} from '../../../../../components/combo-box/combo-box.component';
 import {FormArray, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
@@ -63,10 +63,6 @@ import {PurchaseOrderDetail} from '../../../../../interfaces/entities/purchase-o
 import {PurchaseOrdersService} from '../../../../../services/purchase-orders.service';
 import {Supplier, SupplierDetail} from '../../../../../interfaces/entities/supplier';
 import {SuppliersCollectionResourceResponse, SuppliersService} from '../../../../../services/suppliers.service';
-import {DeliveryReceiptsService} from '../../../../../services/delivery-receipts.service';
-import {PolymorpheusComponent} from '@taiga-ui/polymorpheus';
-import {DeliveryReceiptDialogComponent} from './delivery-receipt-dialog/delivery-receipt-dialog.component';
-import {DeliveryReceipt, DeliveryReceiptCreateRequest} from '../../../../../interfaces/entities/delivery-receipt';
 
 interface QuoteItemRow {
   _d: FormControl<string>,
@@ -119,7 +115,6 @@ interface QuoteItemRow {
     TuiTable,
     TuiNumberFormat,
     RouterLink,
-    DatePipe,
     TuiCell,
     TuiElasticContainer
   ],
@@ -129,7 +124,6 @@ interface QuoteItemRow {
 export class FormComponent implements OnInit {
   readonly columns = ['product', 'price', 'quantity', 'unit', 'total', 'actions'];
   protected resolvedPurchaseOrder$ = new BehaviorSubject<PurchaseOrderDetail | null>(null);
-  protected deliveryReceipt$ = new BehaviorSubject<DeliveryReceipt | null>(null);
   protected inProgress = false;
   protected form!: FormGroup;
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
@@ -152,7 +146,6 @@ export class FormComponent implements OnInit {
               private purchaseOrdersService: PurchaseOrdersService,
               private quoteItemsService: QuoteItemService,
               private productsService: ProductsService,
-              private deliveryReceiptsService: DeliveryReceiptsService,
   ) {
   }
 
@@ -202,8 +195,6 @@ export class FormComponent implements OnInit {
         this.resolvedSupplier$.next(supplier);
         supplier && this.mappedSuppliers$.next([supplier]);
 
-        this.deliveryReceipt$.next(purchaseOrder.deliveryReceipt);
-
         this.form.patchValue({
           purchaseOrder: {
             ...purchaseOrder,
@@ -242,51 +233,6 @@ export class FormComponent implements OnInit {
         this.form.updateValueAndValidity();
       }
     });
-  }
-
-  openDeliveryReceiptDialog() {
-    const purchaseOrder = this.resolvedPurchaseOrder$.value;
-    if (purchaseOrder) {
-      const {id: purchaseOrderId} = purchaseOrder;
-      const deliveryReceipt = this.deliveryReceipt$.value;
-
-      this.dialogs.open<DeliveryReceiptCreateRequest | DeliveryReceipt>(new PolymorpheusComponent(DeliveryReceiptDialogComponent), {
-        dismissible: true,
-        closeable: true,
-        label: `${deliveryReceipt?.id ? 'Update' : 'Create'} Delivery Receipt`,
-        data: {deliveryReceipt},
-        size: 'm'
-      }).pipe(
-        mergeMap(requestData => requestData
-          ? deliveryReceipt?.id
-            ? this.deliveryReceiptsService.updateOne(requestData as DeliveryReceipt)
-            : this.deliveryReceiptsService.createOne(requestData).pipe(
-              mergeMap(response => this.purchaseOrdersService.addDeliveryReceipt(String(purchaseOrderId), response.id.toString()).pipe(mergeMap(() => of(response))))
-            )
-          : of()
-        )
-      ).subscribe({
-        error: err => {
-          this.alerts.open(context => 'Please try again later.',
-            {
-              appearance: 'negative',
-              label: 'Save failed'
-            }).subscribe();
-          this.inProgress = false;
-        },
-        next: value => {
-          this.alerts.open(() => 'Save successful!', {
-            appearance: 'positive',
-            label: 'Success',
-          }).subscribe();
-          this.inProgress = false;
-
-          this.deliveryReceipt$.next(value);
-        },
-        complete: () => {
-        }
-      });
-    }
   }
 
   protected toSupplierId: (item: Supplier) => string = item => {

@@ -13,7 +13,7 @@ export const detailsResolver: ResolveFn<ResolvedData> = (route, state) => {
   const quotationsService = inject(QuotationService);
   const id = route.params['id'];
   if (id) {
-    return forkJoin([quotationsService.getTableOne(id), quotationsService.getCustomer(id)])
+    return forkJoin([quotationsService.getDetailOne(id), quotationsService.getCustomer(id)])
       .pipe(
         concatMap(([quotation, customer]) => {
           return of({quotation, customer});

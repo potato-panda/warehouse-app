@@ -55,8 +55,8 @@
           </td>
           <td *tuiCell="'paymentTerms'" tuiTd>{{ quotation.paymentTerms }}</td>
           <td *tuiCell="'shippingAddress'" tuiTd>{{ quotation.shippingAddress }}</td>
-          <td *tuiCell="'quotationDate'" tuiTd>{{ quotation.quotationDate | date:'long' }}</td>
-          <td *tuiCell="'totalAmount'" tuiTd>{{ quotation.totalAmount }}</td>
+          <td *tuiCell="'quotationDate'" tuiTd>{{ quotation.quotationDate | date:'longDate' }}</td>
+          <td *tuiCell="'totalAmount'" tuiTd>{{ quotation.totalAmount.toFixed(2) }}</td>
           <td *tuiCell="'actions'" tuiTd>
           <span tuiStatus>
           <button [routerLink]="[quotation.id]"

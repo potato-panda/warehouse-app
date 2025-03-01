@@ -1,3 +1,5 @@
+@let resolvedQuotation = (resolvedQuotation$ | async);
+@let deliveryReceipt = (deliveryReceipt$ | async);
 <form (ngSubmit)="save()"
       [formGroup]="form"
       [style.margin-top.rem]="3"
@@ -5,7 +7,6 @@
       tuiCardLarge
       tuiForm="m"
 >
-  @let resolvedQuotation = (resolvedQuotation$ | async);
   <header tuiHeader><h3 tuiTitle>Quotation Details</h3></header>
 
   <div class="columns">
@@ -20,17 +21,6 @@
       </tui-textarea>
       <tui-error [error]="[] | tuiFieldError | async"
                  formControlName="paymentTerms"
-      />
-
-      <tui-textfield class="textfield">
-        <label tuiLabel>Shipping Address</label>
-        <input formControlName="shippingAddress"
-               placeholder="Shipping Address"
-               tuiTextfield
-        />
-      </tui-textfield>
-      <tui-error [error]="[] | tuiFieldError | async"
-                 formControlName="shippingAddress"
       />
 
       <app-combo-box [searchFn]="searchCustomers"
@@ -51,6 +41,44 @@
       <tui-error [error]="[] | tuiFieldError | async"
                  formControlName="customerId"
       />
+
+      <app-combo-box [searchFn]="searchShippingAddress"
+                     [valueFn]="toFullAddress"
+                     class="textfield"
+                     formControlName="shippingAddress"
+                     label="Shipping Address" placeholder="Shipping Address"
+                     tuiTextfieldSize="m"
+      >
+        <ng-template #itemTemplate let-address>
+          <div class="name">{{ address.fullAddress }}</div>
+        </ng-template>
+        <ng-template #loadingTemplate>
+          <tui-loader></tui-loader>
+        </ng-template>
+      </app-combo-box>
+      <tui-error [error]="[] | tuiFieldError | async"
+                 formControlName="shippingAddress"
+      />
+
+      <label>
+        <input formControlName="sameAsBilling"
+               size="m"
+               tuiCheckbox
+               type="checkbox"
+        />
+        Same as Billing Address
+      </label>
+
+      <tui-textfield>
+        <input formControlName="deliveryCharge"
+               tuiInputNumber
+               tuiTextfieldSize="m"
+        />
+        <label tuiLabel>Delivery Charge</label>
+      </tui-textfield>
+      <tui-error [error]="[] | tuiFieldError | async"
+                 formControlName="deliveryCharge"
+      />
     </form>
 
     <span class="column"
@@ -58,12 +86,68 @@
     >
       <tui-textfield class="textfield">
         <label tuiLabel>Date created</label>
-        <input [value]="resolvedQuotation? (resolvedQuotation.quotationDate | date:'long') : ''"
+        <input [value]="resolvedQuotation? (resolvedQuotation.quotationDate | date:'longDate') : ''"
                disabled
                tuiTextfield
         />
       </tui-textfield>
     </span>
+
+    @if (resolvedQuotation?.id) {
+      <span class="column"
+            tuiForm="m"
+      >
+        <span class="column side">
+        <div class="flex row title-button">Delivery Receipt Details
+          @if (deliveryReceipt?.id) {
+            <button (click)="openDeliveryReceiptDialog()"
+                    appearance="primary"
+                    [size]="'xs'"
+                    tuiButton
+                    type="button"
+            >
+            Edit
+          </button>
+          }
+        </div>
+
+          @if (deliveryReceipt?.id) {
+            <tui-textfield class="textfield">
+          <label tuiLabel>Received Date</label>
+          <input tuiTextfield
+                 [value]="deliveryReceipt?.receivedDate ? (deliveryReceipt?.receivedDate | date:'longDate') : ''"
+                 disabled/>
+        </tui-textfield>
+
+            <tui-textfield class="textfield">
+          <label tuiLabel>Received By</label>
+          <input tuiTextfield [value]="deliveryReceipt?.receivedBy" disabled/>
+        </tui-textfield>
+
+            <tui-textfield class="textfield">
+          <label tuiLabel>Payment Due Date</label>
+          <input tuiTextfield
+                 [value]="deliveryReceipt?.paymentDueDate ? (deliveryReceipt?.paymentDueDate | date:'longDate') : ''"
+                 disabled/>
+        </tui-textfield>
+
+            <tui-textfield class="textfield">
+          <label tuiLabel>Cheque Number</label>
+          <input tuiTextfield [value]="deliveryReceipt?.chequeNumber" disabled/>
+        </tui-textfield>
+          } @else if (!deliveryReceipt?.id) {
+            <hr>
+            <button (click)="openDeliveryReceiptDialog()"
+                    appearance="secondary"
+                    tuiButton
+                    type="button"
+            >
+            Create Delivery Receipt
+          </button>
+          }
+      </span>
+    </span>
+    }
 
   </div>
 
@@ -81,15 +165,20 @@
         <thead tuiThead>
         <tr tuiThGroup>
           <th *tuiHead="'product'" [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Product</th>
-          <th *tuiHead="'price'" [style.min-width]="'3.75rem'" [style.text-align]="'end'"
+          <th *tuiHead="'price'" [style.width]="'4rem'" [style.text-align]="'end'"
               [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Price
           </th>
-          <th *tuiHead="'quantity'" [style.text-align]="'end'" [style.width]="'3.75rem'"
+          <th *tuiHead="'quantity'" [style.text-align]="'end'" [style.width]="'4rem'"
               [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Quantity
           </th>
+          <th *tuiHead="'discount'" [style.text-align]="'end'" [style.width]="'8rem'"
+              [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Discount, %
+          </th>
           <th *tuiHead="'unit'" [style.width]="'3.75rem'" [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Units</th>
-          <th *tuiHead="'total'" [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Total</th>
-          <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
+          <th *tuiHead="'total'" [style.text-align]="'end'" [style.width]="'6rem'"
+              [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Total
+          </th>
+          <th *tuiHead="'actions'" [sorter]="null" tuiTh>Actions</th>
         </tr>
         </thead>
 
@@ -111,12 +200,18 @@
                 <ng-template #selected>
                   @let product = selectedProducts[_d];
                   <div *ngIf="product?.name">
-                    <span>{{ product?.name }}</span> | <em>{{ product?.itemCode }}</em> , <em>{{ product?.sku }}</em>
+                    <span>{{ product?.name }}</span>
+                    @if (product?.itemCode) {
+                      | <em>{{ product?.itemCode }}</em>
+                    }
                   </div>
                 </ng-template>
                 <ng-template #itemTemplate let-product>
                   <div>
-                    <span>{{ product?.name }}</span> | <em>{{ product?.itemCode }}</em> , <em>{{ product?.sku }}</em>
+                    <span>{{ product?.name }}</span>
+                    @if (product?.itemCode) {
+                      | <em>{{ product?.itemCode }}</em>
+                    }
                   </div>
                 </ng-template>
                 <ng-template #loadingTemplate>
@@ -145,6 +240,17 @@
                 />
               </tui-textfield>
             </td>
+            <td *tuiCell="'discount'" tuiTd>
+              <tui-textfield>
+                <input [style.padding-bottom]="0"
+                       [tuiNumberFormat]="{precision: 0}"
+                       class="number"
+                       formControlName="discountAmount"
+                       tuiInputNumber
+                       tuiTextfieldSize="m"
+                />
+              </tui-textfield>
+            </td>
             <td *tuiCell="'unit'" tuiTd>
               <tui-textfield>
                 <input [style.padding-bottom]="0"
@@ -160,7 +266,7 @@
             <td *tuiCell="'total'" tuiTd>
               <tui-textfield>
                 <input [style.padding-bottom]="0"
-                       [value]="Number(item.get('price')?.value) * Number(item.get('quantity')?.value)"
+                       [value]="calcQuoteItemTotal(item)"
                        class="number"
                        disabled
                        tuiTextfield
@@ -179,10 +285,37 @@
             </td>
           </tr>
         </ng-container>
+        <tbody tuiBody>
+        <tr>
+          <td tuiTd colspan="7" class="no-side">
+            <button (click)="addRow()" appearance="primary" size="s" tuiButton type="button">Add Row</button>
+          </td>
+        </tr>
+        </tbody>
+        <tbody tuiTbody class="merge-vert-border">
+        <tr>
+          <td tuiTd colSpan="4"></td>
+          <td tuiTd>Subtotal</td>
+          <td tuiTd [style.text-align]="'end'">{{ this.subTotal.toFixed(2) }}</td>
+        </tr>
+        <tr>
+          <td tuiTd colSpan="4"></td>
+          <td tuiTd>Discount Subtotal</td>
+          <td tuiTd [style.text-align]="'end'">{{ this.discountSubtotal.toFixed(2) }}</td>
+        </tr>
+        <tr>
+          <td tuiTd colSpan="4"></td>
+          <td tuiTd>Delivery Subtotal</td>
+          <td tuiTd [style.text-align]="'end'">{{ this.deliverySubtotal.toFixed(2) }}</td>
+        </tr>
+        <tr>
+          <td tuiTd colSpan="4"></td>
+          <td tuiTd>Total</td>
+          <td tuiTd [style.text-align]="'end'">{{ this.total.toFixed(2) }}</td>
+        </tr>
         </tbody>
       </table>
     </tui-scrollbar>
-    <button (click)="addRow()" appearance="primary" size="m" tuiButton type="button">Add Row</button>
   </form>
 
   <span [style.flex]="'1 1 auto'"></span>
@@ -191,6 +324,17 @@
     <button [disabled]="form.invalid || inProgress" tuiButton type="submit">
       Save
     </button>
+    <span [style.flex]="'1 1 auto'"></span>
+    @if (deliveryReceipt?.id) {
+      <button (click)="openDeliveryReceiptDialog()"
+              [disabled]="!resolvedQuotation?.id || deliveryReceipt?.id || inProgress"
+              appearance="secondary"
+              tuiButton
+              type="button"
+      >
+        Create Delivery Receipt
+      </button>
+    }
     <span [style.flex]="'1 1 auto'"></span>
     <button [routerLink]="'..'" appearance="flat" tuiButton type="button">
       Back

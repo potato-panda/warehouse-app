@@ -27,8 +27,7 @@ public class QuoteItem {
     @JoinColumn(name = "purchase_order_id")
     private PurchaseOrder purchaseOrder;
 
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH,
-            CascadeType.PERSIST})
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH, CascadeType.PERSIST})
     @JoinColumn(name = "product_id")
     private Product quotedProduct;
 
@@ -42,11 +41,15 @@ public class QuoteItem {
     private Double discountAmount;
 
     @Transient
+    private Double subtotal;
+
+    @Transient
     private Double totalAmount;
 
     @PostLoad
-    public void calculateTotalAmount() {
-        this.totalAmount = (getQuantity() * getPrice()) - getDiscountAmount();
+    public void postLoad() {
+        this.subtotal    = getQuantity() * getPrice();
+        this.totalAmount = this.subtotal - getDiscountAmount();
     }
 
     @Projection(name = "product", types = {QuoteItem.class})

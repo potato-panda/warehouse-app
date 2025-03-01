@@ -64,8 +64,6 @@ public class Customer {
 
         String getName();
 
-        String getAddress();
-
         String getBillingAddress();
 
         String getWebsite();

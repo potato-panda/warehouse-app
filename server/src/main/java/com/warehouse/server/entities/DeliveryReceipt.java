@@ -24,7 +24,7 @@ public class DeliveryReceipt {
 
     @OneToOne(mappedBy = "deliveryReceipt", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH,
             CascadeType.PERSIST})
-    private PurchaseOrder purchaseOrder;
+    private Quotation quotation;
 
     @Column(name = "received_date")
     @NotNull
@@ -57,8 +57,8 @@ public class DeliveryReceipt {
         String getChequeNumber();
     }
 
-    @Projection(name = "withPurchaseOrder", types = {DeliveryReceipt.class})
-    public interface WithPurchaseOrderProjection extends BriefProjection {
-        PurchaseOrder.PurchaseOrderTableProjection getPurchaseOrder();
+    @Projection(name = "withQuotation", types = {DeliveryReceipt.class})
+    public interface WithQuotationProjection extends BriefProjection {
+        Quotation.QuotationTableReceiptProjection getQuotation();
     }
 }

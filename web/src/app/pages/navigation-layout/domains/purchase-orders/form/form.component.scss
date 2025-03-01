@@ -39,24 +39,3 @@
     width: 20rem;
   }
 }
-
-.side {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  border-left: gray 1.5px solid;
-  padding: 1em 1.25rem;
-}
-
-.flex {
-  display: flex;
-
-  .row {
-    flex-direction: row;
-  }
-}
-
-.title-button {
-  align-items: center;
-  gap: 1rem;
-}
