@@ -11,15 +11,35 @@
   <form formGroupName="inventory"
         tuiForm="m"
   >
-    <tui-textfield>
-      <label tuiLabel>Address</label>
-      <input formControlName="address"
-             placeholder="Inventory Address"
-             tuiTextfield
+    <tui-combo-box (searchChange)="searchSiteRequest($event)"
+                   *tuiLet="this.searchSiteResponse$ | async as sites"
+                   [stringify]="stringifySite"
+                   formControlName="siteId"
+                   tuiTextfieldSize="m"
+    >
+      Site
+      <input placeholder="Site"
+             tuiTextfieldLegacy
       />
-    </tui-textfield>
+      <ng-template tuiDataList>
+        <ng-container>
+          <tui-data-list *ngIf="sites; else loading">
+            <button *ngFor="let site of sites"
+                    [value]="site.id"
+                    tuiOption
+            >
+              <div class="name">{{ site.name }} <em>{{ site?.address?.fullAddress ?? '' }}</em></div>
+            </button>
+          </tui-data-list>
+        </ng-container>
+        <ng-template #loading>
+          <tui-loader></tui-loader>
+        </ng-template>
+      </ng-template>
+
+    </tui-combo-box>
     <tui-error [error]="[] | tuiFieldError | async"
-               formControlName="address"
+               formControlName="siteId"
     />
 
     <tui-textfield>
@@ -34,9 +54,9 @@
     />
   </form>
 
-  <tui-combo-box (searchChange)="searchRequest($event)"
+  <tui-combo-box (searchChange)="searchProductRequest($event)"
                  *tuiLet="this.searchProductResponse$ | async as items"
-                 [stringify]="stringify"
+                 [stringify]="stringifyProduct"
                  formControlName="product"
                  tuiTextfieldSize="m"
   >
@@ -123,13 +143,6 @@
             type="submit"
     >
       Save
-    </button>
-    <button (click)="save(true)"
-            [disabled]="form.invalid || inProgress"
-            tuiButton
-            type="button"
-    >
-      Save and Return
     </button>
     <button [routerLink]="'..'"
             appearance="flat"

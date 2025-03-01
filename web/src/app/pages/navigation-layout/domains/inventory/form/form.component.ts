@@ -24,18 +24,16 @@ import {
   concatMap,
   debounceTime,
   distinctUntilChanged,
+  forkJoin,
   map,
   mergeMap,
   Observable,
   of,
   share,
   startWith,
-  Subject,
-  switchMap,
-  takeUntil
+  switchMap
 } from 'rxjs';
-import {InventoryService, InventoryWithProductResourceResponse} from '../../../../../services/inventory.service';
-import {Inventory} from '../../../../../interfaces/entities/inventory';
+import {InventoryDetailResourceResponse, InventoryService} from '../../../../../services/inventory.service';
 import {TuiCardLarge, TuiCell, TuiForm, TuiHeader} from '@taiga-ui/layout';
 import {TuiElasticContainer, TuiFieldErrorPipe} from '@taiga-ui/kit';
 import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
@@ -44,6 +42,11 @@ import {CleanUrlPipe} from '../../../../../pipes/clean-url.pipe';
 import {TuiLet} from '@taiga-ui/cdk';
 import CleanUrl from '../../../../../utils/clean-url';
 import UniqueId from '../../../../../utils/unique-id';
+import {
+  SitesDetailCollectionResourceResponse,
+  SitesDetailResourceResponse,
+  SitesService
+} from '../../../../../services/sites.service';
 
 @Component({
   selector: 'app-form',
@@ -78,12 +81,12 @@ import UniqueId from '../../../../../utils/unique-id';
   styleUrl: './form.component.scss'
 })
 export class FormComponent implements OnInit {
-  protected resolvedInventory!: InventoryWithProductResourceResponse;
+  protected resolvedInventory!: InventoryDetailResourceResponse;
   protected inProgress = false;
 
   protected readonly form = new FormGroup({
     inventory: new FormGroup({
-      address: new FormControl('',),
+      siteId: new FormControl<string | null>(null),
       quantity: new FormControl(0),
     }),
     product: new FormControl<string | null>(null, Validators.required)
@@ -91,48 +94,59 @@ export class FormComponent implements OnInit {
   protected productInfo$ = new BehaviorSubject<ProductsResourceResponse | null>(null);
   private readonly alerts = inject(TuiAlertService);
   private mappedProducts$ = new BehaviorSubject<ProductsCollectionResourceResponse['_embedded']['products']>([]);
-  private readonly searchCustomerRequest$ = new BehaviorSubject<string>('');
+  private readonly searchProductRequest$ = new BehaviorSubject<string>('');
+  private readonly searchSiteRequest$ = new BehaviorSubject<string>('');
   private resolvedProduct?: ProductsResourceResponse;
-  private destroy$ = new Subject<void>();
+  private resolvedSite?: SitesDetailResourceResponse;
+  private mappedSites$ = new BehaviorSubject<SitesDetailResourceResponse[]>([]);
 
   constructor(private route: ActivatedRoute,
               private router: Router,
               private inventoryService: InventoryService,
               private productsService: ProductsService,
+              private sitesService: SitesService,
   ) {
   }
 
-  save(back?: boolean) {
+  save() {
     this.inProgress = true;
     const inventoryFormValue = this.form.get('inventory')?.value;
     const productHref = this.form.get('product')?.value;
-
-    const updatedInventory = {
-      id: this.resolvedInventory?.id,
-      ...inventoryFormValue,
-    } as Inventory;
+    const siteId = this.form.get('inventory.siteId')?.value;
 
     let saveRequest$: Observable<any>;
-
-    if (updatedInventory.id) {
-      saveRequest$ = this.inventoryService.updateOne(updatedInventory).pipe(concatMap(inventoryResponse => {
+    if (this.resolvedInventory?.id) {
+      const {id, quantity} = this.resolvedInventory;
+      saveRequest$ = this.inventoryService.updateOne({id, quantity}).pipe(concatMap(inventoryResponse => {
         const inventoryProductPropertyUrl = inventoryResponse._links.product.href;
 
-        if (productHref && productHref !== this.resolvedProduct?._links.self.href) {
-          return this.inventoryService.updateRelation(inventoryProductPropertyUrl, productHref);
+        let followRequest = [];
+
+        // update product
+        if (productHref && productHref !== this.resolvedProduct?._links?.self?.href) {
+          followRequest.push(this.inventoryService.updateRelation(inventoryProductPropertyUrl, productHref));
+        }
+        // update site
+        if (siteId && siteId !== this.resolvedSite?.id) {
+          followRequest.push(this.inventoryService.addSite(id.toString(), siteId));
         }
 
-        return of(inventoryResponse);
+        return forkJoin([...followRequest]).pipe(map(() => of(inventoryResponse)));
+
       }));
     } else {
-      saveRequest$ = this.inventoryService.createOne(updatedInventory).pipe(concatMap(inventoryResponse => {
+      saveRequest$ = this.inventoryService.createOne({quantity: inventoryFormValue?.quantity ?? 0}).pipe(concatMap(inventoryResponse => {
         const inventoryProductPropertyUrl = inventoryResponse._links.product.href;
+        let followRequest = [];
 
         if (productHref) {
-          return this.inventoryService.updateRelation(inventoryProductPropertyUrl, productHref);
+          followRequest.push(this.inventoryService.updateRelation(inventoryProductPropertyUrl, productHref));
+        }
+        if (siteId) {
+          followRequest.push(this.inventoryService.addSite(inventoryResponse.id.toString(), siteId));
         }
 
-        return of(inventoryResponse);
+        return forkJoin([...followRequest]).pipe(map(() => of(inventoryResponse)));
       }));
     }
 
@@ -142,8 +156,7 @@ export class FormComponent implements OnInit {
           {
             appearance: 'negative',
             label: 'Save failed'
-          }).subscribe(() => {
-        });
+          }).subscribe();
         this.inProgress = false;
       },
       next: (value) => {
@@ -152,28 +165,28 @@ export class FormComponent implements OnInit {
           {
             appearance: 'positive',
             label: 'Save successful!',
-          }).subscribe(() => {
-        });
+          }).subscribe();
         this.inProgress = false;
 
-        if (back) {
-          this.router.navigate(['..'], {relativeTo: this.route}).then();
-        }
-        if (value.id) {
-          this.router.navigate(['..', `${value.id}`], {relativeTo: this.route}).then();
-        }
+        this.router.navigate(['..'], {relativeTo: this.route}).then();
       },
       complete: () => this.inProgress = false
     });
   }
 
-  searchRequest(search?: string | null) {
-    this.searchCustomerRequest$.next(search ?? '');
+  searchProductRequest(search?: string | null) {
+    this.searchProductRequest$.next(search ?? '');
 
     return this.searchProductResponse$;
   }
 
-  stringify = (href: string) => {
+  searchSiteRequest(search?: string | null) {
+    this.searchSiteRequest$.next(search ?? '');
+
+    return this.searchSiteResponse$;
+  }
+
+  stringifyProduct = (href: string) => {
     return this.mappedProducts$.value.filter(c => CleanUrl.transform(c?._links.self.href) === href)?.[0]?.name || '';
   };
 
@@ -184,7 +197,7 @@ export class FormComponent implements OnInit {
     return this.productsService.getPage().pipe(map(response => response));
   };
 
-  protected searchProductResponse$: Observable<ProductsCollectionResourceResponse['_embedded']['products']> = this.searchCustomerRequest$.pipe(
+  protected searchProductResponse$: Observable<ProductsCollectionResourceResponse['_embedded']['products']> = this.searchProductRequest$.pipe(
     debounceTime(300),
     distinctUntilChanged(),
     switchMap((search) => {
@@ -201,38 +214,61 @@ export class FormComponent implements OnInit {
     share()
   );
 
-  ngOnInit() {
+  getSiteData: (search?: string) => Observable<SitesDetailCollectionResourceResponse> = (search?: string) => {
+    if (search && search.length && search.length > 0) {
+      return this.sitesService.getDetailPageByName(search);
+    }
+    return this.sitesService.getDetailPage();
+  };
 
+  protected searchSiteResponse$: Observable<SitesDetailCollectionResourceResponse['_embedded']['sites']> = this.searchSiteRequest$.pipe(
+    debounceTime(300),
+    distinctUntilChanged(),
+    switchMap((search) => this.getSiteData(search ?? '').pipe(
+      mergeMap((response) => {
+        const sites = response._embedded.sites;
+        this.mappedSites$.next(sites);
+        return of(sites);
+      }),
+      startWith([]))
+    ),
+    share()
+  );
+
+  stringifySite: (siteId: string) => string = (siteId) => {
+    const site = this.mappedSites$.value.filter(site => site.id.toString() === siteId.toString())?.[0];
+    return site ? site.name + ', ' + site.address.fullAddress : '';
+  };
+
+  ngOnInit() {
     this.route.data.subscribe((data) => {
       if (data['resolved']) {
-        const {inventory, product} = this.route.snapshot.data['resolved'] as ResolvedData;
+        const {inventory, product, site} = this.route.snapshot.data['resolved'] as ResolvedData;
         if (product) {
           this.resolvedProduct = product;
           this.mappedProducts$.next([this.resolvedProduct]);
         }
-        this.form.get('product')?.valueChanges.pipe(
-          takeUntil(this.destroy$)
-        ).subscribe(productHref => {
+        if (site) {
+          this.resolvedSite = site;
+          this.mappedSites$.next([this.resolvedSite]);
+        }
+
+        this.form.get('product')?.valueChanges.subscribe(productHref => {
           this.productInfo$.next(this.mappedProducts$.value.filter(p => p._links.self.href === productHref)?.[0]);
         });
 
         this.resolvedInventory = inventory;
-        const {quantity, address} = this.resolvedInventory;
+        const {quantity} = this.resolvedInventory;
 
         this.form.patchValue({
           inventory: {
-            address: address,
-            quantity: quantity,
+            siteId: this.resolvedInventory?.site?.id.toString() ?? null,
+            quantity,
           },
           product: product?._links.self.href
         });
         this.form.updateValueAndValidity();
       }
     });
-  }
-
-  private ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

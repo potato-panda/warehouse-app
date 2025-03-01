@@ -17,20 +17,24 @@ import org.springframework.data.rest.core.config.Projection;
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @Column(name = "full_address")
     String fullAddress;
 
     @ManyToOne
     @JoinColumn(name = "supplier_id")
-    @JsonBackReference
-    Supplier supplier;
+    @JsonBackReference("supplier_id")
+    private Supplier supplier;
+
+    @OneToOne
+    @JoinColumn(name = "site_id")
+    private Site site;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
-    @JsonBackReference
-    Customer customer;
+    @JsonBackReference("customer_id")
+    private Customer customer;
 
     @Projection(name = "basic", types = {Address.class})
     public interface AddressBasicProjection {

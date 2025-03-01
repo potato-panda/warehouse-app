@@ -10,5 +10,6 @@ export const resourceEndpoints = {
   quotation: (id?: string | number) => `${baseApiUrl}/quotations${id ? '/' + id.toString().trim() : ''}`,
   quoteItems: (id?: string | number) => `${baseApiUrl}/quoteItems${id ? '/' + id.toString().trim() : ''}`,
   deliveryReceipts: (id?: string | number) => `${baseApiUrl}/deliveryReceipts${id ? '/' + id.toString().trim() : ''}`,
+  sites: (id?: string | number) => `${baseApiUrl}/sites${id ? '/' + id.toString().trim() : ''}`,
   suppliers: (id?: string | number) => `${baseApiUrl}/suppliers${id ? '/' + id.toString().trim() : ''}`
 };

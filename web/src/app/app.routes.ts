@@ -28,12 +28,14 @@ import {
 import {
   detailsResolver as supplierDetailsResolver
 } from './pages/navigation-layout/domains/suppliers/form/details.resolver';
+import {detailsResolver as siteDetailsResolver} from './pages/navigation-layout/domains/sites/form/details.resolver';
 import {ContactsComponent} from './pages/navigation-layout/domains/contacts/contacts.component';
 import {FormComponent as ContactsFormComponent} from './pages/navigation-layout/domains/contacts/form/form.component';
 import {FormComponent as CustomerFormComponent} from './pages/navigation-layout/domains/customers/form/form.component';
 import {FormComponent as ProductsFormComponent} from './pages/navigation-layout/domains/products/form/form.component';
 import {FormComponent as InventoryFormComponent} from './pages/navigation-layout/domains/inventory/form/form.component';
 import {FormComponent as SupplierFormComponent} from './pages/navigation-layout/domains/suppliers/form/form.component';
+import {FormComponent as SiteFormComponent} from './pages/navigation-layout/domains/sites/form/form.component';
 import {
   FormComponent as QuotationFormComponent
 } from './pages/navigation-layout/domains/quotations/form/form.component';
@@ -44,8 +46,11 @@ import {ProductsComponent} from './pages/navigation-layout/domains/products/prod
 import {InventoryComponent} from './pages/navigation-layout/domains/inventory/inventory.component';
 import {QuotationComponent} from './pages/navigation-layout/domains/quotations/quotation.component';
 import {PurchaseOrdersComponent} from './pages/navigation-layout/domains/purchase-orders/purchase-orders.component';
-import {DeliveryReceiptsComponent} from './pages/navigation-layout/domains/delivery-receipts/delivery-receipts.component';
+import {
+  DeliveryReceiptsComponent
+} from './pages/navigation-layout/domains/delivery-receipts/delivery-receipts.component';
 import {SuppliersComponent} from './pages/navigation-layout/domains/suppliers/suppliers.component';
+import {SitesComponent} from './pages/navigation-layout/domains/sites/sites.component';
 
 export const routes: Routes = [
   {
@@ -249,6 +254,30 @@ export const routes: Routes = [
             },
             component: DeliveryReceiptsComponent
           },
+        ]
+      }, {
+
+        path: 'sites',
+        component: DomainsComponent,
+        children: [
+          {
+            path: '',
+            data: {
+              breadcrumb: 'Sites'
+            },
+            component: SitesComponent
+          },
+          {
+            path: 'create',
+            component: SiteFormComponent
+          },
+          {
+            resolve: {
+              resolved: siteDetailsResolver
+            },
+            path: ':id',
+            component: SiteFormComponent
+          }
         ]
       },
       {

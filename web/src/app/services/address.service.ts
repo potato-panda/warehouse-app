@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {RestService} from './rest.service';
 import {HttpClient} from '@angular/common/http';
-import {Address} from '../interfaces/entities/address';
+import {Address, AddressCreateRequest, AddressUpdateRequest} from '../interfaces/entities/address';
 import {CollectionResource, Resource} from '../interfaces/resource';
 import {resourceEndpoints} from './resource-endpoints';
 
@@ -26,11 +26,11 @@ export class AddressService extends RestService {
     return this.http.get<ResourceResponse>(`${this.resourceEndpoint(id)}?projection=detail`);
   }
 
-  createOne(address: any) {
-    return this.http.post<ResourceResponse>(`${this.resourceEndpoint()}?projection=detail`, address);
+  createOne(address: AddressCreateRequest) {
+    return this.http.post<ResourceResponse>(this.resourceEndpoint(), address);
   }
 
-  updateOne(address: any) {
+  updateOne(address: AddressUpdateRequest) {
     return this.http.put<ResourceResponse>(this.resourceEndpoint(address.id), address);
   }
 

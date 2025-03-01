@@ -1,0 +1,43 @@
+<form (ngSubmit)="save()"
+      [formGroup]="form"
+      [style.margin-top.rem]="3"
+      [style.max-width.rem]="35"
+      tuiAppearance="floating"
+      tuiCardLarge
+      tuiForm="m"
+>
+  <header tuiHeader><h6 tuiTitle>Site Details</h6></header>
+
+  <tui-textfield>
+    <label tuiLabel>Name<sup>*</sup></label>
+    <input formControlName="name" placeholder="Site Name" tuiTextfield/>
+  </tui-textfield>
+  <tui-error [error]="[] | tuiFieldError | async" formControlName="name"/>
+
+  <form formGroupName="address" tuiForm="m">
+    <tui-textfield>
+      <label tuiLabel>Address<sup>*</sup></label>
+      <input formControlName="fullAddress" placeholder="Site Address" tuiTextfield/>
+    </tui-textfield>
+    <tui-error [error]="[] | tuiFieldError | async" formControlName="fullAddress"/>
+  </form>
+
+  <footer class="footer" [style.padding-top.rem]="1">
+    <tui-loader [inheritColor]="true"
+                [overlay]="inProgress"
+                [showLoader]="inProgress"
+                class="loader"
+    >
+      <button [disabled]="form.invalid || inProgress" tuiButton type="submit">
+        Submit
+      </button>
+    </tui-loader>
+    <button [routerLink]="'..'"
+            appearance="flat"
+            tuiButton
+            type="button"
+    >
+      Back
+    </button>
+  </footer>
+</form>

@@ -32,6 +32,7 @@ import {
   TuiTableThGroup,
   TuiTableTr
 } from '@taiga-ui/addon-table';
+import {RouterLink} from '@angular/router';
 import {
   BehaviorSubject,
   combineLatest,
@@ -39,7 +40,9 @@ import {
   distinctUntilChanged,
   filter,
   map,
+  mergeMap,
   Observable,
+  of,
   share,
   startWith,
   switchMap
@@ -47,12 +50,11 @@ import {
 import {toObservable} from '@angular/core/rxjs-interop';
 import {PolymorpheusComponent} from '@taiga-ui/polymorpheus';
 import {DeleteDialogComponent} from '../../../../components/delete-dialog/delete-dialog.component';
-import {RouterLink} from '@angular/router';
-import {InventoryDetailCollectionResourceResponse, InventoryService} from '../../../../services/inventory.service';
-import {InventoryDetail} from '../../../../interfaces/entities/inventory';
+import {SitesDetailCollectionResourceResponse, SitesService} from '../../../../services/sites.service';
+import {Site} from '../../../../interfaces/entities/site';
 
 @Component({
-  selector: 'app-inventory',
+  selector: 'app-sites',
   imports: [
     AsyncPipe,
     NgForOf,
@@ -83,24 +85,24 @@ import {InventoryDetail} from '../../../../interfaces/entities/inventory';
     TuiTextfieldComponent,
     TuiTextfieldDirective,
     RouterLink,
-    TuiDropdown,
     FormsModule,
-    TuiTable
+    TuiTable,
+    TuiDropdown
   ],
-  templateUrl: './inventory.component.html',
-  styleUrl: './inventory.component.scss'
+  templateUrl: './sites.component.html',
+  styleUrl: './sites.component.scss'
 })
-export class InventoryComponent {
+export class SitesComponent {
   protected readonly size$ = new BehaviorSubject(20);
   protected readonly page$ = new BehaviorSubject(0);
 
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
-  protected readonly sorter$ = new BehaviorSubject<'address' | 'quantity' | 'product.name' | 'product.sku' | 'product.itemCode' | 'product.description' | 'product.um' | null>(null);
+  protected readonly sorter$ = new BehaviorSubject<'name' | 'fullAddress' | null>(null);
 
   protected readonly refresh$ = new BehaviorSubject<void>(undefined);
   protected nameSearch = model('');
   protected readonly search$ = toObservable(this.nameSearch);
-  protected columns = ['address', 'quantity', 'name', 'sku', 'itemCode', 'description', 'um', 'actions'];
+  protected columns = ['name', 'fullAddress', 'actions'];
 
   protected readonly request$ = combineLatest([
     this.search$.pipe(
@@ -123,16 +125,16 @@ export class InventoryComponent {
     map((response) => response.page.totalElements),
     startWith(0),
   );
-  protected readonly data$: Observable<InventoryDetailCollectionResourceResponse['_embedded']['inventories']> = this.request$.pipe(
+  protected readonly data$: Observable<SitesDetailCollectionResourceResponse['_embedded']['sites']> = this.request$.pipe(
     filter(tuiIsPresent),
-    map((response) => response._embedded.inventories),
+    map((response) => response._embedded.sites),
     map((items) => items.filter(tuiIsPresent)),
     startWith([]),
   );
   private readonly dialogs = inject(TuiDialogService);
   private readonly alerts = inject(TuiAlertService);
 
-  constructor(private inventoryService: InventoryService,
+  constructor(private sitesService: SitesService,
   ) {
   }
 
@@ -145,49 +147,48 @@ export class InventoryComponent {
     this.size$.next(size);
   };
 
-  protected showDeleteDialog({id, product}: InventoryDetail): void {
-    const productName = product?.name ? `inventory of ${product.name}` : '';
+  protected showDeleteDialog({id, name}: Site): void {
     this.dialogs.open<Observable<any>>(new PolymorpheusComponent(DeleteDialogComponent), {
       dismissible: true,
       closeable: true,
       label: 'Delete?',
       size: 'm',
       data: {
-        subject: productName,
+        subject: name
       }
-    }).subscribe(confirm => {
-      if (confirm)
-        this.inventoryService.deleteOne(id).subscribe({
-          error: err => {
-            this.alerts.open(context => {
-            }, {
-              appearance: 'negative',
-              label: `Error deleting inventory`
-            });
-          },
-          next: response => {
+    }).pipe(mergeMap(value => value ? this.sitesService.deleteOne(id as string) : of()))
+      .subscribe({
+        error: err => {
+          this.alerts.open(context => {
+          }, {
+            appearance: 'negative',
+            label: `Error deleting site`
+          }).subscribe();
+        },
+        next: response => {
+          if (response) {
             this.alerts.open(context => {
             }, {
               appearance: 'positive',
-              label: `Successfully deleted inventory`
+              label: `Successfully deleted site`
             }).subscribe();
-          },
-          complete: () => {
             this.refreshData();
           }
-        });
-    });
+        },
+        complete: () => {
+        }
+      });
   }
 
-  private getData(search?: string): Observable<InventoryDetailCollectionResourceResponse> {
+  private getData(search?: string): Observable<SitesDetailCollectionResourceResponse> {
     const pageable = {
       page: this.page$.value,
       size: this.size$.value,
       sort: this.sorter$.value ? this.sorter$.value + (this.direction$.value == 1 ? ',asc' : ',desc') : undefined
     };
     if (search && search.length && search.length > 0) {
-      return this.inventoryService.getPageByProductName(search, pageable).pipe(map(response => response));
+      return this.sitesService.getDetailPageByName(search, pageable);
     }
-    return this.inventoryService.getPage(pageable).pipe(map(response => response));
+    return this.sitesService.getDetailPage(pageable);
   }
 }

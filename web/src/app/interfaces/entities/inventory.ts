@@ -1,13 +1,14 @@
 import {ResourceRelations} from '../resource';
 import {Product} from './product';
+import {Site, SiteDetail} from './site';
 
 export interface Inventory {
-  id: string | number,
-  address: string,
-  quantity: number
+  id: string | number;
+  quantity: number;
 }
 
-export interface InventoryProduct extends Inventory {
+export interface InventoryDetail extends Inventory {
+  site: SiteDetail;
   product: Product;
 }
 

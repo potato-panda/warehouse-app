@@ -23,19 +23,21 @@ public class Inventory {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    private String address;
+    @ManyToOne
+    @JoinColumn(name = "site_id")
+    private Site site;
 
     @NotNull
     private Integer quantity;
 
-    @Projection(name = "product", types = Inventory.class)
-    public interface WithProductProjection {
+    @Projection(name = "detail", types = Inventory.class)
+    public interface InventoryDetailProjection {
         Long getId();
-
-        String getAddress();
 
         Integer getQuantity();
 
         Product getProduct();
+
+        Site.SiteDetailProjection getSite();
     }
 }
