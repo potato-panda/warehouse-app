@@ -88,19 +88,19 @@
           <td *tuiCell="'phone'" tuiTd>{{ contact.phone }}</td>
           <td *tuiCell="'email'" tuiTd>{{ contact.email }}</td>
           <td *tuiCell="'party'" tuiTd>
-            @if (contact.customer.id) {
-              <a [routerLink]="['/customers', contact.customer.id]"
+            @if (contact.customer?.id) {
+              <a [routerLink]="['/customers', contact.customer?.id]"
                  iconStart="@tui.hand-coins"
                  tuiLink
               >
-                {{ contact.customer.name }}
+                {{ contact.customer?.name }}
               </a>
-            } @else if (contact.supplier.id) {
-              <a [routerLink]="['/suppliers', contact.supplier.id]"
+            } @else if (contact.supplier?.id) {
+              <a [routerLink]="['/suppliers', contact.supplier?.id]"
                  iconStart="@tui.container"
                  tuiLink
               >
-                {{ contact.supplier.name }}
+                {{ contact.supplier?.name }}
               </a>
             } @else {
 

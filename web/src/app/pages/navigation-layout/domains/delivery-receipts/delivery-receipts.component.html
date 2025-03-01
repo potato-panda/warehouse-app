@@ -33,7 +33,7 @@
       >
         <thead tuiThead>
         <tr tuiThGroup>
-          <th *tuiHead="'supplier'" tuiSortable tuiTh>Supplier</th>
+          <th *tuiHead="'customer'" tuiSortable tuiTh>Customer</th>
           <th *tuiHead="'receivedBy'" tuiSortable tuiTh>Received By</th>
           <th *tuiHead="'receivedDate'" tuiSortable tuiTh>Received Date</th>
           <th *tuiHead="'totalAmount'" tuiSortable tuiTh>Total Amount</th>
@@ -47,7 +47,7 @@
         <tr *ngFor="let receipt of sortedReceipts" tuiTr>
           @let quotation = receipt.quotation;
           @let customer = quotation?.customer;
-          <td *tuiCell="'supplier'" tuiTd>
+          <td *tuiCell="'customer'" tuiTd>
             <ng-container *ngIf="customer">{{ customer.name }}</ng-container>
           </td>
           <td *tuiCell="'receivedBy'" tuiTd>{{ receipt.receivedBy }}</td>

@@ -79,11 +79,11 @@ export class DeliveryReceiptsComponent {
   protected readonly page$ = new BehaviorSubject(0);
 
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
-  protected readonly sorter$ = new BehaviorSubject<'supplier' | 'receivedBy' | 'receivedDate' | 'totalAmount' | null>(null);
+  protected readonly sorter$ = new BehaviorSubject<'customer' | 'receivedBy' | 'receivedDate' | 'totalAmount' | null>(null);
 
   protected nameSearch = model('');
   protected readonly search$ = toObservable(this.nameSearch);
-  protected columns = ['supplier', 'receivedBy', 'receivedDate', 'totalAmount', 'actions'];
+  protected columns = ['customer', 'receivedBy', 'receivedDate', 'totalAmount', 'actions'];
 
   protected readonly request$ = combineLatest([
     this.search$.pipe(

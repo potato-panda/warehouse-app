@@ -146,7 +146,7 @@ export class FormComponent implements OnInit {
     return this.quoteItemsFormArray.length > 1;
   }
 
-  protected get selectedCustomer() {
+  protected get selectedCustomerId() {
     return this.form.get('quotation.customerId')?.value || null;
   }
 
@@ -361,7 +361,12 @@ export class FormComponent implements OnInit {
       const {id, paymentTerms, shippingAddress, sameAsBilling, deliveryCharge, vatInclusive} = quotationData;
       if (id) {
         quotationRequest = this.quotationsService.updateOne({
-          id, paymentTerms, shippingAddress, sameAsBilling, deliveryCharge, vatInclusive
+          id,
+          paymentTerms,
+          shippingAddress: sameAsBilling ? (this.mappedCustomers$.value.filter(c => c.id.toString() === this.selectedCustomerId?.toString())?.[0]?.billingAddress.toString() ?? null) : shippingAddress,
+          sameAsBilling,
+          deliveryCharge,
+          vatInclusive
         })
           .pipe(mergeMap(quotationResponse =>
             customerControl?.value && customerControl.dirty && customerControl.valid
@@ -369,7 +374,11 @@ export class FormComponent implements OnInit {
               : of(quotationResponse)));
       } else {
         quotationRequest = this.quotationsService.createOne({
-          paymentTerms, shippingAddress
+          paymentTerms,
+          shippingAddress: sameAsBilling ? (this.mappedCustomers$.value.filter(c => c.id.toString() === this.selectedCustomerId?.toString())?.[0]?.billingAddress.toString() ?? null) : shippingAddress,
+          sameAsBilling,
+          deliveryCharge,
+          vatInclusive
         })
           .pipe(mergeMap(quotationResponse =>
             customerControl?.value

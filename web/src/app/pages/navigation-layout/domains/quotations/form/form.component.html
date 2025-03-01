@@ -62,7 +62,7 @@
 
       <label>
         <input formControlName="sameAsBilling"
-               size="m"
+               size="s"
                tuiCheckbox
                type="checkbox"
         />
@@ -79,6 +79,15 @@
       <tui-error [error]="[] | tuiFieldError | async"
                  formControlName="deliveryCharge"
       />
+
+      <label>
+        <input formControlName="vatInclusive"
+               size="s"
+               tuiCheckbox
+               type="checkbox"
+        />
+        Vat inclusive
+      </label>
     </form>
 
     <span class="column"
