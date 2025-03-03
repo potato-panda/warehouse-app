@@ -40,11 +40,24 @@ public class PurchaseOrder {
     private List<QuoteItem> quoteItems;
 
     @Transient
-    private Double totalAmount;
+    @Builder.Default
+    private Double discountSubtotal = 0.0;
+
+    @Transient
+    @Builder.Default
+    private Double subtotal = 0.0;
+
+    @Transient
+    @Builder.Default
+    private Double totalAmount = 0.0;
 
     @PostLoad
-    public void calculateTotalAmount() {
-        this.totalAmount = getQuoteItems().stream().mapToDouble(QuoteItem::getTotalAmount).sum();
+    public void postLoad() {
+        this.subtotal         = getQuoteItems().stream().mapToDouble(QuoteItem::getSubtotal).sum();
+        this.discountSubtotal = getQuoteItems().stream()
+                                               .mapToDouble(item -> item.getSubtotal() * item.getDiscountAmount() / 100.0)
+                                               .sum();
+        this.totalAmount      = subtotal - discountSubtotal;
     }
 
     @Projection(name = "detail", types = {PurchaseOrder.class})

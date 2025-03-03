@@ -121,38 +121,26 @@
         </div>
 
           @if (deliveryReceipt?.id) {
-            <tui-textfield class="textfield">
-          <label tuiLabel>Received Date</label>
-          <input tuiTextfield
-                 [value]="deliveryReceipt?.receivedDate ? (deliveryReceipt?.receivedDate | date:'longDate') : ''"
-                 disabled/>
-        </tui-textfield>
-
-            <tui-textfield class="textfield">
-          <label tuiLabel>Received By</label>
-          <input tuiTextfield [value]="deliveryReceipt?.receivedBy" disabled/>
-        </tui-textfield>
-
-            <tui-textfield class="textfield">
-          <label tuiLabel>Payment Due Date</label>
-          <input tuiTextfield
-                 [value]="deliveryReceipt?.paymentDueDate ? (deliveryReceipt?.paymentDueDate | date:'longDate') : ''"
-                 disabled/>
-        </tui-textfield>
-
-            <tui-textfield class="textfield">
-          <label tuiLabel>Cheque Number</label>
-          <input tuiTextfield [value]="deliveryReceipt?.chequeNumber" disabled/>
-        </tui-textfield>
-          } @else if (!deliveryReceipt?.id) {
-            <hr>
-            <button (click)="openDeliveryReceiptDialog()"
-                    appearance="secondary"
-                    tuiButton
-                    type="button"
-            >
-            Create Delivery Receipt
-          </button>
+            <tui-textfield>
+              <label tuiLabel>Received Date</label>
+              <input tuiTextfield
+                     [value]="deliveryReceipt?.receivedDate ? (deliveryReceipt?.receivedDate | date:'longDate') : ''"
+                     disabled/>
+            </tui-textfield>
+            <tui-textfield>
+              <label tuiLabel>Received By</label>
+              <input tuiTextfield [value]="deliveryReceipt?.receivedBy" disabled/>
+            </tui-textfield>
+            <tui-textfield>
+              <label tuiLabel>Payment Due Date</label>
+              <input tuiTextfield
+                     [value]="deliveryReceipt?.paymentDueDate ? (deliveryReceipt?.paymentDueDate | date:'longDate') : ''"
+                     disabled/>
+            </tui-textfield>
+            <tui-textfield>
+              <label tuiLabel>Cheque Number</label>
+              <input tuiTextfield [value]="deliveryReceipt?.chequeNumber" disabled/>
+            </tui-textfield>
           }
       </span>
     </span>
@@ -294,7 +282,7 @@
             </td>
           </tr>
         </ng-container>
-        <tbody tuiBody>
+        <tbody tuiTbody>
         <tr>
           <td tuiTd colspan="7" class="no-side">
             <button (click)="addRow()" appearance="primary" size="s" tuiButton type="button">Add Row</button>

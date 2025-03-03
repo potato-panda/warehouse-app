@@ -122,12 +122,12 @@ interface QuoteItemRow {
   styleUrl: './form.component.scss'
 })
 export class FormComponent implements OnInit {
-  readonly columns = ['product', 'price', 'quantity', 'unit', 'total', 'actions'];
+  readonly columns = ['product', 'price', 'quantity', 'discount', 'unit', 'total', 'actions'];
   protected resolvedPurchaseOrder$ = new BehaviorSubject<PurchaseOrderDetail | null>(null);
   protected inProgress = false;
   protected form!: FormGroup;
   protected readonly direction$ = new BehaviorSubject<-1 | 1>(-1);
-  protected readonly sorter$ = new BehaviorSubject<'product' | 'price' | 'quantity' | 'unit' | 'total' | null>(null);
+  protected readonly sorter$ = new BehaviorSubject<'product' | 'price' | 'quantity' | 'discount' | 'unit' | 'total' | null>(null);
   protected selectedProducts: Record<string | number, Product | null> = {};
   protected readonly Number = Number;
   protected resolvedSupplier$ = new BehaviorSubject<Supplier | null>(null);
@@ -149,6 +149,27 @@ export class FormComponent implements OnInit {
   ) {
   }
 
+  protected get subTotal() {
+    return this.quoteItemsFormArray.controls.reduce((subtotal, {value}) => {
+      const price = value.price ?? 0;
+      const quant = value.quantity ?? 0;
+      return subtotal + price * quant;
+    }, 0);
+  }
+
+  protected get discountSubtotal() {
+    return this.quoteItemsFormArray.controls.reduce((subtotal, {value}) => {
+      const price = value.price ?? 0;
+      const quant = value.quantity ?? 0;
+      const discount = value.discountAmount ?? 0;
+      return subtotal + (price * quant * discount / 100.0);
+    }, 0);
+  }
+
+  protected get total() {
+    return this.subTotal - this.discountSubtotal;
+  }
+
   protected get purchaseOrderForm() {
     return this.form.get('purchaseOrder');
   }
@@ -159,6 +180,13 @@ export class FormComponent implements OnInit {
 
   protected get isQuoteItemsFormArraySortable() {
     return this.quoteItemsFormArray.length > 1;
+  }
+
+  calcQuoteItemTotal(item: FormGroup<QuoteItemRow>) {
+    const price = item.get('price')?.value ?? 0;
+    const quant = item.get('quantity')?.value ?? 0;
+    const discount = item.get('discountAmount')?.value ?? 0;
+    return ((price * quant) * (1 - (discount / 100.0))).toFixed(2);
   }
 
   initForm() {

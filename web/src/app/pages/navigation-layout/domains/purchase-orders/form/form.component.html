@@ -158,6 +158,9 @@
           <th *tuiHead="'quantity'" [style.text-align]="'end'" [style.width]="'3.75rem'"
               [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Quantity
           </th>
+          <th *tuiHead="'discount'" [style.text-align]="'end'" [style.width]="'8rem'"
+              [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Discount, %
+          </th>
           <th *tuiHead="'unit'" [style.width]="'3.75rem'" [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Units</th>
           <th *tuiHead="'total'" [tuiSortable]="isQuoteItemsFormArraySortable" tuiTh>Total</th>
           <th *tuiHead="'actions'" [tuiSortable]="false" tuiTh>Actions</th>
@@ -222,6 +225,17 @@
                 />
               </tui-textfield>
             </td>
+            <td *tuiCell="'discount'" tuiTd>
+              <tui-textfield>
+                <input [style.padding-bottom]="0"
+                       [tuiNumberFormat]="{precision: 0}"
+                       class="number"
+                       formControlName="discountAmount"
+                       tuiInputNumber
+                       tuiTextfieldSize="m"
+                />
+              </tui-textfield>
+            </td>
             <td *tuiCell="'unit'" tuiTd>
               <tui-textfield>
                 <input [style.padding-bottom]="0"
@@ -237,7 +251,7 @@
             <td *tuiCell="'total'" tuiTd>
               <tui-textfield>
                 <input [style.padding-bottom]="0"
-                       [value]="Number(item.get('price')?.value) * Number(item.get('quantity')?.value)"
+                       [value]="calcQuoteItemTotal(item)"
                        class="number"
                        disabled
                        tuiTextfield
@@ -256,10 +270,32 @@
           </tr>
         </ng-container>
         </tbody>
+        <tbody tuiTbody>
+        <tr>
+          <td tuiTd colspan="7" class="no-side">
+            <button (click)="addRow()" appearance="primary" size="s" tuiButton type="button">Add Row</button>
+          </td>
+        </tr>
+        </tbody>
+        <tbody tuiTbody class="merge-vert-border">
+        <tr>
+          <td tuiTd colSpan="4"></td>
+          <td tuiTd>Subtotal</td>
+          <td tuiTd [style.text-align]="'end'">{{ this.subTotal.toFixed(2) }}</td>
+        </tr>
+        <tr>
+          <td tuiTd colSpan="4"></td>
+          <td tuiTd>Discount Subtotal</td>
+          <td tuiTd [style.text-align]="'end'">{{ this.discountSubtotal.toFixed(2) }}</td>
+        </tr>
+        <tr>
+          <td tuiTd colSpan="4"></td>
+          <td tuiTd>Total</td>
+          <td tuiTd [style.text-align]="'end'">{{ this.total.toFixed(2) }}</td>
+        </tr>
+        </tbody>
       </table>
     </tui-scrollbar>
-    <button (click)="addRow()" appearance="primary" size="m" tuiButton type="button">Add Row
-    </button>
   </form>
 
   <span [style.flex]="'1 1 auto'"></span>
