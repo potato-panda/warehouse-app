@@ -133,10 +133,10 @@ export const routes: Routes = [
             },
             component: ContactsComponent
           },
-          {
-            path: 'create',
-            component: ContactsFormComponent
-          },
+          // {
+          //   path: 'create',
+          //   component: ContactsFormComponent
+          // },
           {
             resolve: {
               resolved: contactDetailsResolver
