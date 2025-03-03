@@ -28,7 +28,9 @@
                     [value]="site.id"
                     tuiOption
             >
-              <div class="name">{{ site.name }} <em>{{ site?.address?.fullAddress ?? '' }}</em></div>
+              <div
+                class="name">{{ site.name }} {{ site?.address?.fullAddress ? ', ' + site?.address?.fullAddress : '' }}
+              </div>
             </button>
           </tui-data-list>
         </ng-container>
