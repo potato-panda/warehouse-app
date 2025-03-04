@@ -1,6 +1,6 @@
 <header tuiNavigationHeader>
     <span tuiNavigationLogo>
-          <span tuiFade>Warehouse App</span>
+          <span tuiFade>{{ (appName$ | async) ?? 'No name set' }}</span>
       </span>
 
   <hr/>
@@ -211,13 +211,13 @@
     <!--      Add-->
     <!--    </button>-->
     <footer>
-      <!--          <button-->
-      <!--            iconStart="@tui.star"-->
-      <!--            tuiAsideItem-->
-      <!--            type="button"-->
-      <!--          >-->
-      <!--            Favorites-->
-      <!--          </button>-->
+      <button [routerLink]="routes.settings"
+              iconStart="@tui.settings"
+              tuiAsideItem
+              type="button"
+      >
+        Settings
+      </button>
       <button (click)="handleToggle()"
               [iconStart]="expanded() ? '@tui.chevron-left' : '@tui.chevron-right'"
               tuiAsideItem

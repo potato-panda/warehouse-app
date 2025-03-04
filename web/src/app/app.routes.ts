@@ -28,6 +28,7 @@ import {
 import {
   detailsResolver as supplierDetailsResolver
 } from './pages/navigation-layout/domains/suppliers/form/details.resolver';
+import {settingsResolver} from './pages/navigation-layout/domains/settings/settings.resolver';
 import {detailsResolver as siteDetailsResolver} from './pages/navigation-layout/domains/sites/form/details.resolver';
 import {ContactsComponent} from './pages/navigation-layout/domains/contacts/contacts.component';
 import {FormComponent as ContactsFormComponent} from './pages/navigation-layout/domains/contacts/form/form.component';
@@ -282,6 +283,9 @@ export const routes: Routes = [
       },
       {
         path: 'settings',
+        resolve: {
+          resolved: settingsResolver
+        },
         component: SettingsComponent
       }]
   },

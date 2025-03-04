@@ -1,1 +1,39 @@
-<p>settings works!</p>
+<form (ngSubmit)="save()"
+      [formGroup]="form"
+      [style.margin-top.rem]="3"
+      [style.max-width.rem]="35"
+      tuiAppearance="floating"
+      tuiCardLarge
+      tuiForm="m"
+>
+  <header tuiHeader><h6 tuiTitle>Settings</h6></header>
+
+  <form formGroupName="settings" tuiForm="m">
+    <ng-container *ngFor="let control of settingsArray.controls; let i = index" [formGroup]="control">
+      @let value = control.value;
+      <tui-textfield>
+        <label tuiLabel>{{ value.key }}</label>
+        <input name="value" formControlName="value" tuiTextfield/>
+      </tui-textfield>
+      <tui-error [error]="[] | tuiFieldError | async" formControlName="value"/>
+    </ng-container>
+  </form>
+
+  <footer>
+    <tui-loader [inheritColor]="true"
+                [overlay]="inProgress"
+                [showLoader]="inProgress"
+    >
+      <button [disabled]="!settingsArray.dirty || inProgress" tuiButton type="submit">
+        Save
+      </button>
+    </tui-loader>
+    <button [routerLink]="'..'"
+            appearance="flat"
+            tuiButton
+            type="button"
+    >
+      Back
+    </button>
+  </footer>
+</form>
