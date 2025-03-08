@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 public interface SettingService {
     @Getter
     enum KEY {
-        APP_NAME("appName"), COMPANY_NAME("companyName"), TIN("tin"), ADDRESS("address"), DEFAULT("default");
+        APP_NAME("appName"), COMPANY_NAME("companyName"), TIN("tin"), CONTACT("contact"), ADDRESS("address"), DEFAULT("default");
 
         final String value;
 

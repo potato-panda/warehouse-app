@@ -44,7 +44,8 @@ public class Quotation {
     private String shippingAddress;
 
     @Column(name = "quotation_date")
-    private Timestamp quotationDate;
+    @Builder.Default
+    private Timestamp quotationDate = new Timestamp(System.currentTimeMillis());
 
     @Column(name = "vat_inclusive")
     @NotNull
@@ -73,10 +74,9 @@ public class Quotation {
     private Double totalAmount = 0.0;
 
     @PrePersist
-    public void addQuotationDate() {
-        if (quotationDate == null) {
-            quotationDate = new Timestamp(System.currentTimeMillis());
-        }
+    public void prePersist() {
+        // Update quotation modified date
+        quotationDate = new Timestamp(System.currentTimeMillis());
     }
 
     @PostLoad

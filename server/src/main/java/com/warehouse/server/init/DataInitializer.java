@@ -74,6 +74,7 @@ public class DataInitializer implements ApplicationListener<ApplicationReadyEven
         setDefaultIfNotExists("App Name", SettingService.KEY.APP_NAME, "Warehouse App", true);
         setDefaultIfNotExists("Company Name", SettingService.KEY.COMPANY_NAME, "Warehouse App", true);
         setDefaultIfNotExists("TIN", SettingService.KEY.TIN, "", true);
+        setDefaultIfNotExists("Contact", SettingService.KEY.CONTACT, "123-456-7890", true);
         setDefaultIfNotExists("Address", SettingService.KEY.ADDRESS, "", true);
         setDefaultIfNotExists("default", SettingService.KEY.DEFAULT, "default", false);
     }
