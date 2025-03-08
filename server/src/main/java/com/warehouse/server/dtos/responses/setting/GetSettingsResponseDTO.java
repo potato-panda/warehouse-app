@@ -4,6 +4,6 @@ import java.util.List;
 
 public record GetSettingsResponseDTO(List<Setting> settings) {
 
-    public record Setting(Long id, String key, String value) {}
+    public record Setting(Long id, String name, String key, String value) {}
 }
 

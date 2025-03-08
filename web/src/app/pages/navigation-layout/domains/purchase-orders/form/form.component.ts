@@ -457,4 +457,8 @@ export class FormComponent implements OnInit {
       startWith([]),
     );
   };
+
+  protected generatePurchaseOrderPdfUrl = () => this.resolvedPurchaseOrder$.value?.id
+    ? this.purchaseOrdersService.generatePdfUrl(this.resolvedPurchaseOrder$.value?.id)
+    : '';
 }

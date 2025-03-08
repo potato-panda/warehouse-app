@@ -54,10 +54,11 @@ export class NavigationLayoutComponent extends TuiPortals implements OnInit {
   }
 
   ngOnInit(): void {
-    this.appName$ = this.settingsService.getSettingSubject().pipe(mergeMap(response => {
-      const value = response.settings.filter(s => s.key === 'App Name')?.[0]?.value;
-      return of(value);
-    }));
+    this.appName$ = this.settingsService.getSettingSubject()
+      .pipe(mergeMap(response => {
+        const value = response.settings.filter(s => s.name === 'App Name')?.[0]?.value;
+        return of(value);
+      }));
   }
 
 

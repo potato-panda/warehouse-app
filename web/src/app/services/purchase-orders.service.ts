@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {RestService} from './rest.service';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Pageable} from '../interfaces/pageable';
@@ -13,6 +13,7 @@ import {
 import {QuoteItemWithProductCollectionResourceResponse} from './quote-item.service';
 import IdToHrefList from '../utils/id-to-href-list';
 import {resourceEndpoints} from './resource-endpoints';
+import {DomSanitizer} from '@angular/platform-browser';
 
 type ResourceResponse = Resource<PurchaseOrder, 'purchaseOrder'>;
 type TableResourceResponse = Resource<PurchaseOrderTable, 'purchaseOrder'>;
@@ -32,6 +33,8 @@ export type PurchaseOrdersTableCollectionResourceResponse = TableCollectionResou
 export class PurchaseOrdersService extends RestService {
 
   private resourceEndpoint = resourceEndpoints.purchaseOrders;
+
+  private readonly sanitizer = inject(DomSanitizer);
 
   constructor(http: HttpClient) {
     super(http);
@@ -110,5 +113,9 @@ export class PurchaseOrdersService extends RestService {
       }),
       body: IdToHrefList.transform(quoteItemId, resourceEndpoints.quoteItems())
     });
+  }
+
+  generatePdfUrl(id: string | number) {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(`${this.resourceEndpoint(id)}/generate`);
   }
 }

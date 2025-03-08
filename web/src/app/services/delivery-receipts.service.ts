@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {RestService} from './rest.service';
 import {HttpClient} from '@angular/common/http';
 import {Pageable} from '../interfaces/pageable';
@@ -10,6 +10,7 @@ import {
   DeliveryReceiptTable
 } from '../interfaces/entities/delivery-receipt';
 import {resourceEndpoints} from './resource-endpoints';
+import {DomSanitizer} from '@angular/platform-browser';
 
 type ResourceResponse = Resource<DeliveryReceipt, 'deliveryReceipt', DeliveryReceiptRelations>;
 type TableResourceResponse = Resource<DeliveryReceiptTable, 'deliveryReceipt', DeliveryReceiptRelations>;
@@ -26,6 +27,8 @@ export type DeliveryReceiptsTableCollectionResourceResponse = TableCollectionRes
 export class DeliveryReceiptsService extends RestService {
 
   private resourceEndpoint = resourceEndpoints.deliveryReceipts;
+
+  private readonly sanitizer = inject(DomSanitizer);
 
   constructor(http: HttpClient) {
     super(http);
@@ -73,5 +76,9 @@ export class DeliveryReceiptsService extends RestService {
 
   deleteOne(id: string | number) {
     return this.http.delete(this.resourceEndpoint(id));
+  }
+
+  generatePdfUrl(id: string | number) {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(`${this.resourceEndpoint(id)}/generate`);
   }
 }

@@ -5,7 +5,18 @@
       tuiCardLarge
       tuiForm="m"
 >
-  <header tuiHeader><h3 tuiTitle>Purchase Order Details</h3></header>
+  <div [style.display]="'flex'" [style.flex-direction]="'row'" [style.gap.rem]="2">
+    <header tuiHeader><h3 tuiTitle>Purchase Order Details</h3></header>
+    <a *ngIf="resolvedPurchaseOrder$.value?.id"
+       [href]="generatePurchaseOrderPdfUrl()"
+       download
+       size="xs"
+       tuiButton
+    >
+      Generate PDF
+    </a>
+  </div>
+
   <form class="columns"
         formGroupName="purchaseOrder"
         tuiForm="m"

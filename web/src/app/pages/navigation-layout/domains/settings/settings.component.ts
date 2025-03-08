@@ -35,6 +35,7 @@ export class SettingsComponent implements OnInit {
   protected inProgress = false;
   protected settingsArray: FormArray<FormGroup<{
     id: FormControl<number>,
+    name: FormControl<string>,
     key: FormControl<string>,
     value: FormControl<string | null>
   }>> = new FormArray<FormGroup>([]);
@@ -54,6 +55,7 @@ export class SettingsComponent implements OnInit {
       for (const setting of filteredSettings) {
         this.settingsArray.push(new FormGroup({
           id: new FormControl<number>(setting.id, {nonNullable: true, validators: [Validators.required]}),
+          name: new FormControl<string>(setting.name, {nonNullable: true, validators: [Validators.required]}),
           key: new FormControl<string>(setting.key, {nonNullable: true, validators: [Validators.required]}),
           value: new FormControl<string | null>(setting.value)
         }));
@@ -70,6 +72,7 @@ export class SettingsComponent implements OnInit {
         const values = fg.value;
         const request = this.settingsService.updateSetting({
           id: values.id!,
+          name: values.name!,
           key: values.key!,
           value: values.value!
         });

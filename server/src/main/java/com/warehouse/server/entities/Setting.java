@@ -17,10 +17,13 @@ public class Setting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "key", unique = true, nullable = false)
+    @Column(name = "name", unique = true, nullable = false)
+    private String name;
+
+    @Column(name = "setting_key", unique = true, nullable = false)
     private String key;
 
-    @Column(name = "value")
+    @Column(name = "setting_value")
     private String value;
 
     @Column(name = "admin", nullable = false)

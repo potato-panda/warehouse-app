@@ -34,7 +34,7 @@ import UniqueId from '../../../../../utils/unique-id';
 import {ResolvedData} from './details.resolver';
 import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
 import {TuiCardLarge, TuiForm, TuiHeader} from '@taiga-ui/layout';
-import {TuiCheckbox, TuiFieldErrorPipe, TuiInputNumber} from '@taiga-ui/kit';
+import {TuiCheckbox, TuiFieldErrorPipe, TuiInputNumber, TuiPdfViewerService} from '@taiga-ui/kit';
 import {QuotationService, QuotationsTableResourceResponse} from '../../../../../services/quotation.service';
 import {CustomersService, CustomersSummaryResourceResponse} from '../../../../../services/customers.service';
 import {ComboBoxComponent} from '../../../../../components/combo-box/combo-box.component';
@@ -118,6 +118,7 @@ export class FormComponent implements OnInit {
   protected selectedProducts: Record<string | number, Product | null> = {};
   protected readonly Number = Number;
   protected deliveryReceipt$ = new BehaviorSubject<DeliveryReceipt | null>(null);
+  protected pdfOpen = false;
   private readonly alerts = inject(TuiAlertService);
   private mappedProducts$ = new BehaviorSubject<Record<string | number, Product[]>>({});
   private readonly searchProductRequest$ = new Subject<{ index: number, search: string }>();
@@ -126,6 +127,7 @@ export class FormComponent implements OnInit {
   private resolvedCustomer$ = new BehaviorSubject<CustomersSummaryResourceResponse | null>(null);
   private resolvedProducts$ = new BehaviorSubject<Record<string, Product | null>>({});
   private readonly dialogs = inject(TuiDialogService);
+  private readonly pdfService = inject(TuiPdfViewerService);
 
   constructor(private route: ActivatedRoute,
               private router: Router,
@@ -520,4 +522,11 @@ export class FormComponent implements OnInit {
 
   protected toFullAddress: (item: AddressesResourceResponse) => string = item => item.fullAddress;
 
+  protected generateQuotationPdfUrl = () => this.resolvedQuotation$.value?.id
+    ? this.quotationsService.generatePdfUrl(this.resolvedQuotation$.value?.id)
+    : '';
+
+  protected generateDeliveryReceiptPdfUrl = () => this.deliveryReceipt$.value?.id
+    ? this.deliveryReceiptsService.generatePdfUrl(this.deliveryReceipt$.value?.id)
+    : '';
 }

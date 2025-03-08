@@ -7,7 +7,17 @@
       tuiCardLarge
       tuiForm="m"
 >
-  <header tuiHeader><h3 tuiTitle>Quotation Details</h3></header>
+  <div [style.display]="'flex'" [style.flex-direction]="'row'" [style.gap.rem]="2">
+    <header tuiHeader><h3 tuiTitle>Quotation Details</h3></header>
+    <a *ngIf="resolvedQuotation?.id"
+       [href]="generateQuotationPdfUrl()"
+       download
+       size="xs"
+       tuiButton
+    >
+      Generate PDF
+    </a>
+  </div>
 
   <div class="columns">
     <form class="column"
@@ -108,6 +118,17 @@
       >
         <span class="column side">
         <div class="flex row title-button">Delivery Receipt Details
+          @if (resolvedQuotation?.id && !deliveryReceipt?.id) {
+            <button (click)="openDeliveryReceiptDialog()"
+                    [disabled]="inProgress"
+                    appearance="primary"
+                    tuiButton
+                    [size]="'xs'"
+                    type="button"
+            >
+              Create Delivery Receipt
+            </button>
+          }
           @if (deliveryReceipt?.id) {
             <button (click)="openDeliveryReceiptDialog()"
                     appearance="primary"
@@ -116,7 +137,14 @@
                     type="button"
             >
             Edit
-          </button>
+            </button>
+            <a [href]="generateDeliveryReceiptPdfUrl()"
+               download
+               size="xs"
+               tuiButton
+            >
+              Generate PDF
+            </a>
           }
         </div>
 
@@ -321,17 +349,6 @@
     <button [disabled]="form.invalid || inProgress" tuiButton type="submit">
       Save
     </button>
-    <span [style.flex]="'1 1 auto'"></span>
-    @if (deliveryReceipt?.id) {
-      <button (click)="openDeliveryReceiptDialog()"
-              [disabled]="!resolvedQuotation?.id || deliveryReceipt?.id || inProgress"
-              appearance="secondary"
-              tuiButton
-              type="button"
-      >
-        Create Delivery Receipt
-      </button>
-    }
     <span [style.flex]="'1 1 auto'"></span>
     <button [routerLink]="'..'" appearance="flat" tuiButton type="button">
       Back

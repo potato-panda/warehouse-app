@@ -1,14 +1,15 @@
 package com.warehouse.server.services.impl;
 
+import com.warehouse.server.dtos.responses.auth.LoginResponseDTO;
 import com.warehouse.server.dtos.responses.auth.SuccessfulLoginDTO;
 import com.warehouse.server.dtos.responses.auth.SuccessfulPasswordChangeDTO;
-import com.warehouse.server.dtos.responses.auth.LoginResponseDTO;
 import com.warehouse.server.entities.User;
 import com.warehouse.server.exceptions.InvalidInputException;
 import com.warehouse.server.exceptions.NotFoundException;
 import com.warehouse.server.exceptions.UnauthorizedException;
 import com.warehouse.server.repositories.RefreshTokenRepository;
 import com.warehouse.server.repositories.UserRepository;
+import com.warehouse.server.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class AuthServiceImpl implements com.warehouse.server.services.AuthService {
+public class AuthServiceImpl implements AuthService {
 
     private final PasswordEncoder        passwordEncoder;
     private final UserDetailsServiceImpl userDetailsService;
@@ -124,7 +125,10 @@ public class AuthServiceImpl implements com.warehouse.server.services.AuthServic
                 return new LoginResponseDTO(accessToken,
                                             expirationPeriod,
                                             user.getUsername(),
-                                            user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
+                                            user.getAuthorities()
+                                                .stream()
+                                                .map(GrantedAuthority::getAuthority)
+                                                .toList());
             }
 
         }

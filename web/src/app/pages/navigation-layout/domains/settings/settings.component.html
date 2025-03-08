@@ -12,7 +12,7 @@
     <ng-container *ngFor="let control of settingsArray.controls; let i = index" [formGroup]="control">
       @let value = control.value;
       <tui-textfield>
-        <label tuiLabel>{{ value.key }}</label>
+        <label tuiLabel>{{ value.name }}</label>
         <input name="value" formControlName="value" tuiTextfield/>
       </tui-textfield>
       <tui-error [error]="[] | tuiFieldError | async" formControlName="value"/>

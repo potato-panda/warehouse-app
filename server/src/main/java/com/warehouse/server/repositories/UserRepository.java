@@ -10,4 +10,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @PreAuthorize("hasRole('ADMIN')")
 public interface UserRepository extends JpaRepository<User, String> {
     User getUsersByUsername(@NotNull String username);
+
+    boolean existsByUsername(@NotNull String username);
 }
