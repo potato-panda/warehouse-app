@@ -13,7 +13,7 @@ RUN chmod +x ./mvnw
 
 RUN ./mvnw package spring-boot:repackage -DskipTests
 
-COPY target/*.jar app.jar
+RUN cp /app/target/*.jar /app/app.jar
 
 RUN java -Djarmode=tools -jar app.jar extract --layers --destination extracted
 
