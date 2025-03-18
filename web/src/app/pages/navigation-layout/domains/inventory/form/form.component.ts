@@ -21,10 +21,10 @@ import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ResolvedData} from './details.resolver';
 import {
   BehaviorSubject,
+  concat,
   concatMap,
   debounceTime,
   distinctUntilChanged,
-  forkJoin,
   map,
   mergeMap,
   Observable,
@@ -131,7 +131,7 @@ export class FormComponent implements OnInit {
           followRequest.push(this.inventoryService.addSite(id.toString(), siteId));
         }
 
-        return forkJoin([...followRequest]).pipe(map(() => of(inventoryResponse)));
+        return concat(...followRequest).pipe(map(() => of(inventoryResponse)));
 
       }));
     } else {
@@ -146,7 +146,7 @@ export class FormComponent implements OnInit {
           followRequest.push(this.inventoryService.addSite(inventoryResponse.id.toString(), siteId));
         }
 
-        return forkJoin([...followRequest]).pipe(map(() => of(inventoryResponse)));
+        return concat(...followRequest).pipe(map(() => of(inventoryResponse)));
       }));
     }
 

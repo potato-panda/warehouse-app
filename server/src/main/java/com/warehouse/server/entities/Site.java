@@ -27,7 +27,7 @@ public class Site {
     @JoinColumn(name = "address_id")
     private Address address;
 
-    @OneToMany
+    @OneToMany(mappedBy = "site")
     private Collection<Inventory> inventory;
 
     @Projection(name = "detail", types = {Site.class})

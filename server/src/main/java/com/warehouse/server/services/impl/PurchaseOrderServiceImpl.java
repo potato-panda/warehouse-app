@@ -3,12 +3,15 @@ package com.warehouse.server.services.impl;
 import com.warehouse.server.entities.PurchaseOrder;
 import com.warehouse.server.repositories.PurchaseOrderRepository;
 import com.warehouse.server.services.PurchaseOrderService;
+import com.warehouse.server.services.SettingService;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.vandeseer.easytable.RepeatedHeaderTableDrawer;
 import org.vandeseer.easytable.TableDrawer;
@@ -20,13 +23,18 @@ import org.vandeseer.easytable.structure.cell.TextCell;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
 
 @Service
 public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     private final PurchaseOrderRepository purchaseOrderRepository;
+    private final SettingService          settingService;
 
-    public PurchaseOrderServiceImpl(PurchaseOrderRepository purchaseOrderRepository) {
+    public PurchaseOrderServiceImpl(PurchaseOrderRepository purchaseOrderRepository, SettingService settingService) {
         this.purchaseOrderRepository = purchaseOrderRepository;
+        this.settingService          = settingService;
     }
 
     @Override
@@ -38,6 +46,68 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
             document.addPage(page);
 
             try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+                byte[] image  = Files.readAllBytes(Path.of(new ClassPathResource("logo.png").getURI()));
+                var    width  = page.getMediaBox().getWidth();
+                var    height = page.getMediaBox().getHeight();
+                var    lowerX = 20.0f;
+                var    lowerY = height - 90.0f;
+                contentStream.drawImage(PDImageXObject.createFromByteArray(document, image, null),
+                                        lowerX,
+                                        lowerY,
+                                        60,
+                                        60);
+
+                final var royalBlue = new Color(65, 105, 225);
+
+                // Company Heading
+                final Table.TableBuilder purchaseOrderHeaderBuilder = Table.builder()
+                                                                           .addColumnsOfWidth(490)
+                                                                           .fontSize(8)
+                                                                           .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
+                                                                           .borderColor(Color.WHITE)
+                                                                           .textColor(royalBlue)
+                                                                           .wordBreak(false);
+
+                purchaseOrderHeaderBuilder.addRow(Row.builder()
+                                                     .add(TextCell.builder()
+                                                                  .horizontalAlignment(HorizontalAlignment.LEFT)
+                                                                  .fontSize(11)
+                                                                  .text(this.settingService.getSetting(SettingService.KEY.COMPANY_NAME)
+                                                                                           .getValue())
+                                                                  .build())
+                                                     .build())
+                                          .addRow(Row.builder()
+                                                     .add(TextCell.builder()
+                                                                  .horizontalAlignment(HorizontalAlignment.LEFT)
+                                                                  .text("VAT Reg. TIN : " + this.settingService.getSetting(
+                                                                          SettingService.KEY.TIN).getValue())
+                                                                  .build())
+                                                     .build())
+                                          .addRow(Row.builder()
+                                                     .add(TextCell.builder()
+                                                                  .horizontalAlignment(HorizontalAlignment.LEFT)
+                                                                  .text("Contact : " + this.settingService.getSetting(
+                                                                          SettingService.KEY.CONTACT).getValue())
+                                                                  .build())
+                                                     .build())
+                                          .addRow(Row.builder()
+                                                     .add(TextCell.builder()
+                                                                  .horizontalAlignment(HorizontalAlignment.LEFT)
+                                                                  .text(this.settingService.getSetting(SettingService.KEY.ADDRESS)
+                                                                                           .getValue())
+                                                                  .build())
+                                                     .build())
+                                          .build();
+
+                TableDrawer invoiceHeaderDrawer = TableDrawer.builder()
+                                                             .contentStream(contentStream)
+                                                             .startX(80f)
+                                                             .startY(page.getMediaBox().getUpperRightY() - 30f)
+                                                             .table(purchaseOrderHeaderBuilder.build())
+                                                             .build();
+
+                invoiceHeaderDrawer.draw();
+                // Company Heading End
 
                 // Purchase Order Details
                 final Table.TableBuilder detailBuilder = Table.builder()
@@ -51,14 +121,16 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                                      .colSpan(4)
                                                      .horizontalAlignment(HorizontalAlignment.CENTER)
                                                      .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
-                                                     .fontSize(12)
                                                      .text("Purchase Order")
+                                                     .fontSize(11)
+                                                     .backgroundColor(Color.LIGHT_GRAY)
                                                      .build())
                                         .build())
                              .addRow(Row.builder()
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
                                                      .borderColorRight(Color.WHITE)
+                                                     .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                      .text("Date")
                                                      .build())
                                         .add(TextCell.builder()
@@ -67,6 +139,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                                      .build())
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
+                                                     .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                      .text("PO No")
                                                      .build())
                                         .add(TextCell.builder()
@@ -77,6 +150,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                              .addRow(Row.builder()
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
+                                                     .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                      .borderColorRight(Color.WHITE)
                                                      .text("Supplier Name")
                                                      .build())
@@ -86,6 +160,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                                      .build())
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
+                                                     .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                      .text("Ref No")
                                                      .build())
                                         .add(TextCell.builder()
@@ -96,6 +171,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                              .addRow(Row.builder()
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
+                                                     .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                      .borderColorRight(Color.WHITE)
                                                      .text("Contact")
                                                      .build())
@@ -115,39 +191,46 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                              .addRow(Row.builder()
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
+                                                     .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                      .borderColorRight(Color.WHITE)
                                                      .text("Prepared By")
                                                      .build())
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
-                                                     .text(purchaseOrder.getPreparedBy())
+                                                     .text(Optional.ofNullable(purchaseOrder.getPreparedBy())
+                                                                   .orElse(""))
                                                      .build())
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
+                                                     .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                      .text("Checked By")
                                                      .build())
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
-                                                     .text(purchaseOrder.getCheckedBy())
+                                                     .text(Optional.ofNullable(purchaseOrder.getCheckedBy()).orElse(""))
                                                      .build())
                                         .build())
                              .addRow(Row.builder()
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
+                                                     .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                      .borderColorRight(Color.WHITE)
                                                      .text("Approved By")
                                                      .build())
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
-                                                     .text(purchaseOrder.getApprovedBy())
+                                                     .text(Optional.ofNullable(purchaseOrder.getApprovedBy())
+                                                                   .orElse(""))
                                                      .build())
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
+                                                     .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                      .text("Received By")
                                                      .build())
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
-                                                     .text(purchaseOrder.getReceivedBy())
+                                                     .text(Optional.ofNullable(purchaseOrder.getReceivedBy())
+                                                                   .orElse(""))
                                                      .build())
                                         .build())
                              .build();
@@ -155,7 +238,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                 TableDrawer detailDrawer = TableDrawer.builder()
                                                       .contentStream(contentStream)
                                                       .startX(20f)
-                                                      .startY(page.getMediaBox().getUpperRightY() - 20f)
+                                                      .startY(invoiceHeaderDrawer.getFinalY() - 5f)
                                                       .table(detailBuilder.build())
                                                       .build();
 
@@ -282,21 +365,23 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                     .addRow(Row.builder()
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
-                                                            .text("Discount Subtotal")
+                                                            .text("Discount")
                                                             .build())
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
-                                                            .text(String.format("%.2f",
+                                                            .text(String.format(purchaseOrder.getDiscountSubtotal() > 0 ? "-%.2f" : "%.2f",
                                                                                 purchaseOrder.getDiscountSubtotal()))
                                                             .build())
                                                .build())
                                     .addRow(Row.builder()
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
+                                                            .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                             .text("Total")
                                                             .build())
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
+                                                            .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                             .text(String.format("%.2f", purchaseOrder.getTotalAmount()))
                                                             .build())
                                                .build());

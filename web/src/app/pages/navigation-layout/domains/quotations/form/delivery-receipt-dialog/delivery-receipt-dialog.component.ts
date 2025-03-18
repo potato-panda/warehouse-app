@@ -43,8 +43,8 @@ export class DeliveryReceiptDialogComponent implements OnInit {
   }>>();
   protected form = new FormGroup({
     id: new FormControl<string | number>(''),
-    receivedDate: new FormControl<TuiDay | null>(null, Validators.required),
-    receivedBy: new FormControl('', Validators.required),
+    receivedDate: new FormControl<TuiDay | null>(null),
+    receivedBy: new FormControl(''),
     paymentDueDate: new FormControl<TuiDay | null>(null),
     chequeNumber: new FormControl('')
   });

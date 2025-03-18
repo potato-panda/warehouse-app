@@ -325,12 +325,14 @@
         </tr>
         <tr>
           <td tuiTd colSpan="4"></td>
-          <td tuiTd>Discount Subtotal</td>
-          <td tuiTd [style.text-align]="'end'">{{ this.discountSubtotal.toFixed(2) }}</td>
+          <td tuiTd>Discount</td>
+          <td tuiTd
+              [style.text-align]="'end'">{{ (this.discountSubtotal > 0 ? '-' : '') + this.discountSubtotal.toFixed(2) }}
+          </td>
         </tr>
         <tr>
           <td tuiTd colSpan="4"></td>
-          <td tuiTd>Delivery Subtotal</td>
+          <td tuiTd>Delivery Charge</td>
           <td tuiTd [style.text-align]="'end'">{{ this.deliverySubtotal.toFixed(2) }}</td>
         </tr>
         <tr>

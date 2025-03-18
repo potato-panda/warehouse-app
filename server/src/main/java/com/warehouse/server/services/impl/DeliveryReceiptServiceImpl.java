@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 @Service
 public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
@@ -356,10 +357,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                                      .wordBreak(true);
 
                 subtotalTableBuilder.addRow(Row.builder()
-                                               .add(TextCell.builder()
-                                                            .rowSpan(4)
-                                                            .text("")
-                                                            .build())
+                                               .add(TextCell.builder().rowSpan(5).text("").build())
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
                                                             .text("Subtotal")
@@ -372,18 +370,19 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                     .addRow(Row.builder()
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
-                                                            .text("Discount Subtotal")
+                                                            .text("Discount")
                                                             .build())
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
-                                                            .text(String.format("%.2f",
+                                                            .text(String.format(quotation.getDiscountSubtotal() > 0 ?
+                                                                                        "-%.2f" : "%.2f",
                                                                                 quotation.getDiscountSubtotal()))
                                                             .build())
                                                .build())
                                     .addRow(Row.builder()
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
-                                                            .text("Delivery Subtotal")
+                                                            .text("Delivery Charge")
                                                             .build())
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
@@ -394,12 +393,23 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                     .addRow(Row.builder()
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
+                                                            .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                             .text("Total")
                                                             .build())
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
+                                                            .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                             .text(String.format("%.2f", quotation.getTotalAmount()))
                                                             .build())
+                                               .build())
+                                    .addRow(Row.builder()
+                                               .add(TextCell.builder()
+                                                            .horizontalAlignment(HorizontalAlignment.RIGHT)
+                                                            .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_OBLIQUE))
+                                                            .text(quotation.getVatInclusive() ? "VAT Inclusive" :
+                                                                          "VAT Exclusive")
+                                                            .build())
+                                               .add(TextCell.builder().text("").build())
                                                .build());
 
                 RepeatedHeaderTableDrawer subtotalTableDrawer = RepeatedHeaderTableDrawer.builder()
@@ -426,17 +436,23 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                            .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                            .build())
                                               .add(TextCell.builder()
-                                                           .text(quotation.getDeliveryReceipt().getReceivedBy())
+                                                           .text(Optional.ofNullable(quotation.getDeliveryReceipt()
+                                                                                              .getReceivedBy())
+                                                                         .orElse(""))
                                                            .build())
                                               .add(TextCell.builder()
                                                            .text("Received Date")
                                                            .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                            .build())
                                               .add(TextCell.builder()
-                                                           .text(DateTimeFormatter.ofPattern("MMMM d, yyyy")
-                                                                                  .format(quotation.getDeliveryReceipt()
-                                                                                                   .getReceivedDate()
-                                                                                                   .toLocalDateTime()))
+                                                           .text(Optional.ofNullable(quotation.getDeliveryReceipt()
+                                                                                              .getReceivedDate())
+                                                                         .map(date -> DateTimeFormatter.ofPattern(
+                                                                                                               "MMMM "
+                                                                                                               + "d, "
+                                                                                                               + "yyyy")
+                                                                                                       .format(date.toLocalDateTime()))
+                                                                         .orElse(""))
                                                            .build())
                                               .build())
                                    .addRow(Row.builder()
@@ -445,16 +461,20 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                            .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                            .build())
                                               .add(TextCell.builder()
-                                                           .text(quotation.getDeliveryReceipt().getChequeNumber())
+                                                           .text(Optional.ofNullable(quotation.getDeliveryReceipt()
+                                                                                              .getChequeNumber())
+                                                                         .orElse(""))
                                                            .build())
                                               .add(TextCell.builder()
                                                            .text("Payment Due Date")
                                                            .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                            .build())
                                               .add(TextCell.builder()
-                                                           .text(DateTimeFormatter.ofPattern("MMMM d, yyyy")
-                                                                                  .format(quotation.getDeliveryReceipt()
-                                                                                                   .getPaymentDueDate()))
+                                                           .text(Optional.ofNullable(quotation.getDeliveryReceipt()
+                                                                                              .getPaymentDueDate())
+                                                                         .map(date -> DateTimeFormatter.ofPattern(
+                                                                                 "MMMM d, yyyy").format(date))
+                                                                         .orElse(""))
                                                            .build())
                                               .build())
                                    .addRow(Row.builder()

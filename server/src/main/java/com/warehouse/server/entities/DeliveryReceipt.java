@@ -1,12 +1,12 @@
 package com.warehouse.server.entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.rest.core.config.Projection;
+import org.springframework.lang.Nullable;
 
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
@@ -27,17 +27,19 @@ public class DeliveryReceipt {
     private Quotation quotation;
 
     @Column(name = "received_date")
-    @NotNull
+    @Nullable
     private Timestamp receivedDate;
 
     @Column(name = "received_by")
-    @NotNull
+    @Nullable
     private String receivedBy;
 
     @Column(name = "payment_due_date")
+    @Nullable
     private ZonedDateTime paymentDueDate;
 
     @Column(name = "cheque_number")
+    @Nullable
     private String chequeNumber;
 
     @Projection(name = "brief", types = {DeliveryReceipt.class})

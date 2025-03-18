@@ -1,7 +1,7 @@
 <form [formGroup]="form" tuiForm="m" (ngSubmit)="submit()">
   @let deliveryReceipt = this.data.deliveryReceipt;
   <tui-input-date [tuiDateFormat]="{separator: '/', mode: 'MDY'}" formControlName="receivedDate" tuiTextfieldSize="m">
-    Received Date<sup>*</sup>
+    Received Date
     <input tuiTextfieldLegacy />
   </tui-input-date>
   <tui-error formControlName="receivedDate"
@@ -9,7 +9,7 @@
   />
 
   <tui-textfield class="textfield">
-    <label tuiLabel>Received By<sup>*</sup></label>
+    <label tuiLabel>Received By</label>
     <input formControlName="receivedBy"
            placeholder="Received By"
            tuiTextfield
@@ -40,7 +40,7 @@
 
   <footer class="footer">
     <button (click)="submit()"
-            [disabled]="!form.dirty || !form.valid"
+            [disabled]="!form.valid"
             appearance="primary"
             size="m"
             tuiButton
