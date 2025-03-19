@@ -56,14 +56,14 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                 contentStream.drawImage(PDImageXObject.createFromByteArray(document, image, null),
                                         lowerX,
                                         lowerY,
-                                        60,
-                                        60);
+                                        80,
+                                        80);
 
                 final var royalBlue = new Color(65, 105, 225);
 
                 // Company Heading
                 final Table.TableBuilder deliveryReceiptHeaderBuilder = Table.builder()
-                                                                             .addColumnsOfWidth(490)
+                                                                             .addColumnsOfWidth(470)
                                                                              .fontSize(8)
                                                                              .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                                              .borderColor(Color.WHITE)
@@ -103,8 +103,8 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
 
                 TableDrawer invoiceHeaderDrawer = TableDrawer.builder()
                                                              .contentStream(contentStream)
-                                                             .startX(80f)
-                                                             .startY(page.getMediaBox().getUpperRightY() - 30f)
+                                                             .startX(100f)
+                                                             .startY(page.getMediaBox().getUpperRightY() - 25f)
                                                              .table(deliveryReceiptHeaderBuilder.build())
                                                              .build();
 

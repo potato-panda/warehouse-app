@@ -131,7 +131,7 @@ export class FormComponent implements OnInit {
           followRequest.push(this.inventoryService.addSite(id.toString(), siteId));
         }
 
-        return concat(...followRequest).pipe(map(() => of(inventoryResponse)));
+        return concat(...followRequest).pipe(mergeMap(() => of(inventoryResponse)));
 
       }));
     } else {
@@ -146,7 +146,7 @@ export class FormComponent implements OnInit {
           followRequest.push(this.inventoryService.addSite(inventoryResponse.id.toString(), siteId));
         }
 
-        return concat(...followRequest).pipe(map(() => of(inventoryResponse)));
+        return concat(...followRequest).pipe(mergeMap(() => of(inventoryResponse)));
       }));
     }
 

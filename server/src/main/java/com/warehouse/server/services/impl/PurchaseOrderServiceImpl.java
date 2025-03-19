@@ -54,14 +54,14 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                 contentStream.drawImage(PDImageXObject.createFromByteArray(document, image, null),
                                         lowerX,
                                         lowerY,
-                                        60,
-                                        60);
+                                        80,
+                                        80);
 
                 final var royalBlue = new Color(65, 105, 225);
 
                 // Company Heading
                 final Table.TableBuilder purchaseOrderHeaderBuilder = Table.builder()
-                                                                           .addColumnsOfWidth(490)
+                                                                           .addColumnsOfWidth(470)
                                                                            .fontSize(8)
                                                                            .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                                            .borderColor(Color.WHITE)
@@ -101,8 +101,8 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
                 TableDrawer invoiceHeaderDrawer = TableDrawer.builder()
                                                              .contentStream(contentStream)
-                                                             .startX(80f)
-                                                             .startY(page.getMediaBox().getUpperRightY() - 30f)
+                                                             .startX(100f)
+                                                             .startY(page.getMediaBox().getUpperRightY() - 25f)
                                                              .table(purchaseOrderHeaderBuilder.build())
                                                              .build();
 
