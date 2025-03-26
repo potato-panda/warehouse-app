@@ -1,8 +1,8 @@
-import {Component, inject, Injectable, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {AsyncPipe} from '@angular/common';
 import {
   AbstractControl,
-  AsyncValidator,
+  AsyncValidatorFn,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
@@ -14,7 +14,7 @@ import {TuiCardLarge, TuiForm, TuiHeader} from '@taiga-ui/layout';
 import {TuiFieldErrorPipe} from '@taiga-ui/kit';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ResolvedData} from './details.resolver';
-import {catchError, map, Observable, of} from 'rxjs';
+import {catchError, map, Observable, of, Subscription} from 'rxjs';
 import {ProductsResourceResponse, ProductsService} from '../../../../../services/products.service';
 import {TuiTextareaModule, TuiTextfieldControllerModule} from '@taiga-ui/legacy';
 import {Product} from '../../../../../interfaces/entities/product';
@@ -42,18 +42,18 @@ import {HttpErrorResponse} from '@angular/common/http';
   templateUrl: './form.component.html',
   styleUrl: './form.component.scss'
 })
-export class FormComponent implements OnInit {
+export class FormComponent implements OnInit, OnDestroy {
   protected resolvedProduct!: ProductsResourceResponse;
   protected inProgress = false;
 
   protected productForm!: FormGroup;
 
   private readonly alerts = inject(TuiAlertService);
+  private routeSubscription: Subscription | undefined;
 
   constructor(private route: ActivatedRoute,
               private router: Router,
-              private productsService: ProductsService,
-              private uniqueItemCodeValidator: UniqueItemCodeValidator
+              private productsService: ProductsService
   ) {
   }
 
@@ -62,17 +62,18 @@ export class FormComponent implements OnInit {
       name: new FormControl('', Validators.required),
       sku: new FormControl(''),
       itemCode: new FormControl('', {
-        asyncValidators: [this.uniqueItemCodeValidator.validate.bind(this)],
+        validators: [Validators.required],
         updateOn: 'blur'
       }),
       description: new FormControl(''),
       um: new FormControl(''),
     });
 
-    this.route.data.subscribe((data) => {
+    this.routeSubscription = this.route.data.subscribe((data) => {
       if (data['resolved']) {
         this.resolvedProduct = data['resolved'] as ResolvedData;
         this.productForm.patchValue(this.resolvedProduct);
+        this.productForm.controls['itemCode'].addAsyncValidators(control => this.uniqueItemCodeValidator(this.resolvedProduct.itemCode)(control));
       }
     });
   }
@@ -117,18 +118,30 @@ export class FormComponent implements OnInit {
       complete: () => this.inProgress = false
     });
   }
-}
 
-@Injectable({providedIn: 'root'})
-export class UniqueItemCodeValidator implements AsyncValidator {
+  uniqueItemCodeValidator(originalValue: string): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control) {
+        return of(null);
+      }
 
-  constructor(private productsService: ProductsService) {
+      const currentValue = (control.value || '').trim();
+
+      if (!currentValue || currentValue === originalValue) {
+        return of(null);
+      }
+
+      return this.productsService.doesItemCodeExists(currentValue).pipe(
+        map((exists) => (exists ? {unique: true} : null)),
+        catchError(() => of(null))
+      );
+    };
   }
 
-  validate(control: AbstractControl): Observable<ValidationErrors | null> {
-    return this.productsService.doesItemCodeExists(control.value).pipe(
-      map((exists) => (exists ? {unique: 'Item code already exists'} : null)),
-      catchError(() => of(null)),
-    );
+  ngOnDestroy() {
+    if (this.routeSubscription) {
+      this.routeSubscription.unsubscribe();  // Clean up the subscription
+    }
   }
+
 }
