@@ -5,7 +5,10 @@
                [tuiTextfieldSize]="tuiTextfieldSize"
                [valueContent]="valueContent"
 >
-  {{ label }}
+  <ng-container *ngIf="labelTemplate">
+    <ng-container *ngTemplateOutlet="labelTemplate"></ng-container>
+  </ng-container>
+
   <input [placeholder]="placeholder" tuiTextfieldLegacy/>
 
   <ng-container *ngIf="valueContent">

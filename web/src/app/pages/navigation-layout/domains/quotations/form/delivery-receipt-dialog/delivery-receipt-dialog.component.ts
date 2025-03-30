@@ -11,7 +11,7 @@ import {
 } from '@taiga-ui/core';
 import {TuiForm} from '@taiga-ui/layout';
 import {AsyncPipe} from '@angular/common';
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TuiFieldErrorPipe} from '@taiga-ui/kit';
 import {DeliveryReceipt, DeliveryReceiptCreateRequest} from '../../../../../../interfaces/entities/delivery-receipt';
 import {TuiInputDateModule, TuiTextfieldControllerModule} from '@taiga-ui/legacy';
@@ -43,6 +43,7 @@ export class DeliveryReceiptDialogComponent implements OnInit {
   }>>();
   protected form = new FormGroup({
     id: new FormControl<string | number>(''),
+    po: new FormControl<string>(''),
     receivedDate: new FormControl<TuiDay | null>(null),
     receivedBy: new FormControl(''),
     paymentDueDate: new FormControl<TuiDay | null>(null),
@@ -57,9 +58,10 @@ export class DeliveryReceiptDialogComponent implements OnInit {
   ngOnInit(): void {
     const deliveryReceipt = this.data?.deliveryReceipt;
     if (deliveryReceipt) {
-      const {id, paymentDueDate, receivedDate, chequeNumber, receivedBy} = deliveryReceipt;
+      const {id, po, paymentDueDate, receivedDate, chequeNumber, receivedBy} = deliveryReceipt;
       this.form.patchValue({
         id,
+        po,
         receivedBy,
         receivedDate: receivedDate ? TuiDay.fromLocalNativeDate(new Date(receivedDate)) : null,
         paymentDueDate: paymentDueDate ? TuiDay.fromLocalNativeDate(new Date(paymentDueDate)) : null,
@@ -69,9 +71,10 @@ export class DeliveryReceiptDialogComponent implements OnInit {
   }
 
   protected submit(): void {
-    const {id, receivedBy, receivedDate, chequeNumber, paymentDueDate} = this.form.value;
+    const {id, po, receivedBy, receivedDate, chequeNumber, paymentDueDate} = this.form.value;
     this.context.completeWith({
       id,
+      po,
       receivedBy,
       receivedDate: receivedDate?.toLocalNativeDate().toISOString(),
       chequeNumber,

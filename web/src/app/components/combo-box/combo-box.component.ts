@@ -36,8 +36,8 @@ export class ComboBoxComponent<T extends any> implements ControlValueAccessor, O
   @Input() debounceTime: number = 300;
   @Input() tuiTextfieldSize: TuiSizeL | TuiSizeS = 'l';
   @Input() tuiTextfieldCleaner: boolean = true;
-  @Input() label: string = '';
   @Input('valueContent') valueContent?: TemplateRef<any>;
+  @ContentChild('labelTemplate') labelTemplate?: TemplateRef<any>;
   @ContentChild('itemTemplate') itemTemplate?: TemplateRef<any>;
   @ContentChild('loadingTemplate') loadingTemplate?: TemplateRef<any>;
   @Input() disabled: boolean = false;

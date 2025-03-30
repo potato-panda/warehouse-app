@@ -1,6 +1,8 @@
 package com.warehouse.server.services.impl;
 
 import com.warehouse.server.entities.Contact;
+import com.warehouse.server.entities.Customer;
+import com.warehouse.server.entities.DeliveryReceipt;
 import com.warehouse.server.entities.Quotation;
 import com.warehouse.server.repositories.QuotationRepository;
 import com.warehouse.server.services.DeliveryReceiptService;
@@ -27,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -181,19 +184,25 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                      .build())
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
-                                                     .text(quotation.getCustomer()
-                                                                    .getContacts()
-                                                                    .stream()
-                                                                    .findAny()
-                                                                    .orElse(Contact.builder().name("").build())
-                                                                    .getName())
+                                                     .text(Optional.of(quotation)
+                                                                   .map(Quotation::getCustomer)
+                                                                   .map(Customer::getContacts)
+                                                                   .filter(contacts -> !contacts.isEmpty())
+                                                                   .map(List::getFirst)
+                                                                   .map(Contact::getName)
+                                                                   .orElse(""))
                                                      .build())
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
                                                      .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                      .text("PO no")
                                                      .build())
-                                        .add(TextCell.builder().text("").build())
+                                        .add(TextCell.builder()
+                                                     .text(Optional.of(quotation)
+                                                                   .map(Quotation::getDeliveryReceipt)
+                                                                   .map(DeliveryReceipt::getPo)
+                                                                   .orElse(""))
+                                                     .build())
                                         .build())
                              .addRow(Row.builder()
                                         .add(TextCell.builder()

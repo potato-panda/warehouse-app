@@ -44,7 +44,6 @@ public class Customer {
     private String website;
 
     @NotNull
-    @Column(unique = true)
     private String tin;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)

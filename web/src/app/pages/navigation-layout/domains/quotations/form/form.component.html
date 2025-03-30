@@ -24,23 +24,14 @@
           formGroupName="quotation"
           tuiForm="m"
     >
-      <tui-textarea class="textfield"
-                    formControlName="paymentTerms"
-                    tuiTextfieldSize="m">
-        Payment Terms
-      </tui-textarea>
-      <tui-error [error]="[] | tuiFieldError | async"
-                 formControlName="paymentTerms"
-      />
-
       <app-combo-box [searchFn]="searchCustomers"
                      [stringify]="stringifyCustomer"
                      [valueFn]="toCustomerId"
                      class="textfield"
                      formControlName="customerId"
-                     label="Customer"
                      placeholder="Customer" tuiTextfieldSize="m"
       >
+        <ng-template #labelTemplate><label>Customer <sup>*</sup></label></ng-template>
         <ng-template #itemTemplate let-customer>
           <div class="name">{{ customer.name }}</div>
         </ng-template>
@@ -52,23 +43,40 @@
                  formControlName="customerId"
       />
 
-      <app-combo-box [searchFn]="searchShippingAddress"
-                     [valueFn]="toFullAddress"
-                     class="textfield"
-                     formControlName="shippingAddress"
-                     label="Shipping Address" placeholder="Shipping Address"
-                     tuiTextfieldSize="m"
-      >
-        <ng-template #itemTemplate let-address>
-          <div class="name">{{ address.fullAddress }}</div>
-        </ng-template>
-        <ng-template #loadingTemplate>
-          <tui-loader></tui-loader>
-        </ng-template>
-      </app-combo-box>
-      <tui-error [error]="[] | tuiFieldError | async"
-                 formControlName="shippingAddress"
-      />
+      @if (!this.form.controls['quotation'].controls['customerId'].value) {
+        <tui-textfield>
+          <input formControlName="shippingAddress"
+                 class="textfield"
+                 tuiTextfieldSize="m"
+                 placeholder="(Select Customer First)"
+          />
+          <label>Shipping Address <sup>*</sup> (Select Customer First)</label>
+        </tui-textfield>
+        <tui-error [error]="[] | tuiFieldError | async"
+                   formControlName="shippingAddress"
+        />
+      } @else {
+        <app-combo-box [searchFn]="searchShippingAddress"
+                       [valueFn]="toFullAddress"
+                       class="textfield"
+                       formControlName="shippingAddress"
+                       placeholder="Shipping Address"
+                       tuiTextfieldSize="m"
+        >
+          <ng-template #labelTemplate>
+            <label>Shipping Address <sup>*</sup></label>
+          </ng-template>
+          <ng-template #itemTemplate let-address>
+            <div class="name">{{ address.fullAddress }}</div>
+          </ng-template>
+          <ng-template #loadingTemplate>
+            <tui-loader></tui-loader>
+          </ng-template>
+        </app-combo-box>
+        <tui-error [error]="[] | tuiFieldError | async"
+                   formControlName="shippingAddress"
+        />
+      }
 
       <label>
         <input formControlName="sameAsBilling"
@@ -78,6 +86,15 @@
         />
         Same as Billing Address
       </label>
+
+      <tui-textarea class="textfield"
+                    formControlName="paymentTerms"
+                    tuiTextfieldSize="m">
+        Payment Terms
+      </tui-textarea>
+      <tui-error [error]="[] | tuiFieldError | async"
+                 formControlName="paymentTerms"
+      />
 
       <tui-textfield>
         <input formControlName="deliveryCharge"

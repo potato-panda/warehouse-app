@@ -4,6 +4,7 @@ import {
   BehaviorSubject,
   catchError,
   combineLatest,
+  distinctUntilChanged,
   forkJoin,
   map,
   mergeMap,
@@ -105,8 +106,8 @@ export class FormComponent implements OnInit {
     quotation: new FormGroup({
       id: new FormControl<string | number | null | undefined>(''),
       paymentTerms: new FormControl<string | null | undefined>(''),
-      shippingAddress: new FormControl<string | null | undefined>({value: '', disabled: true}),
-      customerId: new FormControl<string | number | null>(null),
+      shippingAddress: new FormControl<string | null | undefined>({value: '', disabled: true}, Validators.required),
+      customerId: new FormControl<string | number | null>(null, Validators.required),
       sameAsBilling: new FormControl<boolean>({value: false, disabled: true}, {nonNullable: true}),
       vatInclusive: new FormControl<boolean>(true, {nonNullable: true}),
       deliveryCharge: new FormControl<number>(0, {nonNullable: true})
@@ -140,16 +141,16 @@ export class FormComponent implements OnInit {
   ) {
   }
 
+  get selectedCustomerId() {
+    return this.form.get('quotation.customerId')?.value || null;
+  }
+
   protected get quoteItemsFormArray() {
     return this.form.get('quoteItems') as FormArray<FormGroup<QuoteItemRow>>;
   }
 
   protected get isQuoteItemsFormArraySortable() {
     return this.quoteItemsFormArray.length > 1;
-  }
-
-  protected get selectedCustomerId() {
-    return this.form.get('quotation.customerId')?.value || null;
   }
 
   protected get subTotal() {
@@ -183,8 +184,8 @@ export class FormComponent implements OnInit {
     const customerIdControl = this.form.get('quotation.customerId');
 
     combineLatest([
-      customerIdControl!.valueChanges.pipe(startWith(null)),
-      sameAsBillingControl!.valueChanges.pipe(startWith(false))
+      customerIdControl!.valueChanges.pipe(distinctUntilChanged(), startWith(null)),
+      sameAsBillingControl!.valueChanges.pipe(distinctUntilChanged(), startWith(false))
     ]).subscribe(([id, sameAsBilling]) => {
       if (id) {
         shippingAddressControl?.disabled && shippingAddressControl?.enable();
@@ -511,9 +512,9 @@ export class FormComponent implements OnInit {
     = search => {
     let results: Observable<AddressesResourceResponse[]>;
     if (search && search.length && search.length > 0) {
-      results = this.addressService.findAddressesByCustomerAndName(this.form.get('quotation.customerId')?.value ?? '', search).pipe(map(response => response._embedded.addresses));
+      results = this.addressService.findAddressesByCustomerAndName(this.selectedCustomerId ?? '', search).pipe(map(response => response._embedded.addresses));
     } else {
-      results = this.addressService.getAddressesByCustomer(this.form.get('quotation.customerId')?.value ?? '').pipe(map(response => response._embedded.addresses));
+      results = this.addressService.getAddressesByCustomer(this.selectedCustomerId ?? '').pipe(map(response => response._embedded.addresses));
     }
     return results.pipe(
       startWith([]),

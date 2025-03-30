@@ -42,9 +42,15 @@ public class DeliveryReceipt {
     @Nullable
     private String chequeNumber;
 
+    @Column(name = "po")
+    @Nullable
+    private String po;
+
     @Projection(name = "brief", types = {DeliveryReceipt.class})
     public interface BriefProjection {
         Long getId();
+
+        String getPo();
 
         Timestamp getReceivedDate();
 

@@ -150,13 +150,13 @@ export class FormComponent {
 
     let request;
 
-    if (this.form.dirty) {
+    if (this.form.dirty && this.customerForm.valid) {
       const customer = {
         ...customerForm!.value,
         contacts: contactsForm.controls.filter(control => control.dirty && control.valid).map(control => control.value),
         shippingAddresses: shippingAddressesForm.controls.filter(control => control.dirty && control.valid).map(control => control.value),
       };
-      if (this.customer?.id && this.customerForm.dirty && this.customerForm.valid) {
+      if (this.customer?.id) {
         request = this.customerService.update(customer as CustomerUpdateRequest);
       } else {
         request = this.customerService.create(customer as CustomerCreateRequest);

@@ -2,6 +2,7 @@ import {ResourceRelations} from '../resource';
 import {QuotationTable} from './quotation';
 
 export interface DeliveryReceiptCreateRequest {
+  po: string;
   receivedDate: string;
   receivedBy: string;
   paymentDueDate: string;
@@ -10,6 +11,7 @@ export interface DeliveryReceiptCreateRequest {
 
 export interface DeliveryReceipt {
   id: string | number;
+  po: string;
   receivedDate: string;
   receivedBy: string;
   paymentDueDate: string;

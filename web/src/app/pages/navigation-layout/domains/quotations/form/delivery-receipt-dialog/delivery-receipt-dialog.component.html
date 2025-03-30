@@ -1,5 +1,17 @@
 <form [formGroup]="form" tuiForm="m" (ngSubmit)="submit()">
   @let deliveryReceipt = this.data.deliveryReceipt;
+
+  <tui-textfield class="textfield">
+    <label tuiLabel>PO</label>
+    <input formControlName="po"
+           placeholder="PO"
+           tuiTextfield
+    />
+  </tui-textfield>
+  <tui-error [error]="[] | tuiFieldError | async"
+             formControlName="receivedBy"
+  />
+
   <tui-input-date [tuiDateFormat]="{separator: '/', mode: 'MDY'}" formControlName="receivedDate" tuiTextfieldSize="m">
     Received Date
     <input tuiTextfieldLegacy />
