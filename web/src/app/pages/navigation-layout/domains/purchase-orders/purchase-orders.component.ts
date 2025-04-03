@@ -7,7 +7,7 @@ import {
   TuiDataListComponent,
   TuiDialogService,
   TuiDropdown,
-  TuiDropdownOpen,
+  TuiDropdownOpen, TuiFormatNumberPipe,
   TuiLabel,
   TuiLink,
   TuiLoader,
@@ -90,7 +90,8 @@ import {
     RouterLink,
     FormsModule,
     TuiDropdown,
-    TuiTable
+    TuiTable,
+    TuiFormatNumberPipe
   ],
   templateUrl: './purchase-orders.component.html',
   styleUrl: './purchase-orders.component.scss'

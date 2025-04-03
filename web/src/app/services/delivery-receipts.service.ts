@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {RestService} from './rest.service';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Pageable} from '../interfaces/pageable';
 import {CollectionResource, Resource} from '../interfaces/resource';
 import {
@@ -11,6 +11,7 @@ import {
 } from '../interfaces/entities/delivery-receipt';
 import {resourceEndpoints} from './resource-endpoints';
 import {DomSanitizer} from '@angular/platform-browser';
+import IdToHrefList from '../utils/id-to-href-list';
 
 type ResourceResponse = Resource<DeliveryReceipt, 'deliveryReceipt', DeliveryReceiptRelations>;
 type TableResourceResponse = Resource<DeliveryReceiptTable, 'deliveryReceipt', DeliveryReceiptRelations>;
@@ -62,6 +63,10 @@ export class DeliveryReceiptsService extends RestService {
     return this.http.get<ResourceResponse>(this.resourceEndpoint(id));
   }
 
+  getOneBrief(id: string | number) {
+    return this.http.get<ResourceResponse>(`${this.resourceEndpoint(id)}?projection=brief`);
+  }
+
   getTableOne(id: string | number) {
     return this.http.get<TableCollectionResourceResponse>(`${this.resourceEndpoint(id)}?projection=withQuotation`);
   }
@@ -76,6 +81,15 @@ export class DeliveryReceiptsService extends RestService {
 
   deleteOne(id: string | number) {
     return this.http.delete(this.resourceEndpoint(id));
+  }
+
+  addSite(id: string, siteId: string | number) {
+    const hrefs = IdToHrefList.transform(siteId, resourceEndpoints.sites());
+    return this.http.put<ResourceResponse>(`${this.resourceEndpoint(id)}/site`, hrefs, {
+      headers: new HttpHeaders({
+        'Content-Type': 'text/uri-list',
+      })
+    });
   }
 
   generatePdfUrl(id: string | number) {

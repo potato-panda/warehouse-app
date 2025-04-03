@@ -7,7 +7,7 @@ import {
   TuiAppearance,
   TuiButton,
   TuiDialogService,
-  TuiError,
+  TuiError, TuiFormatNumberPipe,
   TuiIcon,
   TuiLabel,
   TuiLoader,
@@ -116,7 +116,8 @@ interface QuoteItemRow {
     TuiNumberFormat,
     RouterLink,
     TuiCell,
-    TuiElasticContainer
+    TuiElasticContainer,
+    TuiFormatNumberPipe
   ],
   templateUrl: './form.component.html',
   styleUrl: './form.component.scss'
@@ -186,7 +187,7 @@ export class FormComponent implements OnInit {
     const price = item.get('price')?.value ?? 0;
     const quant = item.get('quantity')?.value ?? 0;
     const discount = item.get('discountAmount')?.value ?? 0;
-    return ((price * quant) * (1 - (discount / 100.0))).toFixed(2);
+    return (price * quant) * (1 - (discount / 100.0));
   }
 
   initForm() {

@@ -59,7 +59,13 @@
           <td *tuiCell="'checkedBy'" tuiTd>{{ item.checkedBy }}</td>
           <td *tuiCell="'approvedBy'" tuiTd>{{ item.approvedBy }}</td>
           <td *tuiCell="'receivedBy'" tuiTd>{{ item.receivedBy }}</td>
-          <td *tuiCell="'totalAmount'" tuiTd>{{ item.totalAmount }}</td>
+          <td *tuiCell="'totalAmount'" tuiTd>{{ item.totalAmount && (item.totalAmount | tuiFormatNumber:{
+            precision: 2,
+            decimalMode: 'always',
+            decimalSeparator: '.',
+            thousandSeparator: ','
+          } | async) }}
+          </td>
           <td *tuiCell="'actions'" tuiTd>
           <span tuiStatus>
           <button [routerLink]="[item.id]"

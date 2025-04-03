@@ -128,6 +128,10 @@ export class QuotationService extends RestService {
     return this.http.get<DeliveryReceipt>(this.resourceEndpoint(id) + '/deliveryReceipt');
   }
 
+  getDeliveryReceiptPayment(id: string | number) {
+    return this.http.get<DeliveryReceipt>(this.resourceEndpoint(id) + '/deliveryReceipt?projection=payment');
+  }
+
   addDeliveryReceipt(id: string, deliveryReceiptId: string | number | string[] | number []) {
     const hrefs = IdToHrefList.transform(deliveryReceiptId, resourceEndpoints.deliveryReceipts());
     return this.http.put<ResourceResponse>(`${this.resourceEndpoint(id)}/deliveryReceipt`, hrefs, {

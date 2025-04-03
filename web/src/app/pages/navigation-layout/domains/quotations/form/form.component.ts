@@ -23,6 +23,7 @@ import {
   TuiButton,
   TuiDialogService,
   TuiError,
+  TuiFormatNumberPipe,
   TuiIcon,
   TuiLoader,
   TuiNumberFormat,
@@ -93,7 +94,8 @@ interface QuoteItemRow {
     DatePipe,
     TuiTextareaModule,
     TuiTextfieldControllerModule,
-    TuiCheckbox
+    TuiCheckbox,
+    TuiFormatNumberPipe
   ],
   templateUrl: './form.component.html',
   styleUrl: './form.component.scss'
@@ -241,7 +243,7 @@ export class FormComponent implements OnInit {
           }
         });
 
-        this.quotationsService.getDeliveryReceipt(customer!.id).subscribe(response => this.deliveryReceipt$.next(response));
+        this.quotationsService.getDeliveryReceiptPayment(quotation!.id).subscribe(response => this.deliveryReceipt$.next(response));
 
         this.form.updateValueAndValidity();
       }
@@ -249,26 +251,36 @@ export class FormComponent implements OnInit {
   }
 
   openDeliveryReceiptDialog() {
-    const purchaseOrder = this.resolvedQuotation$.value;
-    if (purchaseOrder) {
-      const {id: purchaseOrderId} = purchaseOrder;
+    const quotation = this.resolvedQuotation$.value;
+    if (quotation) {
+      const {id: quotationId} = quotation;
       const deliveryReceipt = this.deliveryReceipt$.value;
 
-      this.dialogs.open<DeliveryReceiptCreateRequest | DeliveryReceipt>(new PolymorpheusComponent(DeliveryReceiptDialogComponent), {
+      this.dialogs.open<DeliveryReceiptCreateRequest & {
+        id?: string | number;
+        siteId?: string | number;
+      }>(new PolymorpheusComponent(DeliveryReceiptDialogComponent), {
         dismissible: true,
         closeable: true,
         label: `${deliveryReceipt?.id ? 'Update' : 'Create'} Delivery Receipt`,
         data: {deliveryReceipt},
         size: 'm'
       }).pipe(
-        mergeMap(requestData => requestData
-          ? deliveryReceipt?.id
-            ? this.deliveryReceiptsService.updateOne(requestData as DeliveryReceipt)
-            : this.deliveryReceiptsService.createOne(requestData).pipe(
-              mergeMap(response => this.quotationsService.addDeliveryReceipt(String(purchaseOrderId), response.id.toString()).pipe(mergeMap(() => of(response))))
-            )
-          : of()
-        )
+        mergeMap(requestData => {
+          const deliveryReceiptBrief = requestData?.id ? this.deliveryReceiptsService.getOneBrief(requestData.id) : of();
+          return requestData
+            ? deliveryReceipt?.id
+              ? this.deliveryReceiptsService
+                .updateOne(requestData as DeliveryReceipt)
+                .pipe(mergeMap(response => requestData.siteId ? this.deliveryReceiptsService.addSite(deliveryReceipt.id.toString(), requestData.siteId).pipe(mergeMap(() => deliveryReceiptBrief)) :
+                  deliveryReceiptBrief))
+              : this.deliveryReceiptsService
+                .createOne(requestData)
+                .pipe(mergeMap(response => this.quotationsService.addDeliveryReceipt(String(quotationId), response.id.toString()).pipe(mergeMap(() => deliveryReceiptBrief))))
+                .pipe(mergeMap(response => requestData.siteId ? this.deliveryReceiptsService.addSite(response.id.toString(), requestData.siteId).pipe(mergeMap(() => deliveryReceiptBrief)) :
+                  deliveryReceiptBrief))
+            : of();
+        })
       ).subscribe({
         error: err => {
           this.alerts.open(context => 'Please try again later.',
@@ -297,7 +309,7 @@ export class FormComponent implements OnInit {
     const price = item.get('price')?.value ?? 0;
     const quant = item.get('quantity')?.value ?? 0;
     const discount = item.get('discountAmount')?.value ?? 0;
-    return ((price * quant) * (1 - (discount / 100.0))).toFixed(2);
+    return (price * quant) * (1 - (discount / 100.0));
   }
 
   protected toCustomerId: (item: CustomersSummaryResourceResponse) => string = item => {

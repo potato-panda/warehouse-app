@@ -29,9 +29,10 @@
                      [valueFn]="toSupplierId"
                      class="textfield"
                      formControlName="supplierId"
-                     label="Supplier" placeholder="Supplier"
+                     placeholder="Supplier"
                      tuiTextfieldSize="m"
       >
+        <ng-template #labelTemplate><label>Supplier <sup>*</sup></label></ng-template>
         <ng-template #itemTemplate let-supplier>
           <div class="name">{{ supplier.name }}</div>
         </ng-template>
@@ -218,6 +219,7 @@
             <td *tuiCell="'price'" tuiTd>
               <tui-textfield>
                 <input [style.padding-bottom]="0"
+                       [tuiNumberFormat]="{precision: 2,decimalMode: 'always',decimalSeparator: '.',thousandSeparator: ','} "
                        class="number"
                        formControlName="price"
                        tuiInputNumber
@@ -262,7 +264,7 @@
             <td *tuiCell="'total'" tuiTd>
               <tui-textfield>
                 <input [style.padding-bottom]="0"
-                       [value]="calcQuoteItemTotal(item)"
+                       [value]="calcQuoteItemTotal(item) | tuiFormatNumber:{ precision: 2, decimalMode: 'always', decimalSeparator: '.', thousandSeparator: ',' } | async"
                        class="number"
                        disabled
                        tuiTextfield
@@ -292,17 +294,35 @@
         <tr>
           <td tuiTd colSpan="4"></td>
           <td tuiTd>Subtotal</td>
-          <td tuiTd [style.text-align]="'end'">{{ this.subTotal.toFixed(2) }}</td>
+          <td tuiTd [style.text-align]="'end'">{{ this.subTotal | tuiFormatNumber:{
+            precision: 2,
+            decimalMode: 'always',
+            decimalSeparator: '.',
+            thousandSeparator: ','
+          } | async }}
+          </td>
         </tr>
         <tr>
           <td tuiTd colSpan="4"></td>
           <td tuiTd>Discount</td>
-          <td tuiTd [style.text-align]="'end'">{{ this.discountSubtotal.toFixed(2) }}</td>
+          <td tuiTd [style.text-align]="'end'">{{ this.discountSubtotal | tuiFormatNumber:{
+            precision: 2,
+            decimalMode: 'always',
+            decimalSeparator: '.',
+            thousandSeparator: ','
+          } | async }}
+          </td>
         </tr>
         <tr>
           <td tuiTd colSpan="4"></td>
           <td tuiTd>Total</td>
-          <td tuiTd [style.text-align]="'end'">{{ this.total.toFixed(2) }}</td>
+          <td tuiTd [style.text-align]="'end'">{{ this.total | tuiFormatNumber:{
+            precision: 2,
+            decimalMode: 'always',
+            decimalSeparator: '.',
+            thousandSeparator: ','
+          } | async }}
+          </td>
         </tr>
         </tbody>
       </table>

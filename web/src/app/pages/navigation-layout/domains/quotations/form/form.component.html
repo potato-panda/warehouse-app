@@ -167,6 +167,14 @@
 
           @if (deliveryReceipt?.id) {
             <tui-textfield>
+              <label tuiLabel>PO</label>
+              <input tuiTextfield [value]="deliveryReceipt?.po ?? ''" disabled/>
+            </tui-textfield>
+            <tui-textfield>
+              <label tuiLabel>Site</label>
+              <input tuiTextfield [value]="deliveryReceipt?.site?.name ?? ''" disabled/>
+            </tui-textfield>
+            <tui-textfield>
               <label tuiLabel>Received Date</label>
               <input tuiTextfield
                      [value]="deliveryReceipt?.receivedDate ? (deliveryReceipt?.receivedDate | date:'longDate') : ''"
@@ -264,6 +272,7 @@
             <td *tuiCell="'price'" tuiTd>
               <tui-textfield>
                 <input [style.padding-bottom]="0"
+                       [tuiNumberFormat]="{precision: 2,decimalMode: 'always', decimalSeparator: '.', thousandSeparator: ','}"
                        class="number"
                        formControlName="price"
                        tuiInputNumber
@@ -308,7 +317,7 @@
             <td *tuiCell="'total'" tuiTd>
               <tui-textfield>
                 <input [style.padding-bottom]="0"
-                       [value]="calcQuoteItemTotal(item)"
+                       [value]="calcQuoteItemTotal(item) | tuiFormatNumber: {precision: 2,decimalMode: 'always', decimalSeparator: '.', thousandSeparator: ','} | async"
                        class="number"
                        disabled
                        tuiTextfield
@@ -338,24 +347,47 @@
         <tr>
           <td tuiTd colSpan="4"></td>
           <td tuiTd>Subtotal</td>
-          <td tuiTd [style.text-align]="'end'">{{ this.subTotal.toFixed(2) }}</td>
+          <td tuiTd [style.text-align]="'end'">{{ this.subTotal | tuiFormatNumber:{
+            precision: 2,
+            decimalMode: 'always',
+            decimalSeparator: '.',
+            thousandSeparator: ','
+          } | async }}
+          </td>
         </tr>
         <tr>
           <td tuiTd colSpan="4"></td>
           <td tuiTd>Discount</td>
           <td tuiTd
-              [style.text-align]="'end'">{{ (this.discountSubtotal > 0 ? '-' : '') + this.discountSubtotal.toFixed(2) }}
+              [style.text-align]="'end'">{{ (this.discountSubtotal > 0 ? '-' : '') + (this.discountSubtotal | tuiFormatNumber:{
+            precision: 2,
+            decimalMode: 'always',
+            decimalSeparator: '.',
+            thousandSeparator: ','
+          } | async)?.toString() }}
           </td>
         </tr>
         <tr>
           <td tuiTd colSpan="4"></td>
           <td tuiTd>Delivery Charge</td>
-          <td tuiTd [style.text-align]="'end'">{{ this.deliverySubtotal.toFixed(2) }}</td>
+          <td tuiTd [style.text-align]="'end'">{{ this.deliverySubtotal | tuiFormatNumber:{
+            precision: 2,
+            decimalMode: 'always',
+            decimalSeparator: '.',
+            thousandSeparator: ','
+          } | async }}
+          </td>
         </tr>
         <tr>
           <td tuiTd colSpan="4"></td>
           <td tuiTd>Total</td>
-          <td tuiTd [style.text-align]="'end'">{{ this.total.toFixed(2) }}</td>
+          <td tuiTd [style.text-align]="'end'">{{ this.total | tuiFormatNumber:{
+            precision: 2,
+            decimalMode: 'always',
+            decimalSeparator: '.',
+            thousandSeparator: ','
+          } | async }}
+          </td>
         </tr>
         </tbody>
       </table>

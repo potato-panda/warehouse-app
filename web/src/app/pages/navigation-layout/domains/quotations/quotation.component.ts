@@ -7,7 +7,7 @@ import {
   TuiDataListComponent,
   TuiDialogService,
   TuiDropdown,
-  TuiDropdownOpen,
+  TuiDropdownOpen, TuiFormatNumberPipe,
   TuiLabel,
   TuiLink,
   TuiLoader,
@@ -88,7 +88,8 @@ import {QuotationTable} from '../../../../interfaces/entities/quotation';
     FormsModule,
     TuiDropdown,
     TuiTable,
-    DatePipe
+    DatePipe,
+    TuiFormatNumberPipe
   ],
   templateUrl: './quotation.component.html',
   styleUrl: './quotation.component.scss'

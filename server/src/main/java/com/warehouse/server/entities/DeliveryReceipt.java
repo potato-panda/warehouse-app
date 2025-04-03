@@ -46,23 +46,30 @@ public class DeliveryReceipt {
     @Nullable
     private String po;
 
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinColumn(name = "site_id")
+    @Nullable
+    private Site site;
+
     @Projection(name = "brief", types = {DeliveryReceipt.class})
     public interface BriefProjection {
         Long getId();
 
         String getPo();
 
+        Site getSite();
+
         Timestamp getReceivedDate();
 
         String getReceivedBy();
 
+        ZonedDateTime getPaymentDueDate();
+
+        String getChequeNumber();
     }
 
     @Projection(name = "payment", types = {DeliveryReceipt.class})
     public interface PaymentProjection extends BriefProjection {
-        ZonedDateTime getPaymentDueDate();
-
-        String getChequeNumber();
     }
 
     @Projection(name = "withQuotation", types = {DeliveryReceipt.class})

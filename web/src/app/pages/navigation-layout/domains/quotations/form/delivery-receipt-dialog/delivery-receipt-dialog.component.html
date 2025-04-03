@@ -12,6 +12,28 @@
              formControlName="receivedBy"
   />
 
+  <app-combo-box [searchFn]="searchSite"
+                 [stringify]="stringifySite"
+                 [valueFn]="toSiteId"
+                 class="textfield"
+                 formControlName="siteId"
+                 placeholder="Site"
+                 tuiTextfieldSize="m"
+  >
+    <ng-template #labelTemplate>
+      <label>Site</label>
+    </ng-template>
+    <ng-template #itemTemplate let-site>
+      <div class="name">{{ site.name }}</div>
+    </ng-template>
+    <ng-template #loadingTemplate>
+      <tui-loader></tui-loader>
+    </ng-template>
+  </app-combo-box>
+  <tui-error [error]="[] | tuiFieldError | async"
+             formControlName="siteId"
+  />
+
   <tui-input-date [tuiDateFormat]="{separator: '/', mode: 'MDY'}" formControlName="receivedDate" tuiTextfieldSize="m">
     Received Date
     <input tuiTextfieldLegacy />

@@ -30,6 +30,9 @@ public class Site {
     @OneToMany(mappedBy = "site")
     private Collection<Inventory> inventory;
 
+    @OneToMany(mappedBy = "site", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    private Collection<DeliveryReceipt> deliveryReceipt;
+
     @Projection(name = "detail", types = {Site.class})
     public interface SiteDetailProjection {
         Long getId();

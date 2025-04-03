@@ -1,7 +1,14 @@
 import {Component, model} from '@angular/core';
 import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {TuiButton, TuiLabel, TuiLoader, TuiTextfieldComponent, TuiTextfieldDirective} from '@taiga-ui/core';
+import {
+  TuiButton,
+  TuiFormatNumberPipe,
+  TuiLabel,
+  TuiLoader,
+  TuiTextfieldComponent,
+  TuiTextfieldDirective
+} from '@taiga-ui/core';
 import {TuiFade, TuiStatus} from '@taiga-ui/kit';
 import {tuiIsFalsy, tuiIsPresent, TuiLet} from '@taiga-ui/cdk';
 import {TuiMainComponent, TuiSubheaderCompactComponent} from '@taiga-ui/layout';
@@ -69,7 +76,8 @@ import {RouterLink} from '@angular/router';
     TuiTextfieldComponent,
     TuiTextfieldDirective,
     TuiTable,
-    RouterLink
+    RouterLink,
+    TuiFormatNumberPipe
   ],
   templateUrl: './delivery-receipts.component.html',
   styleUrl: './delivery-receipts.component.scss'

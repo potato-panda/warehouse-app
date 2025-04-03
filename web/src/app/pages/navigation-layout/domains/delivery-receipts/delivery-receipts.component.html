@@ -54,7 +54,13 @@
           <td *tuiCell="'po'" tuiTd>{{ receipt.po }}</td>
           <td *tuiCell="'receivedBy'" tuiTd>{{ receipt.receivedBy }}</td>
           <td *tuiCell="'receivedDate'" tuiTd>{{ receipt.receivedDate | date:'longDate' }}</td>
-          <td *tuiCell="'totalAmount'" tuiTd>{{ quotation?.totalAmount }}</td>
+          <td *tuiCell="'totalAmount'" tuiTd>{{ quotation?.totalAmount && (quotation.totalAmount | tuiFormatNumber:{
+            precision: 2,
+            decimalMode: 'always',
+            decimalSeparator: '.',
+            thousandSeparator: ','
+          } | async) }}
+          </td>
           <td *tuiCell="'actions'" tuiTd>
             @if (quotation?.id) {
               <span tuiStatus>

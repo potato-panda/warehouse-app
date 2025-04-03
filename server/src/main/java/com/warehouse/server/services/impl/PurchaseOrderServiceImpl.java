@@ -25,6 +25,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
@@ -310,15 +314,15 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                                         .text(quoteItem.getQuotedProduct().getDescription())
                                                         .build())
                                            .add(TextCell.builder()
-                                                        .text(String.format("%.2f", quoteItem.getPrice()))
+                                                        .text(String.format("%,.2f", quoteItem.getPrice()))
                                                         .horizontalAlignment(HorizontalAlignment.RIGHT)
                                                         .build())
                                            .add(TextCell.builder()
-                                                        .text(String.format("%.2f", quoteItem.getDiscountAmount()))
+                                                        .text(String.format("%,.2f", quoteItem.getDiscountAmount()))
                                                         .horizontalAlignment(HorizontalAlignment.RIGHT)
                                                         .build())
                                            .add(TextCell.builder()
-                                                        .text(String.format("%.2f", quoteItem.getSubtotal()))
+                                                        .text(String.format("%,.2f", quoteItem.getSubtotal()))
                                                         .horizontalAlignment(HorizontalAlignment.RIGHT)
                                                         .build())
                                            .backgroundColor(i++ % 2 == 0 ? new Color(240, 240, 240) : Color.WHITE)
@@ -359,7 +363,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                                             .build())
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
-                                                            .text(String.format("%.2f", purchaseOrder.getSubtotal()))
+                                                            .text(String.format("%,.2f", purchaseOrder.getSubtotal()))
                                                             .build())
                                                .build())
                                     .addRow(Row.builder()
@@ -369,7 +373,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                                             .build())
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
-                                                            .text(String.format(purchaseOrder.getDiscountSubtotal() > 0 ? "-%.2f" : "%.2f",
+                                                            .text(String.format(purchaseOrder.getDiscountSubtotal() > 0 ? "-%,.2f" : "%,.2f",
                                                                                 purchaseOrder.getDiscountSubtotal()))
                                                             .build())
                                                .build())
@@ -382,7 +386,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
                                                             .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
-                                                            .text(String.format("%.2f", purchaseOrder.getTotalAmount()))
+                                                            .text(String.format("%,.2f", purchaseOrder.getTotalAmount()))
                                                             .build())
                                                .build());
 
@@ -409,16 +413,25 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                 float margin     = 50;
                 float pageWidth  = page.getMediaBox().getWidth();
                 float pageHeight = page.getMediaBox().getHeight();
+                var   font       = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+                var   fontSize   = 8;
 
-                contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 8);
+                contentStream.setFont(font, fontSize);
                 contentStream.setLeading(14.5f);
 
                 contentStream.beginText();
 
 
                 // Footer
-                contentStream.newLineAtOffset(pageWidth - margin - 10, 20);
-                contentStream.showText("Page " + pageNumber++ + " of " + document.getNumberOfPages());
+                contentStream.newLineAtOffset(20, 30);
+                contentStream.showText("Printed on " + LocalDateTime.ofInstant(Instant.now(),
+                                                                               ZoneId.systemDefault())
+                                                                    .format(DateTimeFormatter.ofPattern(
+                                                                            "MM/dd/yyyy HH:mm:ss")));
+                var text      = "Page " + pageNumber++ + " of " + document.getNumberOfPages();
+                var textWidth = font.getStringWidth(text) / 1000 * fontSize;
+                contentStream.newLineAtOffset(pageWidth - margin - textWidth, 0);
+                contentStream.showText(text);
 
                 contentStream.endText();
                 contentStream.close();

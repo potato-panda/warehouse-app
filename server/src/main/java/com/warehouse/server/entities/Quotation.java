@@ -27,11 +27,11 @@ public class Quotation {
     @Builder.Default
     private Collection<QuoteItem> quoteItems = new ArrayList<>();
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "delivery_receipt_id")
     private DeliveryReceipt deliveryReceipt;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "customer_id")
     private Customer customer;
 

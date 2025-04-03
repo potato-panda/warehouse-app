@@ -7,6 +7,8 @@ import com.warehouse.server.entities.Quotation;
 import com.warehouse.server.repositories.QuotationRepository;
 import com.warehouse.server.services.DeliveryReceiptService;
 import com.warehouse.server.services.SettingService;
+import com.warehouse.server.utils.SvgToPngConverter;
+import org.apache.batik.transcoder.TranscoderException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -28,6 +30,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -46,17 +51,49 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
     public byte[] generateDeliveryReceiptPDF(Long id) {
         Quotation quotation = this.quotationRepository.findById(id).orElseThrow();
 
+        var isPhildex = Optional.of(quotation)
+                                .map(Quotation::getDeliveryReceipt)
+                                .map(DeliveryReceipt::getSite)
+                                .map(site -> site.getName().contains("Phildex"))
+                                .orElse(false);
+
+        var POINTS_PER_INCH = 72;
+        var NINE_AND_A_HALF = 9.5f; // width: 684 dots
+        var ELEVEN          = 11.0f; // height: 792 dots
+
+        class Scaler {
+            final float WIDTH_SCALE  = isPhildex ? 1 : 1.36f;
+            final float HEIGHT_SCALE = isPhildex ? 1 : 1.36f;
+
+            float scaleHeight(int height) {
+                return height * HEIGHT_SCALE;
+            }
+
+            float scaleWidth(int width) {
+                return width * WIDTH_SCALE;
+            }
+        }
+
+        Scaler scaler = new Scaler();
+
+        var pageRect = isPhildex ? PDRectangle.A4 : new PDRectangle(ELEVEN * POINTS_PER_INCH,
+                                                                    NINE_AND_A_HALF * POINTS_PER_INCH);
+
         try (PDDocument document = new PDDocument()) {
-            final PDPage page = new PDPage(PDRectangle.A4);
+            final PDPage page = new PDPage(pageRect);
             document.addPage(page);
 
             try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
-                byte[] image  = Files.readAllBytes(Path.of(new ClassPathResource("logo.png").getURI()));
+                PDRectangle pageSize  = page.getMediaBox();
+                float       pageWidth = pageSize.getWidth();
+
+                byte[] logo   = Files.readAllBytes(Path.of(new ClassPathResource("logo.png").getURI()));
                 var    width  = page.getMediaBox().getWidth();
                 var    height = page.getMediaBox().getHeight();
                 var    lowerX = 20.0f;
                 var    lowerY = height - 90.0f;
-                contentStream.drawImage(PDImageXObject.createFromByteArray(document, image, null),
+
+                contentStream.drawImage(PDImageXObject.createFromByteArray(document, logo, null),
                                         lowerX,
                                         lowerY,
                                         80,
@@ -64,9 +101,16 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
 
                 final var royalBlue = new Color(65, 105, 225);
 
+                if (isPhildex) {
+                    var phildex = SvgToPngConverter.convert(Path.of(new ClassPathResource("phildex-logo.svg").getURI())
+                                                                .toString());
+
+                    PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, phildex, "svg_image");
+                    contentStream.drawImage(pdImage, width - 80 - 50, lowerY, 80, 80);
+                }
                 // Company Heading
                 final Table.TableBuilder deliveryReceiptHeaderBuilder = Table.builder()
-                                                                             .addColumnsOfWidth(470)
+                                                                             .addColumnsOfWidth(scaler.scaleWidth(470))
                                                                              .fontSize(8)
                                                                              .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                                              .borderColor(Color.WHITE)
@@ -117,7 +161,10 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                 // Quotation Details
                 final Table.TableBuilder detailBuilder = Table.builder()
                                                               .fontSize(8)
-                                                              .addColumnsOfWidth(80, 195, 80, 195)
+                                                              .addColumnsOfWidth(scaler.scaleWidth(80),
+                                                                                 scaler.scaleWidth(195),
+                                                                                 scaler.scaleWidth(80),
+                                                                                 scaler.scaleWidth(195))
                                                               .textColor(Color.BLACK)
                                                               .wordBreak(false);
 
@@ -265,7 +312,13 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
 
                 // Build the table
                 final Table.TableBuilder tableBuilder = Table.builder()
-                                                             .addColumnsOfWidth(40, 40, 140, 165, 55, 55, 55)
+                                                             .addColumnsOfWidth(scaler.scaleWidth(40),
+                                                                                scaler.scaleWidth(40),
+                                                                                scaler.scaleWidth(140),
+                                                                                scaler.scaleWidth(165),
+                                                                                scaler.scaleWidth(55),
+                                                                                scaler.scaleWidth(55),
+                                                                                scaler.scaleWidth(55))
                                                              .fontSize(8)
                                                              .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                              .borderColor(Color.WHITE)
@@ -328,15 +381,15 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                         .text(quoteItem.getQuotedProduct().getDescription())
                                                         .build())
                                            .add(TextCell.builder()
-                                                        .text(String.format("%.2f", quoteItem.getPrice()))
+                                                        .text(String.format("%,.2f", quoteItem.getPrice()))
                                                         .horizontalAlignment(HorizontalAlignment.RIGHT)
                                                         .build())
                                            .add(TextCell.builder()
-                                                        .text(String.format("%.2f", quoteItem.getDiscountAmount()))
+                                                        .text(String.format("%,.2f", quoteItem.getDiscountAmount()))
                                                         .horizontalAlignment(HorizontalAlignment.RIGHT)
                                                         .build())
                                            .add(TextCell.builder()
-                                                        .text(String.format("%.2f", quoteItem.getSubtotal()))
+                                                        .text(String.format("%,.2f", quoteItem.getSubtotal()))
                                                         .horizontalAlignment(HorizontalAlignment.RIGHT)
                                                         .build())
                                            .backgroundColor(i++ % 2 == 0 ? new Color(240, 240, 240) : Color.WHITE)
@@ -359,7 +412,9 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
 
                 // Subtotal
                 final Table.TableBuilder subtotalTableBuilder = Table.builder()
-                                                                     .addColumnsOfWidth(390, 100, 60)
+                                                                     .addColumnsOfWidth(scaler.scaleWidth(390),
+                                                                                        scaler.scaleWidth(100),
+                                                                                        scaler.scaleWidth(60))
                                                                      .fontSize(8)
                                                                      .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                                      .borderColor(Color.WHITE)
@@ -373,7 +428,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                             .build())
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
-                                                            .text(String.format("%.2f", quotation.getSubtotal()))
+                                                            .text(String.format("%,.2f", quotation.getSubtotal()))
                                                             .build())
                                                .build())
                                     .addRow(Row.builder()
@@ -384,7 +439,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
                                                             .text(String.format(quotation.getDiscountSubtotal() > 0 ?
-                                                                                        "-%.2f" : "%.2f",
+                                                                                        "-%,.2f" : "%,.2f",
                                                                                 quotation.getDiscountSubtotal()))
                                                             .build())
                                                .build())
@@ -395,7 +450,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                             .build())
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
-                                                            .text(String.format("%.2f",
+                                                            .text(String.format("%,.2f",
                                                                                 quotation.getDeliverySubtotal()))
                                                             .build())
                                                .build())
@@ -408,7 +463,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                .add(TextCell.builder()
                                                             .horizontalAlignment(HorizontalAlignment.RIGHT)
                                                             .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
-                                                            .text(String.format("%.2f", quotation.getTotalAmount()))
+                                                            .text(String.format("%,.2f", quotation.getTotalAmount()))
                                                             .build())
                                                .build())
                                     .addRow(Row.builder()
@@ -433,7 +488,10 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                 subtotalTableDrawer.draw(() -> document, () -> new PDPage(PDRectangle.A4), 50f);
 
                 final Table.TableBuilder receiptTableBuilder = Table.builder()
-                                                                    .addColumnsOfWidth(80, 195, 80, 195)
+                                                                    .addColumnsOfWidth(scaler.scaleWidth(80),
+                                                                                       scaler.scaleWidth(195),
+                                                                                       scaler.scaleWidth(80),
+                                                                                       scaler.scaleWidth(195))
                                                                     .fontSize(8)
                                                                     .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                                     .borderColor(Color.WHITE)
@@ -504,6 +562,8 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                             .build();
 
                 receiptTableDrawer.draw();
+            } catch (TranscoderException e) {
+                throw new RuntimeException(e);
             }
 
             int pageNumber = 1;
@@ -517,16 +577,25 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                 float margin     = 50;
                 float pageWidth  = page.getMediaBox().getWidth();
                 float pageHeight = page.getMediaBox().getHeight();
+                var   font       = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+                var   fontSize   = 8;
 
-                contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 8);
+                contentStream.setFont(font, fontSize);
                 contentStream.setLeading(14.5f);
 
                 contentStream.beginText();
 
 
                 // Footer
-                contentStream.newLineAtOffset(pageWidth - margin - 10, 20);
-                contentStream.showText("Page " + pageNumber++ + " of " + document.getNumberOfPages());
+                contentStream.newLineAtOffset(20, 30);
+                contentStream.showText("Printed on " + LocalDateTime.ofInstant(Instant.now(),
+                                                                               ZoneId.systemDefault())
+                                                                    .format(DateTimeFormatter.ofPattern(
+                                                                            "MM/dd/yyyy HH:mm:ss")));
+                var text      = "Page " + pageNumber++ + " of " + document.getNumberOfPages();
+                var textWidth = font.getStringWidth(text) / 1000 * fontSize;
+                contentStream.newLineAtOffset(pageWidth - margin - textWidth, 0);
+                contentStream.showText(text);
 
                 contentStream.endText();
                 contentStream.close();
