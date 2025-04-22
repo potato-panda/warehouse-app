@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {injectContext} from '@taiga-ui/polymorpheus';
 import {
   TuiButton,
@@ -19,7 +19,7 @@ import {DeliveryReceipt, DeliveryReceiptCreateRequest} from '../../../../../../i
 import {TuiInputDateModule, TuiTextfieldControllerModule} from '@taiga-ui/legacy';
 import {TuiDay} from '@taiga-ui/cdk';
 import {ComboBoxComponent} from '../../../../../../components/combo-box/combo-box.component';
-import {BehaviorSubject, map, mergeMap, Observable, of, startWith, Subject, takeUntil, tap, withLatestFrom} from 'rxjs';
+import {BehaviorSubject, map, mergeMap, Observable, of, startWith, Subject, takeUntil, withLatestFrom} from 'rxjs';
 import {SitesResourceResponse, SitesService} from '../../../../../../services/sites.service';
 import UniqueId from '../../../../../../utils/unique-id';
 
@@ -46,7 +46,7 @@ import UniqueId from '../../../../../../utils/unique-id';
   templateUrl: './delivery-receipt-dialog.component.html',
   styleUrl: './delivery-receipt-dialog.component.scss'
 })
-export class DeliveryReceiptDialogComponent implements OnInit {
+export class DeliveryReceiptDialogComponent implements OnInit, OnDestroy {
   public readonly context = injectContext<TuiDialogContext<DeliveryReceiptCreateRequest & {
     siteId?: string | number;
   } | void, {
@@ -54,7 +54,6 @@ export class DeliveryReceiptDialogComponent implements OnInit {
   }>>();
 
   public readonly sitesService = inject(SitesService);
-  public readonly cdr = inject(ChangeDetectorRef);
 
   protected form = new FormGroup({
     id: new FormControl<string | number>(''),
@@ -82,12 +81,13 @@ export class DeliveryReceiptDialogComponent implements OnInit {
         if (site) {
           this.sitesService.getOne(site.id).pipe(
             takeUntil(this.destroy$),
-            tap(response => {
-              this.resolvedSite$.next(response);
-              this.mappedSites$.next([response]);
-              resolve();
-            })
-          ).subscribe();
+          ).subscribe(response => {
+            this.resolvedSite$.next(response);
+            this.mappedSites$.next([response]);
+            resolve();
+          });
+        } else {
+          resolve();
         }
       }).then(r => {
         this.form.patchValue({
@@ -99,11 +99,13 @@ export class DeliveryReceiptDialogComponent implements OnInit {
           paymentDueDate: paymentDueDate ? TuiDay.fromLocalNativeDate(new Date(paymentDueDate)) : null,
           chequeNumber,
         });
+
+        this.form.updateValueAndValidity();
       });
     }
   }
 
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
