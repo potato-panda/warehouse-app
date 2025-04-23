@@ -66,7 +66,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                 // Company Heading
                 final Table.TableBuilder purchaseOrderHeaderBuilder = Table.builder()
                                                                            .addColumnsOfWidth(470)
-                                                                           .fontSize(11)
+                                                                           .fontSize(10)
                                                                            .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                                            .borderColor(Color.WHITE)
                                                                            .textColor(royalBlue)
@@ -115,7 +115,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
                 // Purchase Order Details
                 final Table.TableBuilder detailBuilder = Table.builder()
-                                                              .fontSize(11)
+                                                              .fontSize(10)
                                                               .addColumnsOfWidth(80, 195, 80, 195)
                                                               .textColor(Color.BLACK)
                                                               .wordBreak(false);
@@ -252,7 +252,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                 // Build the table
                 final Table.TableBuilder tableBuilder = Table.builder()
                                                              .addColumnsOfWidth(40, 40, 140, 180, 55, 55, 40)
-                                                             .fontSize(11)
+                                                             .fontSize(10)
                                                              .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                              .borderColor(Color.WHITE)
                                                              .wordBreak(true);
@@ -346,7 +346,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                 // Subtotal
                 final Table.TableBuilder subtotalTableBuilder = Table.builder()
                                                                      .addColumnsOfWidth(390, 100, 60)
-                                                                     .fontSize(11)
+                                                                     .fontSize(10)
                                                                      .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                                      .borderColor(Color.WHITE)
                                                                      .wordBreak(true);
