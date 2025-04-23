@@ -4,7 +4,7 @@ import com.warehouse.server.entities.Contact;
 import com.warehouse.server.entities.Customer;
 import com.warehouse.server.entities.DeliveryReceipt;
 import com.warehouse.server.entities.Quotation;
-import com.warehouse.server.repositories.QuotationRepository;
+import com.warehouse.server.repositories.DeliveryReceiptRepository;
 import com.warehouse.server.services.DeliveryReceiptService;
 import com.warehouse.server.services.SettingService;
 import com.warehouse.server.utils.SvgToPngConverter;
@@ -39,20 +39,21 @@ import java.util.Optional;
 
 @Service
 public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
-    private final QuotationRepository quotationRepository;
-    private final SettingService      settingService;
+    private final DeliveryReceiptRepository deliveryReceiptRepository;
+    private final SettingService            settingService;
 
-    public DeliveryReceiptServiceImpl(QuotationRepository quotationRepository, SettingService settingService) {
-        this.quotationRepository = quotationRepository;
-        this.settingService      = settingService;
+    public DeliveryReceiptServiceImpl(DeliveryReceiptRepository deliveryReceiptRepository,
+                                      SettingService settingService) {
+        this.deliveryReceiptRepository = deliveryReceiptRepository;
+        this.settingService            = settingService;
     }
 
     @Override
     public byte[] generateDeliveryReceiptPDF(Long id) {
-        Quotation quotation = this.quotationRepository.findById(id).orElseThrow();
+        DeliveryReceipt deliveryReceipt = this.deliveryReceiptRepository.findById(id).orElseThrow();
+        Quotation       quotation       = deliveryReceipt.getQuotation();
 
-        var isPhildex = Optional.of(quotation)
-                                .map(Quotation::getDeliveryReceipt)
+        var isPhildex = Optional.of(deliveryReceipt)
                                 .map(DeliveryReceipt::getSite)
                                 .map(site -> site.getName().contains("Phildex"))
                                 .orElse(false);
