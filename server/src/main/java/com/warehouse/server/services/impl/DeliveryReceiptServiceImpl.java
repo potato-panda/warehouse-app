@@ -16,6 +16,8 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.vandeseer.easytable.RepeatedHeaderTableDrawer;
@@ -39,6 +41,7 @@ import java.util.Optional;
 
 @Service
 public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
+    private final Logger                    LOGGER = LoggerFactory.getLogger(DeliveryReceiptServiceImpl.class);
     private final DeliveryReceiptRepository deliveryReceiptRepository;
     private final SettingService            settingService;
 
@@ -608,6 +611,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
 
             return outputStream.toByteArray();
         } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
 
