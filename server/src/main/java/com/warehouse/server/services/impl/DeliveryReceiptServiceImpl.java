@@ -30,6 +30,7 @@ import org.vandeseer.easytable.structure.cell.TextCell;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -106,11 +107,11 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                 final var royalBlue = new Color(65, 105, 225);
 
                 if (isPhildex) {
-                    var phildex = SvgToPngConverter.convert(Path.of(new ClassPathResource("phildex-logo.svg").getURI())
-                                                                .toString());
-
-                    PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, phildex, "svg_image");
-                    contentStream.drawImage(pdImage, width - 80 - 50, lowerY, 80, 80);
+                    try (InputStream is = new ClassPathResource("phildex-logo.svg").getInputStream()) {
+                        byte[] pngBytes = SvgToPngConverter.convert(is);
+                        PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, pngBytes, "svg_image");
+                        contentStream.drawImage(pdImage, width - 80 - 50, lowerY, 80, 80);
+                    }
                 }
                 // Company Heading
                 final Table.TableBuilder deliveryReceiptHeaderBuilder = Table.builder()

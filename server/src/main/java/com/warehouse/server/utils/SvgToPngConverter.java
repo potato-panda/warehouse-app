@@ -6,17 +6,15 @@ import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class SvgToPngConverter {
-    public static byte[] convert(String svgPath) throws IOException, TranscoderException {
-        File svgFile = new File(svgPath);
-
-        TranscoderInput input = new TranscoderInput(svgFile.toURI().toString());
+    public static byte[] convert(InputStream svgInputStream) throws IOException, TranscoderException {
+        TranscoderInput input = new TranscoderInput(svgInputStream);
 
         ByteArrayOutputStream pngOutput = new ByteArrayOutputStream();
-        TranscoderOutput      output    = new TranscoderOutput(pngOutput);
+        TranscoderOutput output = new TranscoderOutput(pngOutput);
 
         new PNGTranscoder().transcode(input, output);
         pngOutput.flush();
