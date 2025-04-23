@@ -119,7 +119,7 @@ public class QuotationServiceImpl implements QuotationService {
                 // Quotation Details
                 final Table.TableBuilder detailBuilder = Table.builder()
                                                               .fontSize(11)
-                                                              .addColumnsOfWidth(80, 195, 80, 195)
+                                                              .addColumnsOfWidth(110, 165, 110, 165)
                                                               .textColor(Color.BLACK)
                                                               .wordBreak(false);
 

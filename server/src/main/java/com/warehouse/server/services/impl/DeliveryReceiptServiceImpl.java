@@ -166,10 +166,10 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                 // Quotation Details
                 final Table.TableBuilder detailBuilder = Table.builder()
                                                               .fontSize(11)
-                                                              .addColumnsOfWidth(scaler.scaleWidth(80),
-                                                                                 scaler.scaleWidth(195),
-                                                                                 scaler.scaleWidth(80),
-                                                                                 scaler.scaleWidth(195))
+                                                              .addColumnsOfWidth(scaler.scaleWidth(110),
+                                                                                 scaler.scaleWidth(165),
+                                                                                 scaler.scaleWidth(110),
+                                                                                 scaler.scaleWidth(165))
                                                               .textColor(Color.BLACK)
                                                               .wordBreak(false);
 
