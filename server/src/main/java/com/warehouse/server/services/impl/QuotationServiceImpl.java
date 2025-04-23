@@ -450,7 +450,7 @@ public class QuotationServiceImpl implements QuotationService {
 
 
                 // Footer
-                contentStream.newLineAtOffset(20, 30);
+                contentStream.newLineAtOffset(20, 15);
                 contentStream.showText("Printed on " + LocalDateTime.ofInstant(Instant.now(),
                                                                                ZoneId.systemDefault())
                                                                     .format(DateTimeFormatter.ofPattern(

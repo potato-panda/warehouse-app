@@ -65,10 +65,11 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
         var POINTS_PER_INCH = 72;
         var NINE_AND_A_HALF = 9.5f; // width: 684 dots
         var ELEVEN          = 11.0f; // height: 792 dots
+        var HALF_OF_ELEVEN  = 5.5f; // height: 396 dots
 
         class Scaler {
-            final float WIDTH_SCALE  = isPhildex ? 1 : 1.36f;
-            final float HEIGHT_SCALE = isPhildex ? 1 : 1.36f;
+            final float WIDTH_SCALE  = isPhildex ? 1.36f : 1.16f;
+            final float HEIGHT_SCALE = isPhildex ? 1.36f : 1.16f;
 
             float scaleHeight(int height) {
                 return height * HEIGHT_SCALE;
@@ -81,8 +82,9 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
 
         Scaler scaler = new Scaler();
 
-        var pageRect = isPhildex ? PDRectangle.A4 : new PDRectangle(ELEVEN * POINTS_PER_INCH,
-                                                                    NINE_AND_A_HALF * POINTS_PER_INCH);
+        var pageRect = isPhildex
+                ? new PDRectangle(ELEVEN * POINTS_PER_INCH, NINE_AND_A_HALF * POINTS_PER_INCH)
+                : new PDRectangle(NINE_AND_A_HALF * POINTS_PER_INCH, HALF_OF_ELEVEN * POINTS_PER_INCH);
 
         try (PDDocument document = new PDDocument()) {
             final PDPage page = new PDPage(pageRect);
@@ -108,8 +110,8 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
 
                 if (isPhildex) {
                     try (InputStream is = new ClassPathResource("phildex-logo.svg").getInputStream()) {
-                        byte[] pngBytes = SvgToPngConverter.convert(is);
-                        PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, pngBytes, "svg_image");
+                        byte[]         pngBytes = SvgToPngConverter.convert(is);
+                        PDImageXObject pdImage  = PDImageXObject.createFromByteArray(document, pngBytes, "svg_image");
                         contentStream.drawImage(pdImage, width - 80 - 50, lowerY, 80, 80);
                     }
                 }
@@ -413,7 +415,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                                                  .build();
 
                 // And go for it!
-                tableDrawer.draw(() -> document, () -> new PDPage(PDRectangle.A4), 50f);
+                tableDrawer.draw(() -> document, () -> new PDPage(pageRect), 50f);
 
                 // Subtotal
                 final Table.TableBuilder subtotalTableBuilder = Table.builder()
@@ -490,14 +492,14 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                                                          .table(subtotalTableBuilder.build())
                                                                                          .build();
 
-                subtotalTableDrawer.draw(() -> document, () -> new PDPage(PDRectangle.A4), 50f);
+                subtotalTableDrawer.draw(() -> document, () -> new PDPage(pageRect), 50f);
 
                 final Table.TableBuilder receiptTableBuilder = Table.builder()
                                                                     .addColumnsOfWidth(scaler.scaleWidth(80),
                                                                                        scaler.scaleWidth(195),
                                                                                        scaler.scaleWidth(80),
                                                                                        scaler.scaleWidth(195))
-                                                                    .fontSize(10)
+                                                                    .fontSize(8)
                                                                     .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                                     .borderColor(Color.WHITE)
                                                                     .wordBreak(true);
@@ -560,13 +562,13 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                 TableDrawer receiptTableDrawer = TableDrawer.builder()
                                                             .contentStream(contentStream)
                                                             .startX(20f)
-                                                            .startY(subtotalTableDrawer.getFinalY() - 5f)
-                                                            .endY(50f)
+                                                            .startY(subtotalTableDrawer.getFinalY())
+                                                            .endY(30f)
                                                             .startTableInNewPage(false)
                                                             .table(receiptTableBuilder.build())
                                                             .build();
 
-                receiptTableDrawer.draw();
+                receiptTableDrawer.draw(() -> document, () -> new PDPage(pageRect), 0f);
             } catch (TranscoderException e) {
                 LOGGER.error(e.getMessage(), e);
                 throw new RuntimeException(e);
@@ -593,7 +595,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
 
 
                 // Footer
-                contentStream.newLineAtOffset(20, 30);
+                contentStream.newLineAtOffset(20, 15);
                 contentStream.showText("Printed on " + LocalDateTime.ofInstant(Instant.now(),
                                                                                ZoneId.systemDefault())
                                                                     .format(DateTimeFormatter.ofPattern(
