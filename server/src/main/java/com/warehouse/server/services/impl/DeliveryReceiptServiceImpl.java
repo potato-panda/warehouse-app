@@ -567,6 +567,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
 
                 receiptTableDrawer.draw();
             } catch (TranscoderException e) {
+                LOGGER.error(e.getMessage(), e);
                 throw new RuntimeException(e);
             }
 
