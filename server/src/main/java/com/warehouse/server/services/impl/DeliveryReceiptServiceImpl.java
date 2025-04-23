@@ -232,7 +232,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
                                                      .borderColorRight(Color.WHITE)
                                                      .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
-                                                     .text("Contact")
+                                                     .text("Contact Person")
                                                      .build())
                                         .add(TextCell.builder()
                                                      .horizontalAlignment(HorizontalAlignment.LEFT)
