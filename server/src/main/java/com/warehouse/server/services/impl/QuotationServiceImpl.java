@@ -69,7 +69,7 @@ public class QuotationServiceImpl implements QuotationService {
                 // Company Heading
                 final Table.TableBuilder quotationHeaderBuilder = Table.builder()
                                                                        .addColumnsOfWidth(470)
-                                                                       .fontSize(8)
+                                                                       .fontSize(11)
                                                                        .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                                        .borderColor(Color.WHITE)
                                                                        .textColor(royalBlue)
@@ -78,7 +78,7 @@ public class QuotationServiceImpl implements QuotationService {
                 quotationHeaderBuilder.addRow(Row.builder()
                                                  .add(TextCell.builder()
                                                               .horizontalAlignment(HorizontalAlignment.LEFT)
-                                                              .fontSize(11)
+                                                              .fontSize(14)
                                                               .text(this.settingService.getSetting(KEY.COMPANY_NAME)
                                                                                        .getValue())
                                                               .build())
@@ -118,7 +118,7 @@ public class QuotationServiceImpl implements QuotationService {
 
                 // Quotation Details
                 final Table.TableBuilder detailBuilder = Table.builder()
-                                                              .fontSize(8)
+                                                              .fontSize(11)
                                                               .addColumnsOfWidth(80, 195, 80, 195)
                                                               .textColor(Color.BLACK)
                                                               .wordBreak(false);
@@ -129,7 +129,7 @@ public class QuotationServiceImpl implements QuotationService {
                                                      .horizontalAlignment(HorizontalAlignment.CENTER)
                                                      .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                      .text("Quotation")
-                                                     .fontSize(11)
+                                                     .fontSize(14)
                                                      .backgroundColor(Color.LIGHT_GRAY)
                                                      .build())
                                         .build())
@@ -262,7 +262,7 @@ public class QuotationServiceImpl implements QuotationService {
                 // Build the table
                 final Table.TableBuilder tableBuilder = Table.builder()
                                                              .addColumnsOfWidth(40, 40, 140, 165, 55, 55, 55)
-                                                             .fontSize(8)
+                                                             .fontSize(11)
                                                              .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                              .borderColor(Color.WHITE)
                                                              .wordBreak(true);
@@ -356,7 +356,7 @@ public class QuotationServiceImpl implements QuotationService {
                 // Subtotal
                 final Table.TableBuilder subtotalTableBuilder = Table.builder()
                                                                      .addColumnsOfWidth(390, 100, 60)
-                                                                     .fontSize(8)
+                                                                     .fontSize(11)
                                                                      .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                                      .borderColor(Color.WHITE)
                                                                      .wordBreak(true);

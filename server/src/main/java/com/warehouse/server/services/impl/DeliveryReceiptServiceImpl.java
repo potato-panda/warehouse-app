@@ -116,7 +116,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                 // Company Heading
                 final Table.TableBuilder deliveryReceiptHeaderBuilder = Table.builder()
                                                                              .addColumnsOfWidth(scaler.scaleWidth(470))
-                                                                             .fontSize(8)
+                                                                             .fontSize(11)
                                                                              .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                                              .borderColor(Color.WHITE)
                                                                              .textColor(royalBlue)
@@ -125,7 +125,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                 deliveryReceiptHeaderBuilder.addRow(Row.builder()
                                                        .add(TextCell.builder()
                                                                     .horizontalAlignment(HorizontalAlignment.LEFT)
-                                                                    .fontSize(11)
+                                                                    .fontSize(14)
                                                                     .text(this.settingService.getSetting(SettingService.KEY.COMPANY_NAME)
                                                                                              .getValue())
                                                                     .build())
@@ -165,7 +165,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
 
                 // Quotation Details
                 final Table.TableBuilder detailBuilder = Table.builder()
-                                                              .fontSize(8)
+                                                              .fontSize(11)
                                                               .addColumnsOfWidth(scaler.scaleWidth(80),
                                                                                  scaler.scaleWidth(195),
                                                                                  scaler.scaleWidth(80),
@@ -179,7 +179,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                      .horizontalAlignment(HorizontalAlignment.CENTER)
                                                      .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD))
                                                      .text("Delivery Receipt")
-                                                     .fontSize(11)
+                                                     .fontSize(14)
                                                      .backgroundColor(Color.LIGHT_GRAY)
                                                      .build())
                                         .build())
@@ -324,7 +324,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                                                 scaler.scaleWidth(55),
                                                                                 scaler.scaleWidth(55),
                                                                                 scaler.scaleWidth(55))
-                                                             .fontSize(8)
+                                                             .fontSize(11)
                                                              .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                              .borderColor(Color.WHITE)
                                                              .wordBreak(true);
@@ -420,7 +420,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                                      .addColumnsOfWidth(scaler.scaleWidth(390),
                                                                                         scaler.scaleWidth(100),
                                                                                         scaler.scaleWidth(60))
-                                                                     .fontSize(8)
+                                                                     .fontSize(11)
                                                                      .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                                      .borderColor(Color.WHITE)
                                                                      .wordBreak(true);
@@ -497,7 +497,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
                                                                                        scaler.scaleWidth(195),
                                                                                        scaler.scaleWidth(80),
                                                                                        scaler.scaleWidth(195))
-                                                                    .fontSize(8)
+                                                                    .fontSize(11)
                                                                     .font(new PDType1Font(Standard14Fonts.FontName.HELVETICA))
                                                                     .borderColor(Color.WHITE)
                                                                     .wordBreak(true);
