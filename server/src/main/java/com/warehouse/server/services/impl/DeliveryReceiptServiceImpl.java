@@ -55,7 +55,7 @@ public class DeliveryReceiptServiceImpl implements DeliveryReceiptService {
 
         var isPhildex = Optional.of(deliveryReceipt)
                                 .map(DeliveryReceipt::getSite)
-                                .map(site -> site.getName().contains("Phildex"))
+                                .map(site -> site.getName().toLowerCase().contains("phildex"))
                                 .orElse(false);
 
         var POINTS_PER_INCH = 72;
